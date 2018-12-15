@@ -120,11 +120,11 @@ Option Explicit
 Dim pMax As Long
 
 Private Sub cmdAll_Click()
-  cmdModules.Value = True
+  ConvertProject txtSrc
 End Sub
 
 Private Sub cmdClasses_Click()
-  MsgBox "TBC - Classes"
+  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPClasses(vbpFile)
 End Sub
 
 Private Sub cmdExit_Click()
@@ -132,19 +132,11 @@ Private Sub cmdExit_Click()
 End Sub
 
 Private Sub cmdForms_Click()
-  MsgBox "TBC - Forms"
+  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPForms(vbpFile)
 End Sub
 
 Private Sub cmdModules_Click()
-  Dim L, P As String, K As String, N As Long
-  P = Left(txtSrc, InStrRev(txtSrc, "\"))
-  K = VBPModules(txtSrc)
-  Prg 0, StrCnt(K, vbCrLf)
-  For Each L In Split(K, vbCrLf)
-    ConvertModule P & L
-    N = N + 1
-    Prg N
-  Next
+  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPModules(vbpFile)
 End Sub
 
 Private Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1)

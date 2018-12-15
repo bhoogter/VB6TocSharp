@@ -1,12 +1,20 @@
 Attribute VB_Name = "modUtils"
 Option Explicit
 
-Public Function IsInStr(ByVal src As String, ByVal Find As String) As Boolean: IsInStr = InStr(src, Find) > 0: End Function
+Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
+
+Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
 Public Function FileExists(ByVal Fn As String) As Boolean: FileExists = Dir(Fn) <> "": End Function
 Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = Left(Trim(Str), N): End Function
 Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As Long = 0) As String: tMid = IIf(M = 0, Mid(Trim(Str), N), Mid(Trim(Str), N, M)): End Function
-Public Function StrCnt(ByVal src As String, ByVal Str As String) As Long: StrCnt = (Len(src) - Len(Replace(src, Str, ""))) / Len(Str): End Function
-Public Function LMatch(ByVal src As String, ByVal tMatch As String) As Boolean: LMatch = Left(src, Len(tMatch)) = tMatch: End Function
+Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / Len(Str): End Function
+Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: LMatch = Left(Src, Len(tMatch)) = tMatch: End Function
+
+
+Public Function nlTrim(ByVal Str As String)
+  Do While InStr(" " & vbTab & vbCr & vbLf, Left(Str, 1)): Str = Mid(Str, 2) <> 0: Loop
+  Do While InStr(" " & vbTab & vbCr & vbLf, Right(Str, 1)): Str = Mid(Str, 1, Len(Str) - 1) <> 0: Loop
+End Function
 
 
 Public Function sSpace(ByVal N As Long)
@@ -14,19 +22,19 @@ On Error Resume Next
   sSpace = Space(N)
 End Function
 
-Public Function nextBy(ByVal src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1)
+Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1)
   Dim L As Long
   DoEvents
-  L = InStr(src, Del)
-  If L = 0 Then nextBy = IIf(Ind <= 1, src, ""): Exit Function
-  Do While StrCnt(Left(src, L - 1), """") Mod 2 <> 0
-    L = InStr(L + 1, src, Del)
-    If L = 0 Then nextBy = IIf(Ind <= 1, src, ""): Exit Function
+  L = InStr(Src, Del)
+  If L = 0 Then nextBy = IIf(Ind <= 1, Src, ""): Exit Function
+  Do While StrCnt(Left(Src, L - 1), """") Mod 2 <> 0
+    L = InStr(L + 1, Src, Del)
+    If L = 0 Then nextBy = IIf(Ind <= 1, Src, ""): Exit Function
   Loop
   If Ind <= 1 Then
-    nextBy = Left(src, L - 1)
+    nextBy = Left(Src, L - 1)
   Else
-    nextBy = nextBy(Mid(src, L + 1), Del, Ind - 1)
+    nextBy = nextBy(Mid(Src, L + 1), Del, Ind - 1)
   End If
 End Function
 
@@ -67,6 +75,7 @@ Public Function SplitWord(ByVal Source As String, Optional ByVal N As Long = 1, 
   End If
   If TrimResult Then SplitWord = Trim(SplitWord)
 End Function
+
 Public Function CountWords(ByVal Source As String, Optional ByVal Space As String = " ") As Long
 '::::CountWords
 ':::SUMMARY
@@ -173,11 +182,13 @@ Public Function CodeSectionGlobalEndLoc(ByVal S As String)
   CodeSectionGlobalEndLoc = A
 End Function
 
-Public Function DebugFolder() As String
+Public Function OutputFolder() As String
     Dim oWSHShell As Object
     Set oWSHShell = CreateObject("WScript.Shell")
     DebugFolder = oWSHShell.SpecialFolders("Desktop") & "\test\"
     Set oWSHShell = Nothing
+    
+    If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
 End Function
 
 Public Function isOperator(ByVal S As String) As Boolean

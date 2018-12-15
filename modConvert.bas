@@ -6,14 +6,54 @@ Const WithMark = "_WithVar"
 Private EOLComment As String
 Dim WithLevel As Long, MaxWithLevel As Long
 
+Public Function ConvertProject(ByVal vbpFile As String)
+  CreateProjectSupportFiles
+  ConvertFileList VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) & vbCrLf & VBPUserControls(vbpFile)
+  MsgBox "Complete."
+End Function
+
+Public Function ConvertFileList(ByVal Path As String, ByVal List As String, Optional ByVal Sep As String = vbCrLf) As Boolean
+  Dim L, K As String
+  frm.Prg 0, StrCnt(K, Sep) + 1
+  For Each L In Split(List, Sep)
+    If L = "" Then GoTo NextItem
+    
+    Select Case LCase(Right(L, 4))
+      Case ".bas": ConvertModule Path & L
+      Case ".cls": ConvertClass Path & L
+      Case ".frm": ConvertForm Path & L
+'      Case ".ctl": ConvertModule Path & L
+      Case Else: MsgBox "UNKNOWN VB TYPE: " & L
+    End Select
+    ConvertModule Path & L
+NextItem:
+    N = N + 1
+    frm.Prg N
+  Next
+End Function
 
 Public Function ConvertForm(ByVal frmFile As String)
-  Dim S As String
+  Dim S As String, J As Long, Preamble As String, Code As String, Globals As String, Functions As String
   If Not FileExists(frmFile) Then
     MsgBox "File not found in ConvertForm: " & frmFile
     Exit Function
   End If
   S = ReadEntireFile(frmFile)
+  J = CodeSectionLoc(S)
+  Preamble = Left(S, J - 1)
+  Code = Mid(S, J)
+  
+  X = ConvertFormUI(Preamble)
+  F = DebugFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml")
+  WriteFile F, X, True
+  
+  J = CodeSectionGlobalEndLoc(Code)
+  Globals = ConvertGlobals(Left(Code, J))
+  Functions = ConvertCodeSegment(Mid(Code, J))
+  
+  X = Globals & vbCrLf & vbCrLf & Functions
+  F = DebugFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml.cs")
+  WriteFile F, X, True
 End Function
 
 
@@ -98,6 +138,29 @@ NextLine:
   SanitizeCode = R
 End Function
 
+Public Function CreateProjectSupportFiles() As Boolean
+  Dim S As String, F As String
+  S = ApplicationXAML()
+  F = OutputFolder & "application.xaml"
+  WriteFile F, S, True
+End Function
+
+Public Function ApplicationXAML() As String
+  Dim R As String, M As String, M As String
+  R = "": M = "": N = vbCrLf
+  
+  R = R & M & "<Application x:Class=""Application"" "
+  R = R & N & "xmlns = ""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" "
+  R = R & N & "xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" "
+  R = R & N & "xmlns:local=""clr-namespace:WpfApp1"" "
+  R = R & N & "StartupUri=""MainWindow.xaml""> "
+  R = R & N & "  <Application.Resources>"
+  R = R & N & "  </Application.Resources>"
+  R = R & N & "</Application>"
+
+  ApplicationXAML = R
+End Function
+
 Public Function ConvertCodeSegment(ByVal S As String) As String
   ConvertCodeSegment = ConvertSub(SanitizeCode(S))
 End Function
@@ -126,6 +189,10 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
   ConvertDeclare = Res
 End Function
 
+Public Function ConvertAPIDef(ByVal S As String) As String
+  ConvertAPIDef = S
+End Function
+
 Public Function ConvertConstant(ByVal S As String, Optional ByVal isGlobal As Boolean = True) As String
   Dim cName As String, cType As String, cVal As String, isPrivate As Boolean
   If tLeft(S, 7) = "Public " Then S = Mid(Trim(S), 8)
@@ -151,11 +218,23 @@ Public Function ConvertConstant(ByVal S As String, Optional ByVal isGlobal As Bo
   ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") & "const " & ConvertDataType(cType) & " " & cName & " = " & cVal & ";"
 End Function
 
-Public Function ConvertEnum()
-
+Public Function ConvertEnum(ByVal S As String)
+  Dim isPrivate As Boolean, eName As String
+  Dim Res As String
+  If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
+  If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
+  If tLeft(S, 5) = "Enum " Then S = tMid(S, 6)
+  eName = RegExNMatch(S, patToken, 0)
+  S = nlTrims(tMid(S, Len(eName) + 1))
+  
+  Res = "enum " & eName & "{" & vbCrLf
+  eName = RegExNMatch(S, patToken, 0)
+  S = Trim(tMid(S, Len(eName) + 1))
+  Res = Res & "}"
+  
 End Function
 
-Public Function ConvertType()
+Public Function ConvertType(ByVal S As String)
 
 End Function
 
@@ -336,10 +415,12 @@ Public Function ConvertGlobals(ByVal Str As String) As String
   Dim Res As String
   Dim S, L, O As String
   Dim Ind As Long
+  Dim Building As String
   Dim inCase As Long
   Dim returnVariable As String
   
   Res = ""
+  Building = ""
   Str = Replace(Str, vbLf, "")
   S = Split(Str, vbCr)
   Ind = 0
@@ -347,16 +428,27 @@ Public Function ConvertGlobals(ByVal Str As String) As String
     L = DeComment(L)
     O = ""
     
-    If L Like "Option *" Then
+    If Building <> "" Then
+      Building = Building & vbCrLf & L
+      If tLeft(L, 8) = "End Type" Then
+        O = ConvertType(Building)
+        Building = ""
+      ElseIf tLeft(L, 8) = "End Enum" Then
+        O = ConvertEnum(Building)
+        Building = ""
+      End If
+    ElseIf L Like "Option *" Then
       O = "// " & L
+    ElseIf RegExTest(L, "(Public |Private |)Declare ") Then
+      O = ConvertAPIDef(L)
     ElseIf RegExTest(L, "(Public |Private |)Const ") Then
       O = ConvertConstant(L, True)
     ElseIf tLeft(L, 8) = "Private " Or tLeft(L, 7) = "Public " Or tLeft(L, 4) = "Dim " Then
       O = ConvertDeclare(L, 0, True)
     ElseIf RegExTest(L, "(Public |Private |)Enum ") Then
-      O = ConvertEnum()
+      Building = L
     ElseIf RegExTest(L, "(Public |Private |)Type ") Then
-      O = ConvertType()
+      Building = L
     End If
       
     O = ReComment(O)
@@ -484,5 +576,30 @@ Public Function ConvertSub(ByVal Str As String)
 End Function
 
 Function ConvertFormUI(ByVal S As String)
+  Dim Sp, I As Long, L As String
+  Dim R As String, N As String, M As String
+  R = "": M = "": N = vbCrLf
+  
+  R = R & M & "<Window x:Class=""MainWindow"" "
+  R = R & M & "xmlns = ""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" "
+  R = R & M & "xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" "
+  R = R & M & "xmlns:d=""http://schemas.microsoft.com/expression/blend/2008"" "
+  R = R & M & "xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"" "
+  R = R & M & "xmlns:local=""clr-namespace:WpfApp1"" "
+  R = R & M & "mc:Ignorable=""d"" "
+  R = R & M & "Title=""MainWindow"" "
+  R = R & M & "Height=""450"" "
+  R = R & M & "Width=""800"">"
+  R = R & N & "    <Grid>"
+  
+  Sp = Split(S, vbCrLf)
+  For I = LBound(Sp) To UBound(Sp)
+    L = Sp(I)
+        
+  Next
+  
+  R = R & N & "    </Grid>"
+  R = R & N & "</Window>"
 
+  ConvertFormUI = R
 End Function

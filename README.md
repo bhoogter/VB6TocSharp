@@ -10,4 +10,5 @@ A VB6 based VB6 -> C# 2017 converter.
 - Opportunistic - This code heavily relies on relative uniformity of the VB6 IDE:
     - Spacing is relatively consistent because the IDE enforces it.
     - Keyword capitalization can be guaranteed.
+- Non-assuming - It makes the assumption that the code compiled while in VB, so it doesn't assume that reference it can't resolve aren't going to be found.
 - C# 2017 - This is a late-comer.  There has never been a freeware solution for VB6 -> C#, and now that VB.NET is more or less discontinued, why not?
