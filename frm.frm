@@ -82,6 +82,15 @@ Begin VB.Form frm
          Top             =   240
          Width           =   2655
       End
+      Begin VB.Label lblPrg 
+         Alignment       =   2  'Center
+         BackStyle       =   0  'Transparent
+         Height          =   255
+         Left            =   2040
+         TabIndex        =   10
+         Top             =   3120
+         Width           =   2415
+      End
       Begin VB.Shape shpPrgBack 
          BackColor       =   &H00FFC0C0&
          Height          =   255
@@ -117,14 +126,14 @@ Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
 
-Dim pMax As Long
+Public pMax As Long
 
 Private Sub cmdAll_Click()
   ConvertProject txtSrc
 End Sub
 
 Private Sub cmdClasses_Click()
-  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPClasses(vbpFile)
+  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPClasses(txtSrc)
 End Sub
 
 Private Sub cmdExit_Click()
@@ -132,16 +141,17 @@ Private Sub cmdExit_Click()
 End Sub
 
 Private Sub cmdForms_Click()
-  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPForms(vbpFile)
+  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPForms(txtSrc)
 End Sub
 
 Private Sub cmdModules_Click()
-  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPModules(vbpFile)
+  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPModules(txtSrc)
 End Sub
 
-Private Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1)
+Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Caption As String = "#")
 On Error Resume Next
-  If Max >= 0 Then pMax = Max
+  If Max >= 0 Then pMax = Max: lblPrg = IIf(Caption = "#", "", Caption)
   shpPrg.Width = Val / pMax * 2415
   shpPrg.Visible = Val >= 0
+  lblPrg.Visible = shpPrg.Visible
 End Function

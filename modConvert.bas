@@ -44,7 +44,7 @@ Public Function ConvertForm(ByVal frmFile As String)
   Code = Mid(S, J)
   
   X = ConvertFormUI(Preamble)
-  F = DebugFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml")
+  F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml")
   WriteFile F, X, True
   
   J = CodeSectionGlobalEndLoc(Code)
@@ -52,7 +52,7 @@ Public Function ConvertForm(ByVal frmFile As String)
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = Globals & vbCrLf & vbCrLf & Functions
-  F = DebugFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml.cs")
+  F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml.cs")
   WriteFile F, X, True
 End Function
 
@@ -68,11 +68,11 @@ Public Function ConvertModule(ByVal basFile As String)
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
-  Globals = ConvertGlobals(Left(Code, J))
+  Globals = ConvertGlobals(Left(Code, J - 1))
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = Globals & vbCrLf & vbCrLf & Functions
-  F = DebugFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".cs")
+  F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".cs")
   WriteFile F, X, True
 End Function
 
@@ -169,6 +169,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
   Dim Sp, L
   Dim pName As String, pType As String
   Dim Res As String
+  Dim ArraySpec As String, aMax As String, aMin As String
   Res = ""
   
   If tLeft(S, 4) = "Dim " Then S = Mid(Trim(S), 5)
@@ -176,9 +177,21 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
   Sp = Split(S, ",")
   For Each L In Sp
     L = Trim(L)
-    pName = SplitWord(L, 1)
-    If SplitWord(L, 2) = "As" Then
-      pType = SplitWord(L, 3)
+    pName = RegExNMatch(L, patToken)
+    L = tMid(L, Len(pName) + 1)
+    If tLeft(L, 1) = "(" Then
+      ArraySpec = nextBy(Mid(L, 2), ")")
+      L = Trim(tMid(L, Len(ArraySpec) + 3))
+      aMin = 0
+      aMax = SplitWord(ArraySpec)
+      ArraySpec = Trim(tMid(ArraySpec, Len(aMax) + 1))
+      If tLeft(ArraySpec, 3) = "To " Then
+        aMin = aMax
+        aMax = tMid(ArraySpec, 4)
+      End If
+    End If
+    If SplitWord(L, 1) = "As" Then
+      pType = SplitWord(L, 2)
     Else
       pType = "Variant"
     End If
@@ -190,6 +203,67 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
 End Function
 
 Public Function ConvertAPIDef(ByVal S As String) As String
+'Private Declare Function CreateFile Lib "kernel32" Alias "CreateFileA" (ByVal lpFileName As String, ByVal dwDesiredAccess As Long, ByVal dwShareMode As Long, ByVal lpSecurityAttributes As Long, ByVal dwCreationDisposition As Long, ByVal dwFlagsAndAttributes As Long, ByVal hTemplateFile As Long) As Long
+'[DllImport("User32.dll")]
+'public static extern int MessageBox(int h, string m, string c, int type);
+  Dim isPrivate As Boolean, isSub As Boolean
+  Dim aName As String
+  Dim aLib As String
+  Dim aAlias As String
+  Dim aArgs As String
+  Dim aReturn As String
+  Dim tArg As String, has As Boolean
+  If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
+  If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
+  If tLeft(S, 8) = "Declare " Then S = tMid(S, 9)
+  If tLeft(S, 4) = "Sub " Then S = tMid(S, 5): isSub = True
+  If tLeft(S, 9) = "Function " Then S = tMid(S, 10)
+  aName = RegExNMatch(S, patToken)
+  S = Trim(tMid(S, Len(aName) + 1))
+  If tLeft(S, 4) = "Lib " Then
+    S = Trim(tMid(S, 5))
+    aLib = SplitWord(S, 1)
+    S = Trim(tMid(S, Len(aLib) + 1))
+    If Left(aLib, 1) = """" Then aLib = Mid(aLib, 2)
+    If Right(aLib, 1) = """" Then aLib = Left(aLib, Len(aLib) - 1)
+    If LCase(Right(aLib, 4)) <> ".dll" Then aLib = aLib & ".dll"
+    aLib = LCase(aLib)
+  End If
+  If tLeft(S, 6) = "Alias " Then
+    S = Trim(tMid(S, 7))
+    aAlias = SplitWord(S, 1)
+    S = Trim(tMid(S, Len(aAlias) + 1))
+    If Left(aAlias, 1) = """" Then aAlias = Mid(aAlias, 2)
+    If Right(aAlias, 1) = """" Then aAlias = Left(aAlias, Len(aAlias) - 1)
+    End If
+  If tLeft(S, 1) = "(" Then S = tMid(S, 2)
+  aArgs = nextBy(S, ")")
+  S = Trim(tMid(S, Len(aArgs) + 2))
+  If tLeft(S, 3) = "As " Then
+    S = Trim(tMid(S, 4))
+    aReturn = SplitWord(S, 1)
+    S = Trim(tMid(S, Len(aReturn) + 1))
+  Else
+    aReturn = "Variant"
+  End If
+  
+  S = ""
+  S = S & "[DllImport(""" & aLib & """)] "
+  S = S & IIf(isPrivate, "private ", "public ")
+  S = S & "static extern "
+  S = S & IIf(isSub, "void ", ConvertDataType(aReturn))
+  S = S & aName
+  S = S & "("
+  Do
+    If aArgs = "" Then Exit Do
+    tArg = Trim(nextBy(aArgs, ","))
+    aArgs = tMid(aArgs, Len(tArg) + 2)
+    S = S & IIf(has, ", ", "") & ConvertParameter(tArg)
+    has = True
+  Loop While True
+  S = S & ");"
+  
+  
   ConvertAPIDef = S
 End Function
 
@@ -220,22 +294,56 @@ End Function
 
 Public Function ConvertEnum(ByVal S As String)
   Dim isPrivate As Boolean, eName As String
-  Dim Res As String
+  Dim Res As String, has As Boolean
   If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
   If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
   If tLeft(S, 5) = "Enum " Then S = tMid(S, 6)
   eName = RegExNMatch(S, patToken, 0)
-  S = nlTrims(tMid(S, Len(eName) + 1))
+  S = nlTrim(tMid(S, Len(eName) + 1))
   
-  Res = "enum " & eName & "{" & vbCrLf
-  eName = RegExNMatch(S, patToken, 0)
-  S = Trim(tMid(S, Len(eName) + 1))
-  Res = Res & "}"
+  Res = "enum " & eName & " {"
   
+  Do While tLeft(S, 8) <> "End Enum" And S <> ""
+    eName = RegExNMatch(S, patToken, 0)
+    Res = Res & IIf(has, ",", "") & vbCrLf & sSpace(SpIndent) & eName
+    has = True
+
+    S = nlTrim(tMid(S, Len(eName) + 1))
+    If tLeft(S, 1) = "=" Then
+      S = nlTrim(Mid(S, 2))
+      eName = RegExNMatch(S, "[0-9]*", 0)
+      Res = Res & " = " & eName
+      S = nlTrim(tMid(S, Len(eName) + 1))
+    End If
+  Loop
+  Res = Res & vbCrLf & "}"
 End Function
 
 Public Function ConvertType(ByVal S As String)
-
+  Dim isPrivate As Boolean, eName As String, eType As String
+  Dim Res As String
+  If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
+  If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
+  If tLeft(S, 5) = "Type " Then S = tMid(S, 6)
+  eName = RegExNMatch(S, patToken, 0)
+  S = nlTrim(tMid(S, Len(eName) + 1))
+  
+  Res = IIf(isPrivate, "private ", "public ") & "struct " & eName & " {"
+  
+  Do While tLeft(S, 8) <> "End Enum" And S <> ""
+    eName = RegExNMatch(S, patToken, 0)
+    S = nlTrim(tMid(S, Len(eName) + 1))
+    
+    If tLeft(S, 3) = "As " Then
+      S = nlTrim(Mid(S, 4))
+      eType = RegExNMatch(S, patToken, 0)
+      S = nlTrim(tMid(S, Len(eType) + 1))
+    Else
+      eType = "Variant"
+    End If
+    Res = Res & vbCrLf & " public " & ConvertDataType(eType) & " " & eName & ";"
+  Loop
+  Res = Res & vbCrLf & "}"
 End Function
 
 Public Function DeComment(ByVal Str As String) As String
@@ -264,6 +372,7 @@ Public Function ConvertParameter(ByVal S As String) As String
   Dim Res As String
   Dim pName As String, pType As String, pDef As String
   
+  S = Trim(S)
   If tLeft(S, 9) = "Optional " Then isOptional = True: S = Mid(S, 10)
   isByRef = True
   If tLeft(S, 6) = "ByRef " Then isByRef = True: S = Mid(S, 7)
@@ -310,6 +419,7 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Long":  ConvertDataType = "int"
     Case "Double": ConvertDataType = "double"
     Case "Variant": ConvertDataType = "object"
+    Case "Byte":    ConvertDataType = "byte"
     Case Else: ConvertDataType = "object"
   End Select
 End Function
@@ -348,6 +458,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   Res = Res & "("
   hArgs = False
   Do
+    If Trim(fArgs) = "" Then Exit Do
     tArg = nextBy(fArgs, ",")
     fArgs = LTrim(Mid(fArgs, Len(tArg) + 2))
     
@@ -373,8 +484,8 @@ Public Function ConvertValue(ByVal S As String) As String
   S = Trim(S)
   FirstToken = RegExNMatch(S, "[a-zA-Z_][a-zA-Z_0-9.]*", 0)
   FirstWord = SplitWord(S, 1)
-  If S = FirstWord Then ConvertValue = S: Exit Function
-  If S = FirstToken Then ConvertValue = S & "(): exit function"
+  If S = FirstWord Then ConvertValue = S: GoTo DoReplacements
+  If S = FirstToken Then ConvertValue = S & "()": GoTo DoReplacements
   
   If FirstToken = FirstWord And Not isOperator(SplitWord(S, 2)) Then ' Sub without parenthesis
     ConvertValue = FirstWord & "(" & SplitWord(S, 2, , , True) & ")"
@@ -382,6 +493,7 @@ Public Function ConvertValue(ByVal S As String) As String
     ConvertValue = S
   End If
   
+DoReplacements:
   ConvertValue = Replace(ConvertValue, " & ", " + ")
   ConvertValue = Replace(ConvertValue, ":=", ": ")
   ConvertValue = Replace(ConvertValue, "=", "==")
@@ -391,9 +503,11 @@ Public Function ConvertValue(ByVal S As String) As String
   ConvertValue = Replace(ConvertValue, " And ", " && ")
   ConvertValue = Replace(ConvertValue, " Mod ", " % ")
   ConvertValue = Replace(ConvertValue, " &H", "0x")
+  If Left(ConvertValue, 2) = "&H" Then ConvertValue = "0x" & Mid(ConvertValue, 3)
 
   If WithLevel > 0 Then
     ConvertValue = Trim(Replace(" " & ConvertValue, " .", " " & WithMark & WithLevel & "."))
+    If Left(ConvertValue, 1) = "." Then ConvertValue = WithMark & WithLevel & ConvertValue
   End If
 End Function
 
@@ -418,16 +532,18 @@ Public Function ConvertGlobals(ByVal Str As String) As String
   Dim Building As String
   Dim inCase As Long
   Dim returnVariable As String
+  Dim N As Long
   
   Res = ""
   Building = ""
   Str = Replace(Str, vbLf, "")
   S = Split(Str, vbCr)
   Ind = 0
+  N = 0
+  Prg 0, UBound(S) - LBound(S) + 1, "Globals..."
   For Each L In S
     L = DeComment(L)
     O = ""
-    
     If Building <> "" Then
       Building = Building & vbCrLf & L
       If tLeft(L, 8) = "End Type" Then
@@ -443,17 +559,21 @@ Public Function ConvertGlobals(ByVal Str As String) As String
       O = ConvertAPIDef(L)
     ElseIf RegExTest(L, "(Public |Private |)Const ") Then
       O = ConvertConstant(L, True)
-    ElseIf tLeft(L, 8) = "Private " Or tLeft(L, 7) = "Public " Or tLeft(L, 4) = "Dim " Then
-      O = ConvertDeclare(L, 0, True)
     ElseIf RegExTest(L, "(Public |Private |)Enum ") Then
       Building = L
     ElseIf RegExTest(L, "(Public |Private |)Type ") Then
       Building = L
+    ElseIf tLeft(L, 8) = "Private " Or tLeft(L, 7) = "Public " Or tLeft(L, 4) = "Dim " Then
+      O = ConvertDeclare(L, 0, True)
     End If
       
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "", "", vbCrLf)
+    N = N + 1
+    Prg N
+    If N Mod 10000 = 0 Then Stop
   Next
+  Prg
   
   ConvertGlobals = Res
 End Function

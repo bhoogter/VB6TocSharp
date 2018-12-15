@@ -12,8 +12,9 @@ Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: 
 
 
 Public Function nlTrim(ByVal Str As String)
-  Do While InStr(" " & vbTab & vbCr & vbLf, Left(Str, 1)): Str = Mid(Str, 2) <> 0: Loop
-  Do While InStr(" " & vbTab & vbCr & vbLf, Right(Str, 1)): Str = Mid(Str, 1, Len(Str) - 1) <> 0: Loop
+  Do While InStr(" " & vbTab & vbCr & vbLf, Left(Str, 1)) <> 0 And Str <> "": Str = Mid(Str, 2): Loop
+  Do While InStr(" " & vbTab & vbCr & vbLf, Right(Str, 1)) <> 0 And Str <> "": Str = Mid(Str, 1, Len(Str) - 1): Loop
+  nlTrim = Str
 End Function
 
 
@@ -166,26 +167,18 @@ Public Function CodeSectionLoc(ByVal S As String) As Long
 End Function
 
 Public Function CodeSectionGlobalEndLoc(ByVal S As String)
-  Dim A As Long, B As Long, C As Long
-  A = InStr(S, "Function ")
-  If A = 0 Then A = 1000000
-  B = InStr(S, "Sub ")
-  If B = 0 Then B = 1000000
-  If B < A Then A = B
-  B = InStr(S, "Property ")
-  If B = 0 Then B = 1000000
-  If B < A Then A = B
-  
-  If Mid(S, A - 8, 8) = "Private " Then A = A - 8
-  If Mid(S, A - 7, 7) = "Public " Then A = A - 7
-
-  CodeSectionGlobalEndLoc = A
+  Do
+    CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc + RegExNPos(Mid(S, CodeSectionGlobalEndLoc + 1), "([^a-zA-Z0-9_]Function |[^a-zA-Z0-9_]Sub |[^a-zA-Z0-9_]Property )") + 1
+  Loop While Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "Declare "
+  If Mid(S, CodeSectionGlobalEndLoc - 7, 7) = "Public " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 7
+  If Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "private " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 8
+  CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 1
 End Function
 
 Public Function OutputFolder() As String
     Dim oWSHShell As Object
     Set oWSHShell = CreateObject("WScript.Shell")
-    DebugFolder = oWSHShell.SpecialFolders("Desktop") & "\test\"
+    OutputFolder = oWSHShell.SpecialFolders("Desktop") & "\test\"
     Set oWSHShell = Nothing
     
     If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
@@ -197,3 +190,13 @@ Public Function isOperator(ByVal S As String) As Boolean
     Case Else: isOperator = False
   End Select
 End Function
+
+Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Caption = "#")
+On Error Resume Next
+  With frm
+    If Max >= 0 Then .pMax = Max
+    .shpPrg.Width = Val / .pMax * 2415
+    .shpPrg.Visible = Val >= 0
+  End With
+End Function
+
