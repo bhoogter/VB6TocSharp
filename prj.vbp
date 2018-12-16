@@ -7,6 +7,7 @@ Module=modProjectFiles; modProjectFiles.bas
 Module=modTextFiles; modTextFiles.bas
 Module=modRegEx; modRegEx.bas
 Module=frmTest; frmTest.bas
+Module=modConvertForm; modConvertForm.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""

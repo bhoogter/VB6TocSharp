@@ -1,7 +1,7 @@
 Attribute VB_Name = "modConvert"
 Option Explicit
 
-Const SpIndent As Long = 2
+
 Const WithMark = "_WithVar"
 Private EOLComment As String
 Dim WithLevel As Long, MaxWithLevel As Long
@@ -43,23 +43,23 @@ Public Function ConvertForm(ByVal frmFile As String)
   Preamble = Left(S, J - 1)
   Code = Mid(S, J)
   
-  X = ConvertFormUI(Preamble)
+  x = ConvertFormUi(Preamble)
   F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml")
-  WriteFile F, X, True
+  WriteFile F, x, True
   
   J = CodeSectionGlobalEndLoc(Code)
   Globals = ConvertGlobals(Left(Code, J))
   Functions = ConvertCodeSegment(Mid(Code, J))
   
-  X = Globals & vbCrLf & vbCrLf & Functions
+  x = Globals & vbCrLf & vbCrLf & Functions
   F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml.cs")
-  WriteFile F, X, True
+  WriteFile F, x, True
 End Function
 
 
 Public Function ConvertModule(ByVal basFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
-  Dim F As String, X As String
+  Dim F As String, x As String
   If Not FileExists(basFile) Then
     MsgBox "File not found in ConvertModule: " & basFile
     Exit Function
@@ -71,9 +71,9 @@ Public Function ConvertModule(ByVal basFile As String)
   Globals = ConvertGlobals(Left(Code, J - 1))
   Functions = ConvertCodeSegment(Mid(Code, J))
   
-  X = Globals & vbCrLf & vbCrLf & Functions
+  x = Globals & vbCrLf & vbCrLf & Functions
   F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".cs")
-  WriteFile F, X, True
+  WriteFile F, x, True
 End Function
 
 
@@ -166,11 +166,13 @@ Public Function ConvertCodeSegment(ByVal S As String) As String
 End Function
 
 Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional ByVal isGlobal As Boolean) As String
-  Dim Sp, L
+  Dim Sp, L, SS As String
   Dim pName As String, pType As String
   Dim Res As String
-  Dim ArraySpec As String, aMax As String, aMin As String
+  Dim ArraySpec As String, isArr As Boolean, aMax As String, aMin As String, aTodo As String
   Res = ""
+  
+  SS = S
   
   If tLeft(S, 4) = "Dim " Then S = Mid(Trim(S), 5)
   
@@ -180,14 +182,21 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
     pName = RegExNMatch(L, patToken)
     L = tMid(L, Len(pName) + 1)
     If tLeft(L, 1) = "(" Then
+      isArr = True
       ArraySpec = nextBy(Mid(L, 2), ")")
-      L = Trim(tMid(L, Len(ArraySpec) + 3))
-      aMin = 0
-      aMax = SplitWord(ArraySpec)
-      ArraySpec = Trim(tMid(ArraySpec, Len(aMax) + 1))
-      If tLeft(ArraySpec, 3) = "To " Then
-        aMin = aMax
-        aMax = tMid(ArraySpec, 4)
+      If ArraySpec = "" Then
+        aMin = -1
+        aMax = -1
+        L = Trim(tMid(L, 3))
+      Else
+        L = Trim(tMid(L, Len(ArraySpec) + 3))
+        aMin = 0
+        aMax = SplitWord(ArraySpec)
+        ArraySpec = Trim(tMid(ArraySpec, Len(aMax) + 1))
+        If tLeft(ArraySpec, 3) = "To " Then
+          aMin = aMax
+          aMax = tMid(ArraySpec, 4)
+        End If
       End If
     End If
     If SplitWord(L, 1) = "As" Then
@@ -196,7 +205,16 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
       pType = "Variant"
     End If
     
-    Res = Res & sSpace(Ind) & ConvertDataType(pType) & " " & pName & ";" & vbCrLf
+    If Not isArr Then
+      Res = Res & sSpace(Ind) & ConvertDataType(pType) & " " & pName & ";" & vbCrLf
+    Else
+      aTodo = IIf(aMin = 0, "", " // TODO - Specified Minimum Array Boundary Not Supported: " & SS)
+      If aMax = -1 Then
+        Res = Res & sSpace(Ind) & "List<" & ConvertDataType(pType) & "> " & pName & " = new List<" & ConvertDataType(pType) & "> {};" & aTodo & vbCrLf
+      Else
+        Res = Res & sSpace(Ind) & "List<" & ConvertDataType(pType) & "> " & pName & " = new List<" & ConvertDataType(pType) & "> (new " & ConvertDataType(pType) & "[" & (Val(aMax) + 1) & "]);" & aTodo & vbCrLf
+      End If
+    End If
   Next
   
   ConvertDeclare = Res
@@ -346,8 +364,8 @@ Public Function ConvertType(ByVal S As String)
   Res = Res & vbCrLf & "}"
 End Function
 
-Public Function DeComment(ByVal Str As String) As String
-  EOLComment = nextBy(Str, "'", 2)
+Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean = False) As String
+  If Not Discard Then EOLComment = nextBy(Str, "'", 2)
   DeComment = RTrim(nextBy(Str, "'", 1))
 End Function
 
@@ -415,19 +433,20 @@ End Function
 
 Public Function ConvertDataType(ByVal S As String) As String
   Select Case S
-    Case "String": ConvertDataType = "string"
-    Case "Long":  ConvertDataType = "int"
-    Case "Double": ConvertDataType = "double"
-    Case "Variant": ConvertDataType = "object"
-    Case "Byte":    ConvertDataType = "byte"
-    Case Else: ConvertDataType = "object"
+    Case "String":    ConvertDataType = "string"
+    Case "Long":      ConvertDataType = "int"
+    Case "Double":    ConvertDataType = "double"
+    Case "Variant":   ConvertDataType = "object"
+    Case "Byte":      ConvertDataType = "byte"
+    Case "Boolean":   ConvertDataType = "bool"
+    Case Else:        ConvertDataType = "object"
   End Select
 End Function
 
 Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String) As String
   Const retToken = "#RET#"
   Dim Res As String
-  Dim fName As String, fArgs As String, retType As String, T As String
+  Dim fName As String, fArgs As String, retType As String, t As String
   Dim tArg As String
   Dim isSub As Boolean
   Dim hArgs As Boolean
@@ -512,12 +531,12 @@ DoReplacements:
 End Function
 
 Public Function ConvertCodeLine(ByVal S As String) As String
-  Dim T As Long
+  Dim t As Long
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
   If S Like "* = *" Then
-    T = InStr(S, "=")
-    ConvertCodeLine = Trim(Left(S, T - 1)) & " = " & ConvertValue(Trim(Mid(S, T + 1)))
+    t = InStr(S, "=")
+    ConvertCodeLine = Trim(Left(S, t - 1)) & " = " & ConvertValue(Trim(Mid(S, t + 1)))
   Else
     ConvertCodeLine = ConvertValue(S)
   End If
@@ -695,10 +714,17 @@ Public Function ConvertSub(ByVal Str As String)
   ConvertSub = Res
 End Function
 
-Function ConvertFormUI(ByVal S As String)
+Function ConvertFormUi(ByVal S As String)
   Dim Sp, I As Long, L As String
   Dim R As String, N As String, M As String
   R = "": M = "": N = vbCrLf
+  
+  Sp = Split(S, vbCrLf)
+  For I = LBound(Sp) To UBound(Sp)
+    L = Sp(I)
+        
+  Next
+  
   
   R = R & M & "<Window x:Class=""MainWindow"" "
   R = R & M & "xmlns = ""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" "
@@ -712,14 +738,9 @@ Function ConvertFormUI(ByVal S As String)
   R = R & M & "Width=""800"">"
   R = R & N & "    <Grid>"
   
-  Sp = Split(S, vbCrLf)
-  For I = LBound(Sp) To UBound(Sp)
-    L = Sp(I)
-        
-  Next
   
   R = R & N & "    </Grid>"
   R = R & N & "</Window>"
 
-  ConvertFormUI = R
+  ConvertFormUi = R
 End Function

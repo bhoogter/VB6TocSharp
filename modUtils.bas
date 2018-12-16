@@ -1,6 +1,7 @@
 Attribute VB_Name = "modUtils"
 Option Explicit
 
+Public Const SpIndent As Long = 2
 Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
 
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
@@ -9,7 +10,14 @@ Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = L
 Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As Long = 0) As String: tMid = IIf(M = 0, Mid(Trim(Str), N), Mid(Trim(Str), N, M)): End Function
 Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / Len(Str): End Function
 Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: LMatch = Left(Src, Len(tMatch)) = tMatch: End Function
+Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 
+
+Public Function deQuote(ByVal Src As String) As String
+  If Left(Src, 1) = """" Then Src = Mid(Src, 2)
+  If Right(Src, 1) = """" Then Src = Left(Src, Len(Src) - 1)
+  deQuote = Src
+End Function
 
 Public Function nlTrim(ByVal Str As String)
   Do While InStr(" " & vbTab & vbCr & vbLf, Left(Str, 1)) <> 0 And Str <> "": Str = Mid(Str, 2): Loop
@@ -118,10 +126,10 @@ Public Function ArrSlice(ByRef sourceArray, ByVal fromIndex As Long, ByVal toInd
 End Function
 
 Public Sub ArrAdd(ByRef Arr(), ByRef Item)
-  Dim X As Long
+  Dim x As Long
   Err.Clear
 On Error Resume Next
-  X = UBound(Arr)
+  x = UBound(Arr)
   If Err.Number <> 0 Then
     Arr = Array(Item)
     Exit Sub
@@ -200,3 +208,16 @@ On Error Resume Next
   End With
 End Function
 
+Public Function cVal(coll As Collection, Key As String) As String
+  On Error Resume Next
+  cVal = coll.Item(LCase(Key))
+End Function
+
+Public Function cValP(coll As Collection, Key As String) As String
+  cValP = P(deQuote(cVal(coll, Key)))
+End Function
+
+Public Function P(ByVal Str As String) As String
+  Str = Replace(Str, "&", "&amp;")
+  P = Str
+End Function
