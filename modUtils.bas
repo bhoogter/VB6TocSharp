@@ -6,12 +6,17 @@ Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
 
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
 Public Function FileExists(ByVal Fn As String) As Boolean: FileExists = Dir(Fn) <> "": End Function
+Public Function FileName(ByVal Fn As String) As String: FileName = Mid(Fn, InStrRev(Fn, "\") + 1): End Function
+Public Function FilePath(ByVal Fn As String) As String: FilePath = Left(Fn, InStrRev(Fn, "\")): End Function
+Public Function FileExt(ByVal Fn As String) As String: FileExt = Mid(Fn, InStrRev(Fn, ".")): End Function
+Public Function ChgExt(ByVal Fn As String, ByVal NewExt As String) As String: ChgExt = Left(Fn, InStrRev(Fn, ".") - 1) & NewExt: End Function
 Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = Left(Trim(Str), N): End Function
 Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As Long = 0) As String: tMid = IIf(M = 0, Mid(Trim(Str), N), Mid(Trim(Str), N, M)): End Function
 Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / Len(Str): End Function
 Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: LMatch = Left(Src, Len(tMatch)) = tMatch: End Function
-Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
+Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 12: End Function
 
+Public Function WriteOut(ByVal F As String, ByVal S As String) As Boolean: WriteOut = WriteFile(OutputFolder & F, S, True): End Function
 
 Public Function deQuote(ByVal Src As String) As String
   If Left(Src, 1) = """" Then Src = Mid(Src, 2)
@@ -126,10 +131,10 @@ Public Function ArrSlice(ByRef sourceArray, ByVal fromIndex As Long, ByVal toInd
 End Function
 
 Public Sub ArrAdd(ByRef Arr(), ByRef Item)
-  Dim x As Long
+  Dim X As Long
   Err.Clear
 On Error Resume Next
-  x = UBound(Arr)
+  X = UBound(Arr)
   If Err.Number <> 0 Then
     Arr = Array(Item)
     Exit Sub
@@ -177,9 +182,12 @@ End Function
 Public Function CodeSectionGlobalEndLoc(ByVal S As String)
   Do
     CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc + RegExNPos(Mid(S, CodeSectionGlobalEndLoc + 1), "([^a-zA-Z0-9_]Function |[^a-zA-Z0-9_]Sub |[^a-zA-Z0-9_]Property )") + 1
+    If CodeSectionGlobalEndLoc = 1 Then CodeSectionGlobalEndLoc = Len(S): Exit Function
   Loop While Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "Declare "
-  If Mid(S, CodeSectionGlobalEndLoc - 7, 7) = "Public " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 7
-  If Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "private " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 8
+  If CodeSectionGlobalEndLoc >= 8 Then
+    If Mid(S, CodeSectionGlobalEndLoc - 7, 7) = "Public " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 7
+    If Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "Private " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 8
+  End If
   CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 1
 End Function
 
@@ -192,6 +200,8 @@ Public Function OutputFolder() As String
     If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
 End Function
 
+
+
 Public Function isOperator(ByVal S As String) As Boolean
   Select Case Trim(S)
     Case "+", "-", "/", "*", "&", "<>", "<", ">", "<=", ">=", "=", "Mod", "And", "Or", "Xor": isOperator = True
@@ -199,13 +209,8 @@ Public Function isOperator(ByVal S As String) As Boolean
   End Select
 End Function
 
-Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Caption = "#")
-On Error Resume Next
-  With frm
-    If Max >= 0 Then .pMax = Max
-    .shpPrg.Width = Val / .pMax * 2415
-    .shpPrg.Visible = Val >= 0
-  End With
+Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap = "#")
+  frm.Prg Val, Max, Cap
 End Function
 
 Public Function cVal(coll As Collection, Key As String) As String
@@ -220,4 +225,12 @@ End Function
 Public Function P(ByVal Str As String) As String
   Str = Replace(Str, "&", "&amp;")
   P = Str
+End Function
+
+Public Function ModuleName(ByVal S As String) As String
+  Dim J As Long, K As Long
+  Const NameTag As String = "Attribute VB_Name = """
+  J = InStr(S, NameTag) + Len(NameTag) + 1
+  K = InStr(J, S, """") - J
+  ModuleName = Mid(S, J, K)
 End Function

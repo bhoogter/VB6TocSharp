@@ -8,17 +8,21 @@ Dim WithLevel As Long, MaxWithLevel As Long
 
 Public Function ConvertProject(ByVal vbpFile As String)
   CreateProjectSupportFiles
-  ConvertFileList VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) & vbCrLf & VBPUserControls(vbpFile)
+  ConvertFileList FilePath(vbpFile), VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) & vbCrLf & VBPUserControls(vbpFile)
   MsgBox "Complete."
 End Function
 
 Public Function ConvertFileList(ByVal Path As String, ByVal List As String, Optional ByVal Sep As String = vbCrLf) As Boolean
-  Dim L, K As String
-  frm.Prg 0, StrCnt(K, Sep) + 1
+  Dim L, V As Long, N As Long
+  V = StrCnt(List, Sep) + 1
+  Prg 0, V, N & "/" & V & "..."
   For Each L In Split(List, Sep)
+    N = N + 1
     If L = "" Then GoTo NextItem
     
-    Select Case LCase(Right(L, 4))
+    If L = "modFunctionList.bas" Then GoTo NextItem
+    
+    Select Case LCase(FileExt(L))
       Case ".bas": ConvertModule Path & L
       Case ".cls": ConvertClass Path & L
       Case ".frm": ConvertForm Path & L
@@ -27,39 +31,46 @@ Public Function ConvertFileList(ByVal Path As String, ByVal List As String, Opti
     End Select
     ConvertModule Path & L
 NextItem:
-    N = N + 1
-    frm.Prg N
+    Prg N, , N & "/" & V & "..."
+    DoEvents
   Next
+  Prg
 End Function
 
 Public Function ConvertForm(ByVal frmFile As String)
   Dim S As String, J As Long, Preamble As String, Code As String, Globals As String, Functions As String
+  Dim X As String, fName As String
+  Dim F As String
   If Not FileExists(frmFile) Then
     MsgBox "File not found in ConvertForm: " & frmFile
     Exit Function
   End If
   S = ReadEntireFile(frmFile)
+  fName = ModuleName(S)
+  
   J = CodeSectionLoc(S)
   Preamble = Left(S, J - 1)
   Code = Mid(S, J)
   
-  x = ConvertFormUi(Preamble)
-  F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml")
-  WriteFile F, x, True
+  X = ConvertFormUi(Preamble)
+  F = ChgExt(FileName(frmFile), ".xaml")
+  WriteOut F, X
   
   J = CodeSectionGlobalEndLoc(Code)
   Globals = ConvertGlobals(Left(Code, J))
   Functions = ConvertCodeSegment(Mid(Code, J))
   
-  x = Globals & vbCrLf & vbCrLf & Functions
-  F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".xaml.cs")
-  WriteFile F, x, True
+  X = "class " & fName & " {" & vbCrLf
+  X = X & Globals & vbCrLf & vbCrLf & Functions
+  X = X & vbCrLf & "}"
+  F = ChgExt(FileName(frmFile), ".xaml.cs")
+  WriteOut F, X
 End Function
 
 
 Public Function ConvertModule(ByVal basFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
-  Dim F As String, x As String
+  Dim F As String, X As String
   If Not FileExists(basFile) Then
     MsgBox "File not found in ConvertModule: " & basFile
     Exit Function
@@ -71,20 +82,35 @@ Public Function ConvertModule(ByVal basFile As String)
   Globals = ConvertGlobals(Left(Code, J - 1))
   Functions = ConvertCodeSegment(Mid(Code, J))
   
-  x = Globals & vbCrLf & vbCrLf & Functions
-  F = OutputFolder & Replace(Mid(basFile, InStrRev(basFile, "\") + 1), ".bas", ".cs")
-  WriteFile F, x, True
+  X = Globals & vbCrLf & vbCrLf & Functions
+  F = ChgExt(FileName(basFile), ".cs")
+  WriteOut F, X
 End Function
 
 
 
 Public Function ConvertClass(ByVal clsFile As String)
-  Dim S As String
+  Dim S As String, J As Long, Code As String, Globals As String, Functions As String
+  Dim F As String, X As String, fName As String
+  Dim cName As String
   If Not FileExists(clsFile) Then
-    MsgBox "File not found in ConvertForm: " & clsFile
+    MsgBox "File not found in ConvertModule: " & clsFile
     Exit Function
   End If
   S = ReadEntireFile(clsFile)
+  fName = ModuleName(S)
+  Code = Mid(S, CodeSectionLoc(S))
+  
+  J = CodeSectionGlobalEndLoc(Code)
+  Globals = ConvertGlobals(Left(Code, J - 1))
+  Functions = ConvertCodeSegment(Mid(Code, J))
+  
+  X = "class " & fName & " {" & vbCrLf
+  X = X & Globals & vbCrLf & vbCrLf & Functions
+  X = X & vbCrLf & "}"
+  
+  F = ChgExt(FileName(clsFile), ".cs")
+  WriteOut F, X
 End Function
 
 Public Function SanitizeCode(ByVal Str As String)
@@ -141,12 +167,12 @@ End Function
 Public Function CreateProjectSupportFiles() As Boolean
   Dim S As String, F As String
   S = ApplicationXAML()
-  F = OutputFolder & "application.xaml"
-  WriteFile F, S, True
+  F = "application.xaml"
+  WriteOut F, S
 End Function
 
 Public Function ApplicationXAML() As String
-  Dim R As String, M As String, M As String
+  Dim R As String, M As String, N As String
   R = "": M = "": N = vbCrLf
   
   R = R & M & "<Application x:Class=""Application"" "
@@ -446,7 +472,7 @@ End Function
 Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String) As String
   Const retToken = "#RET#"
   Dim Res As String
-  Dim fName As String, fArgs As String, retType As String, t As String
+  Dim fName As String, fArgs As String, retType As String, T As String
   Dim tArg As String
   Dim isSub As Boolean
   Dim hArgs As Boolean
@@ -531,12 +557,12 @@ DoReplacements:
 End Function
 
 Public Function ConvertCodeLine(ByVal S As String) As String
-  Dim t As Long
+  Dim T As Long
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
   If S Like "* = *" Then
-    t = InStr(S, "=")
-    ConvertCodeLine = Trim(Left(S, t - 1)) & " = " & ConvertValue(Trim(Mid(S, t + 1)))
+    T = InStr(S, "=")
+    ConvertCodeLine = Trim(Left(S, T - 1)) & " = " & ConvertValue(Trim(Mid(S, T + 1)))
   Else
     ConvertCodeLine = ConvertValue(S)
   End If
@@ -559,7 +585,7 @@ Public Function ConvertGlobals(ByVal Str As String) As String
   S = Split(Str, vbCr)
   Ind = 0
   N = 0
-  Prg 0, UBound(S) - LBound(S) + 1, "Globals..."
+'  Prg 0, UBound(S) - LBound(S) + 1, "Globals..."
   For Each L In S
     L = DeComment(L)
     O = ""
@@ -589,10 +615,10 @@ Public Function ConvertGlobals(ByVal Str As String) As String
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "", "", vbCrLf)
     N = N + 1
-    Prg N
-    If N Mod 10000 = 0 Then Stop
+'    Prg N
+'    If N Mod 10000 = 0 Then Stop
   Next
-  Prg
+'  Prg
   
   ConvertGlobals = Res
 End Function

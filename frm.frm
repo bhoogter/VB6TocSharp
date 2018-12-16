@@ -133,7 +133,7 @@ Private Sub cmdAll_Click()
 End Sub
 
 Private Sub cmdClasses_Click()
-  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPClasses(txtSrc)
+  ConvertFileList FilePath(txtSrc), VBPClasses(txtSrc)
 End Sub
 
 Private Sub cmdExit_Click()
@@ -141,16 +141,17 @@ Private Sub cmdExit_Click()
 End Sub
 
 Private Sub cmdForms_Click()
-  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPForms(txtSrc)
+  ConvertFileList FilePath(txtSrc), VBPForms(txtSrc)
 End Sub
 
 Private Sub cmdModules_Click()
-  ConvertFileList Left(txtSrc, InStrRev(txtSrc, "\")), VBPModules(txtSrc)
+  ConvertFileList FilePath(txtSrc), VBPModules(txtSrc)
 End Sub
 
-Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Caption As String = "#")
+Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#")
 On Error Resume Next
-  If Max >= 0 Then pMax = Max: lblPrg = IIf(Caption = "#", "", Caption)
+  If Max >= 0 Then pMax = Max
+  lblPrg = IIf(Prg = "#", "", Cap)
   shpPrg.Width = Val / pMax * 2415
   shpPrg.Visible = Val >= 0
   lblPrg.Visible = shpPrg.Visible
