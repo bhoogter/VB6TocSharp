@@ -49,20 +49,19 @@ Public Function ConvertFormUi(ByVal F As String) As String
         If LMatch(M, "Begin ") Or M = "End" Then Exit Do
         
         If LMatch(M, "BeginProperty ") Then
-          Prefix = Prefix & SplitWord(M, 2) & "."
-        End If
-        If LMatch(M, "EndProperty") Then
+          Prefix = LCase(Prefix & SplitWord(M, 2) & ".")
+        ElseIf LMatch(M, "EndProperty") Then
           Prefix = Left(Prefix, Len(Prefix) - 1)
           If Not IsInStr(Prefix, ".") Then
             Prefix = ""
           Else
             Prefix = Left(Prefix, InStrRev(Prefix, ".", -2))
           End If
+        Else
+          pK = Prefix & LCase(SplitWord(M, 1, "="))
+          pV = ConvertProperty(SplitWord(M, 2, "=", , True))
+          Props.Add pV, pK
         End If
-        
-        pK = Prefix & LCase(SplitWord(M, 1, "="))
-        pV = ConvertProperty(SplitWord(M, 2, "=", , True))
-        Props.Add pV, pK
       Loop While True
       K = K + J - 1
       R = R & sSpace(I * SpIndent) & StartControl(L, Props, LMatch(M, "End"), Tag) & vbCrLf
@@ -115,8 +114,8 @@ On Error Resume Next
     S = S & N & "    xmlns:local=""clr-namespace:WpfApp1"""
     S = S & N & "    mc:Ignorable=""d"""
     S = S & N & "    Title=" & Quote(cValP(Props, "caption"))
-    S = S & M & "    Height=" & Quote(Px(cValP(Props, "clientheight")))
-    S = S & M & "    Width=" & Quote(Px(cValP(Props, "clientwidth")))
+    S = S & M & "    Height=" & Quote(Px(cValP(Props, "clientheight", 0) + 435))
+    S = S & M & "    Width=" & Quote(Px(cValP(Props, "clientwidth", 0) + 435))
     S = S & M & ">"
     S = S & N & " <Grid"
   ElseIf tType = "GroupBox" Then
@@ -132,7 +131,7 @@ On Error Resume Next
     S = S & " FontSize=" & Quote(cValP(Props, "font.size", 10))
       
     S = S & " Header=""" & cValP(Props, "caption") & """"
-    S = S & "> <Grid"
+    S = S & "> <Grid Margin=""0,-15,0,0"""
   ElseIf tType = "Canvas" Then
     S = S & "<" & tType
     S = S & " x:Name=""" & cName & """"
@@ -145,7 +144,7 @@ On Error Resume Next
     S = S & "<" & tType
     S = S & " x:Name=""" & cName & """"
     S = S & " Margin=" & Quote(Px(cValP(Props, "left")) & "," & Px(cValP(Props, "top")) & ",0,0")
-    S = S & " Padding=" & Quote("0,0,0,0")
+    S = S & " Padding=" & Quote("2,2,2,2")
     S = S & " Width=" & Quote(Px(cValP(Props, "width")))
     S = S & " Height=" & Quote(Px(cValP(Props, "height")))
     S = S & " VerticalAlignment=" & Quote("Top")
@@ -156,6 +155,8 @@ On Error Resume Next
   If IsInStr(Features, "Font") Then
     S = S & " FontFamily=" & Quote(cValP(Props, "font.name", "Calibri"))
     S = S & " FontSize=" & Quote(cValP(Props, "font.size", 10))
+    If Val(cValP(Props, "font.weight", "400")) > 400 Then S = S & " FontWeight=" & Quote("Bold")
+      
   End If
   
   If IsInStr(Features, "Content") Then
@@ -166,8 +167,14 @@ On Error Resume Next
     S = S & " Content=" & Quote(cValP(Props, "caption") & cValP(Props, "text"))
   End If
 
-  If IsInStr(Features, "Header") Then
-    S = S & " Text=" & Quote(cValP(Props, "caption") & cValP(Props, "text"))
+  V = cValP(Props, "caption") & cValP(Props, "text")
+  If IsInStr(Features, "Text") And V <> "" Then
+    S = S & " Text=" & Quote(V)
+  End If
+  
+  V = cValP(Props, "ToolTipText")
+  If IsInStr(Features, "ToolTip") And V <> "" Then
+    S = S & " ToolTip=" & Quote(V)
   End If
 
   
@@ -198,15 +205,15 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "VB.Form"
       Name = "Window"
       Cont = True
-    Case "VB.PictureBox":             Name = "Canvas": Cont = True: Def = "Picture": Features = ""
-    Case "VB.Label":                  Name = "Label": Features = "": Features = "Font,Content"
-    Case "VB.TextBox":                Name = "TextBox": Def = "Text": Features = "Font,Text"
-    Case "VB.Frame":                  Name = "GroupBox": Features = ""
-    Case "VB.CommandButton":          Name = "Button": Features = "Font,Content"
-    Case "VB.CheckBox":               Name = "CheckBox": Features = "Font,Content"
-    Case "VB.OptionButton":           Name = "RadioButton": Features = "Font,Content"
-    Case "VB.ComboBox":               Name = "ComboBox": Def = "Text": Features = "Font,Text"
-    Case "VB.ListBox":                Name = "ListBox": Def = "Text": Features = "Font"
+    Case "VB.PictureBox":             Name = "Canvas": Cont = True: Def = "Picture": Features = "Tooltiptext"
+    Case "VB.Label":                  Name = "Label": Features = "": Features = "Font,Content,Tooltiptext"
+    Case "VB.TextBox":                Name = "TextBox": Def = "Text": Features = "Font,Text,Tooltiptext"
+    Case "VB.Frame":                  Name = "GroupBox": Features = "Tooltiptext"
+    Case "VB.CommandButton":          Name = "Button": Features = "Font,Content,Tooltiptext"
+    Case "VB.CheckBox":               Name = "CheckBox": Features = "Font,Content,Tooltiptext"
+    Case "VB.OptionButton":           Name = "RadioButton": Features = "Font,Content,Tooltiptext"
+    Case "VB.ComboBox":               Name = "ComboBox": Def = "Text": Features = "Font,Text,Tooltiptext"
+    Case "VB.ListBox":                Name = "ListBox": Def = "Text": Features = "Font,Tooltiptext"
     Case "VB.HScrollBar":             Name = "": Def = "Value": Features = ""
     Case "VB.VScrollBar":             Name = "": Def = "Value": Features = ""
     Case "VB.Timer":                  Name = "Timer": Def = "Enabled": Features = ""
@@ -215,18 +222,18 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "VB.FileListBox":            Name = "FileListBox": Def = "Path": Features = ""
     Case "VB.Shape":                  Name = "Shape": Def = "Visible": Features = ""
     Case "VB.Line":                   Name = "Line": Def = "Visible": Features = ""
-    Case "VB.Image":                  Name = "Canvas": Def = "Picture": Features = ""
+    Case "VB.Image":                  Name = "Canvas": Def = "Picture": Features = "Tooltiptext"
     Case "VB.Data":                   Name = "Data": Def = "DataSource": Features = ""
     Case "VB.OLE":                    Name = "OLE": Def = "OLE": Features = ""
     
     ' MS Windows Common Controls 6.0
-    Case "MSComCtl2.TabStrip":        Name = ""
+    Case "MSComCtl2.TabStrip":
     Case "MSComCtl2.ToolBar":
-    Case "MSComCtl2.StatusBar":
-    Case "MSComCtl2.ProgressBar":
-    Case "MSComCtl2.TreeView":
-    Case "MSComCtl2.ListView":
-    Case "MSComCtl2.ImageList":
+    Case "MSComCtl2.StatusBar":       Name = "StatusBar": Def = "Text": Features = "Tooltiptext"
+    Case "MSComCtl2.ProgressBar":     Name = "ProgressBar": Def = "Value": Features = "Tooltiptext"
+    Case "MSComCtl2.TreeView":        Name = "TreeView": Features = "Tooltiptext"
+    Case "MSComCtl2.ListView":        Name = "ListView": Features = "Tooltiptext"
+    Case "MSComCtl2.ImageList":       Name = "ImageList": Features = "Tooltiptext"
     Case "MSComCtl2.Slider":
     Case "MSComCtl2.ImageCombo":
 

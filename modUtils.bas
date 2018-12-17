@@ -14,7 +14,7 @@ Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = L
 Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As Long = 0) As String: tMid = IIf(M = 0, Mid(Trim(Str), N), Mid(Trim(Str), N, M)): End Function
 Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / Len(Str): End Function
 Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: LMatch = Left(Src, Len(tMatch)) = tMatch: End Function
-Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 12: End Function
+Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
 
 Public Function WriteOut(ByVal F As String, ByVal S As String) As Boolean: WriteOut = WriteFile(OutputFolder(F) & F, S, True): End Function
@@ -203,8 +203,8 @@ Public Function OutputFolder(Optional ByVal F As String) As String
   If LCase(F) Like "arpayset*" Then redFrm = True
   If LCase(F) Like "modcsv*" Then redMod = True
   If red Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
-  If redFrm Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
-  If redMod Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
+  If redFrm Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\Forms"
+  If redMod Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\Modules"
   
   If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
 End Function
