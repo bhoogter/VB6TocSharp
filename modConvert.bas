@@ -22,22 +22,26 @@ Public Function ConvertFileList(ByVal Path As String, ByVal List As String, Opti
     
     If L = "modFunctionList.bas" Then GoTo NextItem
     
-    Select Case LCase(FileExt(L))
-      Case ".bas": ConvertModule Path & L
-      Case ".cls": ConvertClass Path & L
-      Case ".frm": ConvertForm Path & L
-'      Case ".ctl": ConvertModule Path & L
-      Case Else: MsgBox "UNKNOWN VB TYPE: " & L
-    End Select
-    ConvertModule Path & L
+    ConvertFile Path & L
+    
 NextItem:
-    Prg N, , N & "/" & V & "..."
+    Prg N, , N & "/" & V & ": " & L
     DoEvents
   Next
   Prg
 End Function
 
-Public Function ConvertForm(ByVal frmFile As String)
+Public Function ConvertFile(ByVal someFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean
+  Select Case LCase(FileExt(someFile))
+    Case ".bas": ConvertFile = ConvertModule(someFile)
+    Case ".cls": ConvertFile = ConvertClass(someFile)
+    Case ".frm": ConvertFile = ConvertForm(someFile, UIOnly)
+'      Case ".ctl": ConvertModule  someFile
+    Case Else: MsgBox "UNKNOWN VB TYPE: " & someFile
+  End Select
+End Function
+
+Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean
   Dim S As String, J As Long, Preamble As String, Code As String, Globals As String, Functions As String
   Dim X As String, fName As String
   Dim F As String
@@ -53,8 +57,9 @@ Public Function ConvertForm(ByVal frmFile As String)
   Code = Mid(S, J)
   
   X = ConvertFormUi(Preamble)
-  F = ChgExt(FileName(frmFile), ".xaml")
+  F = fName & ".xaml"
   WriteOut F, X
+  If UIOnly Then Exit Function
   
   J = CodeSectionGlobalEndLoc(Code)
   Globals = ConvertGlobals(Left(Code, J))
@@ -63,27 +68,31 @@ Public Function ConvertForm(ByVal frmFile As String)
   X = "class " & fName & " {" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
-  F = ChgExt(FileName(frmFile), ".xaml.cs")
+  F = fName & ".xaml.cs"
   WriteOut F, X
 End Function
 
 
 Public Function ConvertModule(ByVal basFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
-  Dim F As String, X As String
+  Dim F As String, X As String, fName As String
   If Not FileExists(basFile) Then
     MsgBox "File not found in ConvertModule: " & basFile
     Exit Function
   End If
   S = ReadEntireFile(basFile)
+  fName = ModuleName(S)
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
   Globals = ConvertGlobals(Left(Code, J - 1))
-  Functions = ConvertCodeSegment(Mid(Code, J))
+  Functions = ConvertCodeSegment(Mid(Code, J), True)
   
-  X = Globals & vbCrLf & vbCrLf & Functions
-  F = ChgExt(FileName(basFile), ".cs")
+  X = ""
+  X = X & "static class " & fName & " {" & vbCrLf
+  X = X & nlTrim(Globals & vbCrLf & vbCrLf & Functions)
+  X = X & vbCrLf & "}"
+  F = fName & ".cs"
   WriteOut F, X
 End Function
 
@@ -109,7 +118,7 @@ Public Function ConvertClass(ByVal clsFile As String)
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
-  F = ChgExt(FileName(clsFile), ".cs")
+  F = fName & ".cs"
   WriteOut F, X
 End Function
 
@@ -187,8 +196,54 @@ Public Function ApplicationXAML() As String
   ApplicationXAML = R
 End Function
 
-Public Function ConvertCodeSegment(ByVal S As String) As String
-  ConvertCodeSegment = ConvertSub(SanitizeCode(S))
+Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As Boolean = False) As String
+  Dim P As String, N As Long
+  Dim F As String, T As Long, E As Long, K As String, X As Long
+  Dim Pre As String, Body As String
+  Dim R As String
+  S = SanitizeCode(S)
+  Do
+    P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "\("
+    N = -1
+    Do
+      N = N + 1
+      F = RegExNMatch(S, P, N)
+      T = RegExNPos(S, P, N)
+    Loop While Not IsInCode(S, T) And F <> ""
+    If F = "" Then Exit Do
+    
+    If IsInStr(F, " Function ") Then K = "End Function"
+    If IsInStr(F, " Sub ") Then K = "End Sub"
+    If IsInStr(F, " Property ") Then K = "End Property"
+    N = -1
+    Do
+      N = N + 1
+      E = RegExNPos(Mid(S, T), K, N) + Len(K) + T
+    Loop While Not IsInCode(S, E) And E <> 0
+    
+    If T > 1 Then Pre = nlTrim(Left(S, T - 1)) Else Pre = ""
+    Do Until Mid(S, E, 1) = vbCr Or Mid(S, E, 1) = vbLf Or Mid(S, E, 1) = ""
+      E = E + 1
+    Loop
+    Body = nlTrim(Mid(S, T, E - T))
+      
+    S = nlTrim(Mid(S, E + 1))
+    
+    R = R & CommentBlock(Pre) & ConvertSub(Body, AsModule) & vbCrLf
+  Loop While True
+  
+  
+  ConvertCodeSegment = R
+End Function
+
+Public Function CommentBlock(ByVal Str As String) As String
+  Dim S As String
+  If nlTrim(Str) = "" Then Exit Function
+  S = ""
+  S = S & "/*" & vbCrLf
+  S = S & Replace(Str, "*/", "* /") & vbCrLf
+  S = S & "*/" & vbCrLf
+  CommentBlock = S
 End Function
 
 Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional ByVal isGlobal As Boolean) As String
@@ -292,7 +347,7 @@ Public Function ConvertAPIDef(ByVal S As String) As String
   End If
   
   S = ""
-  S = S & "[DllImport(""" & aLib & """)] "
+  S = S & "[DllImport(""" & aLib & """)" & IIf(aAlias = "", "", ", DllEntryPoint(""" & aAlias & """)") & "] "
   S = S & IIf(isPrivate, "private ", "public ")
   S = S & "static extern "
   S = S & IIf(isSub, "void ", ConvertDataType(aReturn))
@@ -465,11 +520,11 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Variant":   ConvertDataType = "object"
     Case "Byte":      ConvertDataType = "byte"
     Case "Boolean":   ConvertDataType = "bool"
-    Case Else:        ConvertDataType = "object"
+    Case Else:        ConvertDataType = "dynamic" ' "object"
   End Select
 End Function
 
-Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String) As String
+Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal AsModule As Boolean = False) As String
   Const retToken = "#RET#"
   Dim Res As String
   Dim fName As String, fArgs As String, retType As String, T As String
@@ -482,6 +537,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   isSub = False
   If tLeft(S, 7) = "Public " Then Res = Res & "public ": S = Mid(S, 8)
   If tLeft(S, 8) = "Private " Then Res = Res & "private ": S = Mid(S, 9)
+  If AsModule Then Res = Res & "static "
   If tLeft(S, 4) = "Sub " Then Res = Res & "void ": S = Mid(S, 5): isSub = True
   If tLeft(S, 9) = "Function " Then Res = Res & retToken & " ": S = Mid(S, 10)
   
@@ -613,7 +669,7 @@ Public Function ConvertGlobals(ByVal Str As String) As String
     End If
       
     O = ReComment(O)
-    Res = Res & ReComment(O) & IIf(O = "", "", vbCrLf)
+    Res = Res & ReComment(O) & IIf(O = "" Or Right(O, 2) = vbCrLf, "", vbCrLf)
     N = N + 1
 '    Prg N
 '    If N Mod 10000 = 0 Then Stop
@@ -623,7 +679,7 @@ Public Function ConvertGlobals(ByVal Str As String) As String
   ConvertGlobals = Res
 End Function
 
-Public Function ConvertSub(ByVal Str As String)
+Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False)
   Dim Res As String
   Dim S, L, O As String
   Dim Ind As Long
@@ -639,7 +695,7 @@ Public Function ConvertSub(ByVal Str As String)
     O = ""
 
     If L Like "*Sub *" Or L Like "*Function *" Then
-      O = sSpace(Ind) & ConvertPrototype(L, returnVariable)
+      O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
       Ind = Ind + SpIndent
     ElseIf L Like "End Sub" Or L Like "End Function" Then
       If returnVariable <> "" Then
@@ -738,35 +794,4 @@ Public Function ConvertSub(ByVal Str As String)
   Next
   
   ConvertSub = Res
-End Function
-
-Function ConvertFormUi(ByVal S As String)
-  Dim Sp, I As Long, L As String
-  Dim R As String, N As String, M As String
-  R = "": M = "": N = vbCrLf
-  
-  Sp = Split(S, vbCrLf)
-  For I = LBound(Sp) To UBound(Sp)
-    L = Sp(I)
-        
-  Next
-  
-  
-  R = R & M & "<Window x:Class=""MainWindow"" "
-  R = R & M & "xmlns = ""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" "
-  R = R & M & "xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" "
-  R = R & M & "xmlns:d=""http://schemas.microsoft.com/expression/blend/2008"" "
-  R = R & M & "xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"" "
-  R = R & M & "xmlns:local=""clr-namespace:WpfApp1"" "
-  R = R & M & "mc:Ignorable=""d"" "
-  R = R & M & "Title=""MainWindow"" "
-  R = R & M & "Height=""450"" "
-  R = R & M & "Width=""800"">"
-  R = R & N & "    <Grid>"
-  
-  
-  R = R & N & "    </Grid>"
-  R = R & N & "</Window>"
-
-  ConvertFormUi = R
 End Function

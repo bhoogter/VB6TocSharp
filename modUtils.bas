@@ -15,8 +15,9 @@ Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As L
 Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / Len(Str): End Function
 Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: LMatch = Left(Src, Len(tMatch)) = tMatch: End Function
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 12: End Function
+Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
 
-Public Function WriteOut(ByVal F As String, ByVal S As String) As Boolean: WriteOut = WriteFile(OutputFolder & F, S, True): End Function
+Public Function WriteOut(ByVal F As String, ByVal S As String) As Boolean: WriteOut = WriteFile(OutputFolder(F) & F, S, True): End Function
 
 Public Function deQuote(ByVal Src As String) As String
   If Left(Src, 1) = """" Then Src = Mid(Src, 2)
@@ -36,7 +37,7 @@ On Error Resume Next
   sSpace = Space(N)
 End Function
 
-Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1)
+Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1, Optional ByVal ProcessVBComments As Boolean = False)
   Dim L As Long
   DoEvents
   L = InStr(Src, Del)
@@ -167,16 +168,17 @@ On Error Resume Next
 End Function
 
 Public Function CodeSectionLoc(ByVal S As String) As Long
+  Const Token As String = "Attribute VB_Name"
   Dim N As Long, K As Long
 
+  N = InStr(S, Token)
+  If N = 0 Then Exit Function
   Do
-    N = InStr(S, "Attribute VB_Name")
-    If N = 0 Then Exit Function
-    K = InStr(N, S, vbLf)
-    If K = 0 Then Exit Function
-  Loop While Mid(S, K, 10) = "Attribute "
+    N = InStr(N, S, vbLf) + 1
+    If N <= 1 Then Exit Function
+  Loop While Mid(S, N, 10) = "Attribute "
   
-  CodeSectionLoc = K + 1
+  CodeSectionLoc = N
 End Function
 
 Public Function CodeSectionGlobalEndLoc(ByVal S As String)
@@ -191,13 +193,20 @@ Public Function CodeSectionGlobalEndLoc(ByVal S As String)
   CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 1
 End Function
 
-Public Function OutputFolder() As String
-    Dim oWSHShell As Object
-    Set oWSHShell = CreateObject("WScript.Shell")
-    OutputFolder = oWSHShell.SpecialFolders("Desktop") & "\test\"
-    Set oWSHShell = Nothing
-    
-    If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
+Public Function OutputFolder(Optional ByVal F As String) As String
+  Dim red As Boolean, redMod As Boolean, redFrm As Boolean
+  Dim oWSHShell As Object
+  Set oWSHShell = CreateObject("WScript.Shell")
+  OutputFolder = oWSHShell.SpecialFolders("Desktop") & "\test\"
+  Set oWSHShell = Nothing
+  
+  If LCase(F) Like "arpayset*" Then redFrm = True
+  If LCase(F) Like "modcsv*" Then redMod = True
+  If red Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
+  If redFrm Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
+  If redMod Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
+  
+  If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
 End Function
 
 
@@ -213,13 +222,14 @@ Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long 
   frm.Prg Val, Max, Cap
 End Function
 
-Public Function cVal(coll As Collection, Key As String) As String
+Public Function cVal(coll As Collection, Key As String, Optional ByVal Def As String = "") As String
   On Error Resume Next
+  cVal = Def
   cVal = coll.Item(LCase(Key))
 End Function
 
-Public Function cValP(coll As Collection, Key As String) As String
-  cValP = P(deQuote(cVal(coll, Key)))
+Public Function cValP(coll As Collection, Key As String, Optional ByVal Def As String = "") As String
+  cValP = P(deQuote(cVal(coll, Key, Def)))
 End Function
 
 Public Function P(ByVal Str As String) As String
@@ -230,7 +240,25 @@ End Function
 Public Function ModuleName(ByVal S As String) As String
   Dim J As Long, K As Long
   Const NameTag As String = "Attribute VB_Name = """
-  J = InStr(S, NameTag) + Len(NameTag) + 1
+  J = InStr(S, NameTag) + Len(NameTag)
   K = InStr(J, S, """") - J
   ModuleName = Mid(S, J, K)
+End Function
+
+Public Function IsInCode(ByVal Src As String, ByVal N As Long)
+  Dim I As Long, C As String
+  Dim Qu As Boolean
+  IsInCode = False
+  For I = N To 1 Step -1
+    C = Mid(Src, I, 1)
+    If C = vbCr Or C = vbLf Then
+      IsInCode = True
+      Exit Function
+    ElseIf C = """" Then
+      Qu = Not Qu
+    ElseIf C = "'" Then
+      If Not Qu Then Exit Function
+    End If
+  Next
+  IsInCode = True
 End Function
