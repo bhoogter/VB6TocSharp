@@ -233,7 +233,7 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "MSComCtlLib.TabStrip":
     Case "MSComCtlLib.ToolBar":
     Case "MSComCtlLib.StatusBar":       Name = "StatusBar": Def = "Text": Features = "Tooltiptext"
-    Case "MSComCtlLib.ProgressBar":     Name = "ProgressBar": Def = "Value": Features = "Tooltiptext"
+    Case "MSComctlLib.ProgressBar":     Name = "ProgressBar": Def = "Value": Features = "Tooltiptext"
     Case "MSComctlLib.TreeView":        Name = "TreeView": Features = "Tooltiptext"
     Case "MSComCtlLib.ListView":        Name = "ListView": Features = "Tooltiptext"
     Case "MSComCtlLib.ImageList":       Name = "ImageList": Features = "Tooltiptext"
@@ -242,7 +242,7 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
 
     ' MS Windows Common Controls-2 6.0
 '    Case "MSComCtl2.Animation":
-'    Case "MSComCtl2.UpDown":
+    Case "MSComCtl2.UpDown":          Name = "Label"
     Case "MSComCtl2.DTPicker":        Name = "Label" '"DateTimePicker"
     Case "MSComCtl2.MonthView":       Name = "DatePicker"
     Case "MSComCtl2.FlatScrollBar":   Name = "ScrollBar"
