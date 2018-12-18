@@ -8,7 +8,6 @@ Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: I
 Public Function FileExists(ByVal Fn As String) As Boolean: FileExists = Dir(Fn) <> "": End Function
 Public Function FileName(ByVal Fn As String) As String: FileName = Mid(Fn, InStrRev(Fn, "\") + 1): End Function
 Public Function FilePath(ByVal Fn As String) As String: FilePath = Left(Fn, InStrRev(Fn, "\")): End Function
-Public Function FileExt(ByVal Fn As String) As String: FileExt = Mid(Fn, InStrRev(Fn, ".")): End Function
 Public Function ChgExt(ByVal Fn As String, ByVal NewExt As String) As String: ChgExt = Left(Fn, InStrRev(Fn, ".") - 1) & NewExt: End Function
 Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = Left(Trim(Str), N): End Function
 Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As Long = 0) As String: tMid = IIf(M = 0, Mid(Trim(Str), N), Mid(Trim(Str), N, M)): End Function
@@ -17,7 +16,14 @@ Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: 
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
 
-Public Function WriteOut(ByVal F As String, ByVal S As String) As Boolean: WriteOut = WriteFile(OutputFolder(F) & F, S, True): End Function
+Public Function WriteOut(ByVal F As String, ByVal S As String, ByVal O As String) As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
+
+Public Function FileExt(ByVal Fn As String, Optional ByVal vLCase As Boolean = True) As String
+  If Fn = "" Then Exit Function
+  FileExt = Mid(Fn, InStrRev(Fn, "."))
+  FileExt = IIf(vLCase, LCase(FileExt), FileExt)
+End Function
+
 
 Public Function deQuote(ByVal Src As String) As String
   If Left(Src, 1) = """" Then Src = Mid(Src, 2)
@@ -194,17 +200,15 @@ Public Function CodeSectionGlobalEndLoc(ByVal S As String)
 End Function
 
 Public Function OutputFolder(Optional ByVal F As String) As String
-  Dim red As Boolean, redMod As Boolean, redFrm As Boolean
   Dim oWSHShell As Object
   Set oWSHShell = CreateObject("WScript.Shell")
   OutputFolder = oWSHShell.SpecialFolders("Desktop") & "\test\"
   Set oWSHShell = Nothing
   
-  If LCase(F) Like "arpayset*" Then redFrm = True
-  If LCase(F) Like "modcsv*" Then redMod = True
-  If red Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
-  If redFrm Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\Forms"
-  If redMod Then OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\Modules"
+  OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
+  If FileExt(F) = ".bas" Then OutputFolder = OutputFolder & "Modules\"
+  If FileExt(F) = ".cls" Then OutputFolder = OutputFolder & "Classes\"
+  If FileExt(F) = ".frm" Then OutputFolder = OutputFolder & "Forms\"
   
   If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
 End Function

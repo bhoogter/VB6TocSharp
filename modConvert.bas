@@ -58,7 +58,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   
   X = ConvertFormUi(Preamble)
   F = fName & ".xaml"
-  WriteOut F, X
+  WriteOut F, X, frmFile
   If UIOnly Then Exit Function
   
   J = CodeSectionGlobalEndLoc(Code)
@@ -69,7 +69,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   F = fName & ".xaml.cs"
-  WriteOut F, X
+  WriteOut F, X, frmFile
 End Function
 
 
@@ -93,7 +93,7 @@ Public Function ConvertModule(ByVal basFile As String)
   X = X & nlTrim(Globals & vbCrLf & vbCrLf & Functions)
   X = X & vbCrLf & "}"
   F = fName & ".cs"
-  WriteOut F, X
+  WriteOut F, X, basFile
 End Function
 
 
@@ -119,7 +119,7 @@ Public Function ConvertClass(ByVal clsFile As String)
   X = X & vbCrLf & "}"
   
   F = fName & ".cs"
-  WriteOut F, X
+  WriteOut F, X, clsFile
 End Function
 
 Public Function SanitizeCode(ByVal Str As String)
@@ -177,7 +177,7 @@ Public Function CreateProjectSupportFiles() As Boolean
   Dim S As String, F As String
   S = ApplicationXAML()
   F = "application.xaml"
-  WriteOut F, S
+  WriteOut F, S, ""
 End Function
 
 Public Function ApplicationXAML() As String
