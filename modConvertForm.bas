@@ -55,7 +55,7 @@ Public Function ConvertFormUi(ByVal F As String) As String
           If Not IsInStr(Prefix, ".") Then
             Prefix = ""
           Else
-            Prefix = Left(Prefix, InStrRev(Prefix, ".", -2))
+            Prefix = Left(Prefix, InStrRev(Left(Prefix, Len(Prefix) - 1), "."))
           End If
         Else
           pK = Prefix & LCase(SplitWord(M, 1, "="))
@@ -202,9 +202,10 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
   Cont = False
   Def = "Caption"
   Select Case cType
-    Case "VB.Form"
-      Name = "Window"
+    Case "VB.Form":                   Name = "Window": Cont = True
+    Case "VB.MDIForm":                Name = "Window": Cont = True
       Cont = True
+    
     Case "VB.PictureBox":             Name = "Canvas": Cont = True: Def = "Picture": Features = "Tooltiptext"
     Case "VB.Label":                  Name = "Label": Features = "": Features = "Font,Content,Tooltiptext"
     Case "VB.TextBox":                Name = "TextBox": Def = "Text": Features = "Font,Text,Tooltiptext"
@@ -227,15 +228,15 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "VB.OLE":                    Name = "OLE": Def = "OLE": Features = ""
     
     ' MS Windows Common Controls 6.0
-    Case "MSComCtl2.TabStrip":
-    Case "MSComCtl2.ToolBar":
-    Case "MSComCtl2.StatusBar":       Name = "StatusBar": Def = "Text": Features = "Tooltiptext"
-    Case "MSComCtl2.ProgressBar":     Name = "ProgressBar": Def = "Value": Features = "Tooltiptext"
-    Case "MSComCtl2.TreeView":        Name = "TreeView": Features = "Tooltiptext"
-    Case "MSComCtl2.ListView":        Name = "ListView": Features = "Tooltiptext"
-    Case "MSComCtl2.ImageList":       Name = "ImageList": Features = "Tooltiptext"
-    Case "MSComCtl2.Slider":
-    Case "MSComCtl2.ImageCombo":
+    Case "MSComCtlLib.TabStrip":
+    Case "MSComCtlLib.ToolBar":
+    Case "MSComCtlLib.StatusBar":       Name = "StatusBar": Def = "Text": Features = "Tooltiptext"
+    Case "MSComCtlLib.ProgressBar":     Name = "ProgressBar": Def = "Value": Features = "Tooltiptext"
+    Case "MSComCtlLib.TreeView":        Name = "TreeView": Features = "Tooltiptext"
+    Case "MSComCtlLib.ListView":        Name = "ListView": Features = "Tooltiptext"
+    Case "MSComCtlLib.ImageList":       Name = "ImageList": Features = "Tooltiptext"
+    Case "MSComCtlLib.Slider":
+    Case "MSComCtlLib.ImageCombo":
 
     ' MS Windows Common Controls-2 6.0
 '    Case "MSComCtl2.Animation":
@@ -244,13 +245,23 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "MSComCtl2.MonthView":       Name = "DatePicker"
     Case "MSComCtl2.FlatScrollBar":   Name = "ScrollBar"
     
-    Case "MsFlexGridLib.MsFlexGrid":  Name = "Grid"
+    Case "MSComDlg.CommonDialog":     Name = "Label"
+    Case "MSFlexGridLib.MSFlexGrid":  Name = "Grid"
     Case "MSDBGrid.DBGrid":           Name = "Grid"
     Case "TabDlg.SSTab":              Name = "TabControl"
     Case "RichTextLib.RichTextBox":   Name = "TextBlock"
     Case "InetCtlsObjects.Inet":      Name = "INet"
     Case "MSCommLib.MSComm":          Name = "MSComm"
     Case "MSWinsockLib.Winsock":      Name = "Winsock"
+    
+    Case "WinCDS.UGridIO":            Name = "UGridIO"
+    Case "WinCDS.CandyButton":        Name = "Button"
+    Case "WinCDS.ucPBar":             Name = "ProgressBar"
+    Case "WinCDS.PrinterSelector":    Name = "Label"
+    Case "WinCDS.RichTextBoxNew":     Name = "TextBlock"
+    
+    Case "VJCZIPLib.VjcZip":          Name = "Label"
+    Case "MSChart20Lib.MSChart":      Name = "Label"
     
     Case Else
       Debug.Print "Unknown Control Type: " & cType

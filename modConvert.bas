@@ -290,7 +290,9 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
       Res = Res & sSpace(Ind) & ConvertDataType(pType) & " " & pName & ";" & vbCrLf
     Else
       aTodo = IIf(aMin = 0, "", " // TODO - Specified Minimum Array Boundary Not Supported: " & SS)
-      If aMax = -1 Then
+      If Not IsNumeric(aMax) Then
+        Res = Res & sSpace(Ind) & "List<" & ConvertDataType(pType) & "> " & pName & " = new List<" & ConvertDataType(pType) & "> (new " & ConvertDataType(pType) & "[(" & aMax & " + 1)]);  // TODO: Confirm Array Size By Token" & aTodo & vbCrLf
+      ElseIf Val(aMax) = -1 Then
         Res = Res & sSpace(Ind) & "List<" & ConvertDataType(pType) & "> " & pName & " = new List<" & ConvertDataType(pType) & "> {};" & aTodo & vbCrLf
       Else
         Res = Res & sSpace(Ind) & "List<" & ConvertDataType(pType) & "> " & pName & " = new List<" & ConvertDataType(pType) & "> (new " & ConvertDataType(pType) & "[" & (Val(aMax) + 1) & "]);" & aTodo & vbCrLf
