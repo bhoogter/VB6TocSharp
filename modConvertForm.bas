@@ -60,7 +60,9 @@ Public Function ConvertFormUi(ByVal F As String) As String
         Else
           pK = Prefix & LCase(SplitWord(M, 1, "="))
           pV = ConvertProperty(SplitWord(M, 2, "=", , True))
+On Error Resume Next
           Props.Add pV, pK
+On Error GoTo 0
         End If
       Loop While True
       K = K + J - 1
@@ -232,7 +234,7 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "MSComCtlLib.ToolBar":
     Case "MSComCtlLib.StatusBar":       Name = "StatusBar": Def = "Text": Features = "Tooltiptext"
     Case "MSComCtlLib.ProgressBar":     Name = "ProgressBar": Def = "Value": Features = "Tooltiptext"
-    Case "MSComCtlLib.TreeView":        Name = "TreeView": Features = "Tooltiptext"
+    Case "MSComctlLib.TreeView":        Name = "TreeView": Features = "Tooltiptext"
     Case "MSComCtlLib.ListView":        Name = "ListView": Features = "Tooltiptext"
     Case "MSComCtlLib.ImageList":       Name = "ImageList": Features = "Tooltiptext"
     Case "MSComCtlLib.Slider":
@@ -262,6 +264,7 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     
     Case "VJCZIPLib.VjcZip":          Name = "Label"
     Case "MSChart20Lib.MSChart":      Name = "Label"
+    Case "MapPointCtl.MappointControl": Name = "Label"
     
     Case Else
       Debug.Print "Unknown Control Type: " & cType
