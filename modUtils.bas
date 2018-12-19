@@ -64,7 +64,7 @@ Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """",
 End Function
 
 Public Function ReplaceToken(ByVal Src As String, ByVal OrigToken As String, ByVal NewToken As String) As String
-  ReplaceToken = Str
+  ReplaceToken = RegExReplace(Src, "([^a-zA-Z_0-9])(" & OrigToken & ")([^a-zA-Z_0-9])", "$1" & NewToken & "$3")
 End Function
 
 Public Function SplitWord(ByVal Source As String, Optional ByVal N As Long = 1, Optional ByVal Space As String = " ", Optional ByVal TrimResult As Boolean = True, Optional ByVal IncludeRest As Boolean = False) As String

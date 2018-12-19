@@ -36,6 +36,15 @@ On Error Resume Next
   RegExNMatch = RegEx.Execute(Src).Item(N).Value
 End Function
 
+Public Function RegExReplace(ByVal Src As String, ByVal Find As String, ByVal Repl As String) As String
+On Error Resume Next
+  Dim RegEx As Object, RegM As Object, tempStr As String, tempStr2 As String
+  Set RegEx = CreateObject("vbscript.regexp")
+  RegEx.Pattern = Find
+  RegEx.Global = True
+  RegExReplace = RegEx.Replace(Src, Repl)
+End Function
+
 Public Function RegExSplit(ByVal szStr As String, ByVal szPattern As String)
 On Error Resume Next
   Dim oAl, oRe, oMatches

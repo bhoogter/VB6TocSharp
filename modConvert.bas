@@ -66,6 +66,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = "class " & fName & " {" & vbCrLf
+  X = X & "  public static " & fName & "DefaultInstance;" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   F = fName & ".xaml.cs"
@@ -201,6 +202,9 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As
   Dim F As String, T As Long, E As Long, K As String, X As Long
   Dim Pre As String, Body As String
   Dim R As String
+  
+  ClearProperties
+  
   S = SanitizeCode(S)
   Do
     P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "\("
@@ -232,6 +236,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As
     R = R & CommentBlock(Pre) & ConvertSub(Body, AsModule) & vbCrLf
   Loop While True
   
+  R = ReadOutProperties & vbCrLf2 & R
   
   ConvertCodeSegment = R
 End Function
@@ -261,7 +266,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
   For Each L In Sp
     L = Trim(L)
     pName = RegExNMatch(L, patToken)
-    L = tMid(L, Len(pName) + 1)
+    L = Trim(tMid(L, Len(pName) + 1))
     If tLeft(L, 1) = "(" Then
       isArr = True
       ArraySpec = nextBy(Mid(L, 2), ")")
@@ -736,7 +741,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
   Select Case ScanFirst
     Case vbUseDefault:  oStr = Str
                         ConvertSub oStr, AsModule, vbTrue
-                        ConvertSub oStr, AsModule, vbFalse
+                        ConvertSub = ConvertSub(oStr, AsModule, vbFalse)
+                        Exit Function
     Case vbTrue:        SubBegin
     Case vbFalse:       SubBegin True
   End Select
@@ -749,13 +755,13 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     L = DeComment(L)
     O = ""
 
-If ScanFirst = vbFalse Then Stop
+'If ScanFirst = vbFalse Then Stop
     If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then
       AddProperty Str
-      Exit Function
+      Exit Function    ' repacked later...  not added here.
     ElseIf L Like "End Sub" Or L Like "End Function" Then
       If returnVariable <> "" Then
         O = O & sSpace(Ind) & "return " & returnVariable & ";" & vbCrLf
@@ -777,6 +783,8 @@ If ScanFirst = vbFalse Then Stop
     ElseIf tLeft(L, 3) = "If " Then  ' Code sanitization prevents all single-line ifs.
       O = sSpace(Ind) & "if (" & ConvertValue(Mid(Trim(L), 4, Len(Trim(L)) - 8)) & ") {"
       Ind = Ind + SpIndent
+    ElseIf tLeft(L, 7) = "ElseIf " Then
+      O = sSpace(Ind - SpIndent) & "} else if (" & ConvertValue(Mid(L, 8)) & ") {"
     ElseIf tLeft(L, 4) = "Else" Then
       O = sSpace(Ind - SpIndent) & "} else {"
     ElseIf tLeft(L, 6) = "End If" Then
