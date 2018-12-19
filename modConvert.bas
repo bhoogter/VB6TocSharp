@@ -622,10 +622,49 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     T = InStr(S, "=")
     ConvertCodeLine = Trim(Left(S, T - 1)) & " = " & ConvertValue(Trim(Mid(S, T + 1)))
   Else
-    ConvertCodeLine = ConvertValue(S)
+Debug.Print S
+      ConvertCodeLine = ConvertValue(S)
   End If
   
   ConvertCodeLine = ConvertCodeLine & ";"
+Debug.Print ConvertCodeLine
+End Function
+
+Public Function TestConvertStrings()
+  Const Q As String = """"
+  Dim S As String, T As String
+  S = "a + b + " & Q & "hello" & Q & " + " & Q & ", " & Q & Q & Q & " + k + " & Q & Q & Q & Q & " & " & Q & Q & Q & Q & Q & Q
+  T = ConvertStrings(S)
+  Debug.Print S
+  Debug.Print T
+End Function
+
+Public Function ConvertStrings(ByVal S As String)
+  Dim A As Long, B As Long
+  Dim T As String, U As String
+  A = InStr(S, """")
+  Do Until A = 0
+    B = InStr(A + 1, S, """")
+    If B = 0 Then Exit Do
+    Do While Mid(S, B + 1, 1) = """" And B <> 0
+      B = InStr(B + 2, S, """")
+    Loop
+    If B = 0 Then Exit Do
+    
+    T = Mid(S, A, B - A + 1)
+    U = """" & ConvertString(Mid(T, 2, Len(T) - 2)) & """"
+    
+    If T <> U Then
+      S = Left(S, A - 1) & U & Mid(S, B + 1)
+    End If
+    A = InStr(B - Len(T) + Len(U) + 1, S, """")
+  Loop
+  ConvertStrings = S
+End Function
+
+Public Function ConvertString(ByVal S As String)
+  S = Replace(S, """""", "\""")
+  ConvertString = S
 End Function
 
 Public Function ConvertGlobals(ByVal Str As String) As String
@@ -696,7 +735,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     L = DeComment(L)
     O = ""
 
-    If L Like "*Sub *" Or L Like "*Function *" Then
+    If L Like "*Sub *" Or L Like "*Function *" Or L Like "*Property*" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
       Ind = Ind + SpIndent
     ElseIf L Like "End Sub" Or L Like "End Function" Then
