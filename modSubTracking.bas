@@ -13,13 +13,16 @@ End Type
 Private Vars() As Variable
 
 Public Sub SubBegin()
-  Vars = Array()
+  Dim nVars() As Variable
+  Vars = nVars
 End Sub
 
 Private Function SubParamIndex(ByVal P As String) As Long
+  On Error GoTo NoEntries
   For SubParamIndex = LBound(Vars) To UBound(Vars)
     If Vars(SubParamIndex).Name = P Then Exit Function
   Next
+NoEntries:
   SubParamIndex = -1
 End Function
 

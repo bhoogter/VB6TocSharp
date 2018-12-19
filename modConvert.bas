@@ -619,11 +619,11 @@ End Function
 
 Public Function TestConvertStrings()
   Const Q As String = """"
-  Dim S As String, T As String
+  Dim S As String
   S = "a + b + " & Q & "hello" & Q & " + " & Q & ", " & Q & Q & Q & " + k + " & Q & Q & Q & Q & " & " & Q & Q & Q & Q & Q & Q
-  T = ConvertStrings(S)
-  Debug.Print S
-  Debug.Print T
+  TestConvertStrings = ConvertStrings(S)
+'  Debug.Print S
+'  Debug.Print TestConvertStrings
 End Function
 
 Public Function ConvertStrings(ByVal S As String)
@@ -716,12 +716,12 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     SubParamAssign Trim(Left(S, T - 1))
     ConvertCodeLine = Trim(Left(S, T - 1)) & " = " & ConvertValue(Trim(Mid(S, T + 1)))
   Else
-Debug.Print S
+'Debug.Print S
       ConvertCodeLine = ConvertValue(S)
   End If
   
   ConvertCodeLine = ConvertCodeLine & ";"
-Debug.Print ConvertCodeLine
+'Debug.Print ConvertCodeLine
 End Function
 
 
