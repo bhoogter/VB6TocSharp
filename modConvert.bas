@@ -298,6 +298,8 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
         Res = Res & sSpace(Ind) & "List<" & ConvertDataType(pType) & "> " & pName & " = new List<" & ConvertDataType(pType) & "> (new " & ConvertDataType(pType) & "[" & (Val(aMax) + 1) & "]);" & aTodo & vbCrLf
       End If
     End If
+    
+    SubParamDecl pName, pType, isArr, False
   Next
   
   ConvertDeclare = Res
@@ -502,6 +504,7 @@ Public Function ConvertParameter(ByVal S As String) As String
     Res = Res & "= " & pDef
   End If
   
+  SubParamDecl pName, pType, False, True
   ConvertParameter = Trim(Res)
 End Function
 
@@ -614,22 +617,6 @@ DoReplacements:
   End If
 End Function
 
-Public Function ConvertCodeLine(ByVal S As String) As String
-  Dim T As Long
-  If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
-  
-  If S Like "* = *" Then
-    T = InStr(S, "=")
-    ConvertCodeLine = Trim(Left(S, T - 1)) & " = " & ConvertValue(Trim(Mid(S, T + 1)))
-  Else
-Debug.Print S
-      ConvertCodeLine = ConvertValue(S)
-  End If
-  
-  ConvertCodeLine = ConvertCodeLine & ";"
-Debug.Print ConvertCodeLine
-End Function
-
 Public Function TestConvertStrings()
   Const Q As String = """"
   Dim S As String, T As String
@@ -720,12 +707,33 @@ Public Function ConvertGlobals(ByVal Str As String) As String
   ConvertGlobals = Res
 End Function
 
-Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False)
+Public Function ConvertCodeLine(ByVal S As String) As String
+  Dim T As Long
+  If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
+  
+  If S Like "* = *" Then
+    T = InStr(S, "=")
+    SubParamAssign Trim(Left(S, T - 1))
+    ConvertCodeLine = Trim(Left(S, T - 1)) & " = " & ConvertValue(Trim(Mid(S, T + 1)))
+  Else
+Debug.Print S
+      ConvertCodeLine = ConvertValue(S)
+  End If
+  
+  ConvertCodeLine = ConvertCodeLine & ";"
+Debug.Print ConvertCodeLine
+End Function
+
+
+Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim Res As String
   Dim S, L, O As String
   Dim Ind As Long
   Dim inCase As Long
   Dim returnVariable As String
+  
+  If ScanFirst = vbUseDefault Then ConvertSub Str, AsModule, vbTrue: ConvertSub Str, AsModule, vbFalse
+  If ScanFirst = vbTrue Then SubBegin
   
   Res = ""
   Str = Replace(Str, vbLf, "")
