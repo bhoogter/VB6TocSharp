@@ -3,6 +3,10 @@ Option Explicit
 
 Public Const SpIndent As Long = 2
 Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
+Public Const vbCrLf2 As String = vbCrLf & vbCrLf
+Public Const vbCrLf3 As String = vbCrLf & vbCrLf & vbCrLf
+Public Const vbCrLf4 As String = vbCrLf & vbCrLf & vbCrLf & vbCrLf
+
 
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
 Public Function FileExists(ByVal Fn As String) As Boolean: FileExists = Dir(Fn) <> "": End Function
@@ -57,6 +61,10 @@ Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """",
   Else
     nextBy = nextBy(Mid(Src, L + 1), Del, Ind - 1)
   End If
+End Function
+
+Public Function ReplaceToken(ByVal Src As String, ByVal OrigToken As String, ByVal NewToken As String) As String
+  ReplaceToken = Str
 End Function
 
 Public Function SplitWord(ByVal Source As String, Optional ByVal N As Long = 1, Optional ByVal Space As String = " ", Optional ByVal TrimResult As Boolean = True, Optional ByVal IncludeRest As Boolean = False) As String

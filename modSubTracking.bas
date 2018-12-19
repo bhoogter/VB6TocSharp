@@ -8,13 +8,34 @@ Private Type Variable
   Param As Boolean
   Assigned As Boolean
   Used As Boolean
+  AssignedBeforeUsed As Boolean
+  UsedBeforeAssigned As Boolean
 End Type
 
-Private Vars() As Variable
+Private Type Property
+  Name As String
+  asPublic As Boolean
+  asType As Boolean
+  asFunc As Boolean
+  Getter As String
+  Setter As String
+  origArgName As String
+End Type
+  
+Private Lockout As Boolean
 
-Public Sub SubBegin()
+Private Vars() As Variable
+Private Props() As Property
+
+Public Sub SubBegin(Optional ByVal setLockout As Boolean = False)
   Dim nVars() As Variable
   Vars = nVars
+  Lockout = Lockout
+  
+  If Not setLockout Then
+    Dim nProps() As Property
+    Props = nProps
+  End If
 End Sub
 
 Private Function SubParamIndex(ByVal P As String) As Long
@@ -26,7 +47,14 @@ NoEntries:
   SubParamIndex = -1
 End Function
 
+Private Function SubParam(ByVal P As String) As Variable
+On Error Resume Next
+  SubParam = Vars(SubParamIndex)
+End Function
+
 Public Sub SubParamDecl(ByVal P As String, ByVal asType As String, ByVal asArray As String, ByVal isParam As Boolean)
+  If Lockout Then Exit Sub
+
   Dim K As Variable
   K.Name = P
   K.Param = isParam
@@ -40,21 +68,110 @@ On Error Resume Next
 End Sub
 
 Public Sub SubParamAssign(ByVal P As String)
+  If Lockout Then Exit Sub
+  
   Dim K As Long
   K = SubParamIndex(P)
-  If K >= 0 Then Vars(K).Assigned = True
+  If K >= 0 Then
+    With Vars(K)
+      .Assigned = True
+      If Not .Used Then .AssignedBeforeUsed = True
+    End With
+  End If
 End Sub
 
 Public Sub SubParamUsed(ByVal P As String)
+  If Lockout Then Exit Sub
+
   Dim K As Long
   K = SubParamIndex(P)
   If K >= 0 Then Vars(K).Used = True
+  If K >= 0 Then
+    With Vars(K)
+      .Used = True
+      If Not .Used Then .UsedBeforeAssigned = True
+    End With
+  End If
 End Sub
 
-Public Sub AddProperty(ByVal P As String, GSL As String, Body As String)
 
+Private Function PropIndex(ByVal P As String) As Long
+  On Error GoTo NoEntries
+  For PropIndex = LBound(Props) To UBound(Vars)
+    If Props(SubParamIndex).Name = P Then Exit Function
+  Next
+NoEntries:
+  PropIndex = -1
+End Function
+
+Public Sub AddProperty(ByVal S As String)
+  Dim X As Long
+  Dim Pro As String, asPublic As Boolean
+  Dim GSL As String, pName As String, pArgs As String, pType As String
+  Pro = SplitWord(S, 1, vbCrLf)
+  S = nlTrim(Replace(S, Pro, ""))
+  If Right(S, 12) = "End Property" Then S = nlTrim(Left(S, Len(S) - 12))
+  
+  If LMatch(Pro, "Public ") Then Pro = Mid(Pro, 8): asPublic = True ' if one is public, both are...
+  If LMatch(Pro, "Private ") Then Pro = Mid(Pro, 9)
+  If LMatch(Pro, "Property ") Then Pro = Mid(Pro, 10)
+  If LMatch(Pro, "Get ") Then Pro = Mid(Pro, 5): GSL = "get"
+  If LMatch(Pro, "Let ") Then Pro = Mid(Pro, 5): GSL = "let"
+  If LMatch(Pro, "Set ") Then Pro = Mid(Pro, 5): GSL = "set"
+  pName = RegExNMatch(Pro, patToken)
+  Pro = Mid(Pro, Len(pName) + 1)
+  If LMatch(Pro, "(") Then Pro = Mid(Pro, 2)
+  pArgs = nextBy(Pro, ")")
+  Pro = Mid(Pro, Len(pArgs) + 1)
+  If LMatch(Pro, ")") Then Pro = Trim(Pro, 2)
+  If LMatch(Pro, "As ") Then Pro = Mid(Pro, 4)
+  pType = Pro
+  
+  X = PropIndex(pName)
+  If X = -1 Then
+    X = UBound(Props) + 1
+    ReDim Preserve Vars(X)
+  End If
+  
+  With Props(UBound(Props))
+    .Name = P
+    .asType = ConvertDataType(pType)
+    If asPublic Then .asPublic = True  ' if one is public, both are...
+    Select Case GSL
+      Case "get":         .Getter = ConvertSub(S)
+      Case "set", "let":  .Setter = ConvertSub(S)
+    End Select
+  End With
 End Sub
 
 Public Function ReadOutProperties() As String
-
+On Error Resume Next
+  Dim I As Long, R As String, P As Property
+  R = ""
+  For I = LBound(Props) To UBound(Props)
+    With Props(I)
+      If .Name <> "" And Not (.Getter = "" And .Setter = "") Then
+        If Not .asFunc Then
+          If .asPublic Then R = R & "public "
+          If .Getter = "" Then R = R & "writeonly "
+          If .Setter = "" Then R = R & "readonly "
+          R = R & .asType & " "
+          R = R & "{"
+          If .Getter <> "" Then
+            R = R & "  get {"
+            R = R & "    " & .asType & " " & .Name & ";" & vbCrLf
+            R = R & "    " & ReplaceToken(.Getter, .Name, "return")
+            R = R & "  }"
+          End If
+          If .Setter <> "" Then
+            R = R & "  set (" & .asType & " value) {"
+            R = R & "    " & ReplaceToken(.Setter, .origArgName, "value")
+            R = R & "  }"
+          End If
+          R = R & "}" & vbCrLf2
+        Else
+        End If
+      End If
+    End With
+  Next
 End Function

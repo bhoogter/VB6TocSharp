@@ -726,14 +726,20 @@ End Function
 
 
 Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
+  Dim oStr As String
   Dim Res As String
   Dim S, L, O As String
   Dim Ind As Long
   Dim inCase As Long
   Dim returnVariable As String
   
-  If ScanFirst = vbUseDefault Then ConvertSub Str, AsModule, vbTrue: ConvertSub Str, AsModule, vbFalse
-  If ScanFirst = vbTrue Then SubBegin
+  Select Case ScanFirst
+    Case vbUseDefault:  oStr = Str
+                        ConvertSub oStr, AsModule, vbTrue
+                        ConvertSub oStr, AsModule, vbFalse
+    Case vbTrue:        SubBegin
+    Case vbFalse:       SubBegin True
+  End Select
   
   Res = ""
   Str = Replace(Str, vbLf, "")
@@ -743,9 +749,13 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     L = DeComment(L)
     O = ""
 
-    If L Like "*Sub *" Or L Like "*Function *" Or L Like "*Property*" Then
+If ScanFirst = vbFalse Then Stop
+    If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
       Ind = Ind + SpIndent
+    ElseIf L Like "*Property *" Then
+      AddProperty Str
+      Exit Function
     ElseIf L Like "End Sub" Or L Like "End Function" Then
       If returnVariable <> "" Then
         O = O & sSpace(Ind) & "return " & returnVariable & ";" & vbCrLf
