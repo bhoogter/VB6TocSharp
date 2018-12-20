@@ -237,7 +237,6 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As
       
     S = nlTrim(Mid(S, E + 1))
     
-If IsInStr(Body, "AlreadyMadeSameAsCash") Then Stop
     R = R & CommentBlock(Pre) & ConvertSub(Body, AsModule) & vbCrLf
   Loop While True
   
@@ -741,7 +740,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
   Dim T As Long, A As String
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
-  If RegExTest(S, "^" & patToken & " = ") Then
+  If RegExTest(Trim(S), "^[a-zA-Z0-9_.]+ \= ") Then
     T = InStr(S, "=")
     A = Trim(Left(S, T - 1))
     SubParamAssign A
