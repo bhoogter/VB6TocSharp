@@ -139,11 +139,11 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   End Select
   
   If IsInStr(S, ".Print ") Then
-    S = Replace(S, ";", ",")
-    If IsInStr(S, ",)") Then
+    If Right(S, 1) = ";" Then
       S = Replace(S, ".Print ", ".PrintNNL ")
-      S = S & Replace(S, ",)", ")")
+      S = Left(S, Len(S) - 1)
     End If
+    S = Replace(S, ";", ",")
   End If
   
   ConvertVb6Specific = S

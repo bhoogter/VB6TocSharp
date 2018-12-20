@@ -606,6 +606,7 @@ Public Function ConvertValue(ByVal S As String) As String
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
 'If IsInStr(S, "cmdSaleTotals.Move") Then Stop
+If IsInStr(S, "2830") Then Stop
   
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4")
   
