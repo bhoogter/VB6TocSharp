@@ -143,28 +143,32 @@ Public Function SanitizeCode(ByVal Str As String)
     End If
     
     L = DeComment(L)
-    
     FinishSplitIf = False
-    If Left(LTrim(L), 3) = "If " And Right(RTrim(L), 5) <> " Then" Then
+    If tLeft(L, 3) = "If " And Right(RTrim(L), 5) <> " Then" Then
       FinishSplitIf = True
       F = nextBy(L, " Then ") & " Then"
       R = R & N & F
       L = Mid(L, Len(F) + 2)
     End If
     
-    If RegExTest(Trim(L), "^[a-zA-Z_][a-zA-Z_0-9]*:$") Then ' Goto Label
-      R = R & N & ReComment(L)
-    Else
-      Do
-        L = Replace(L, NamedParamSrc, NamedParamTok)
-        F = nextBy(L, ":")
-        F = Replace(F, NamedParamTok, NamedParamSrc)
-        R = R & N & ReComment(F, True)
-        L = Replace(L, NamedParamTok, NamedParamSrc)
-        If F = L Then Exit Do
-        L = Mid(L, Len(F) + 2)
+    If nextBy(L, ":") <> L Then
+      If RegExTest(Trim(L), "^[a-zA-Z_][a-zA-Z_0-9]*:$") Then ' Goto Label
+        R = R & N & ReComment(L)
+      Else
+        Do
+          L = Replace(L, NamedParamSrc, NamedParamTok)
+          F = nextBy(L, ":")
+          F = Replace(F, NamedParamTok, NamedParamSrc)
+          R = R & N & ReComment(F, True)
+          L = Replace(L, NamedParamTok, NamedParamSrc)
+          If F = L Then Exit Do
+          L = Trim(Mid(L, Len(F) + 2))
+          R = R & N & SanitizeCode(L)
 
-      Loop While True
+        Loop While False
+      End If
+    Else
+      R = R & N & L
     End If
     
     If FinishSplitIf Then R = R & N & "End If"
@@ -233,6 +237,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As
       
     S = nlTrim(Mid(S, E + 1))
     
+If IsInStr(Body, "AlreadyMadeSameAsCash") Then Stop
     R = R & CommentBlock(Pre) & ConvertSub(Body, AsModule) & vbCrLf
   Loop While True
   
@@ -538,6 +543,7 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Byte":      ConvertDataType = "byte"
     Case "Boolean":   ConvertDataType = "bool"
     Case "Currency":  ConvertDataType = "decimal"
+    Case "RecordSet": ConvertDataType = "recordset"
     Case Else:        ConvertDataType = "dynamic" ' "object"
   End Select
 End Function
@@ -606,6 +612,10 @@ Public Function ConvertValue(ByVal S As String) As String
   
   FirstToken = RegExNMatch(S, patToken, 0)
   FirstWord = SplitWord(S, 1)
+  If FirstWord = "Not" Then
+    S = "!" & Mid(S, 5)
+    FirstWord = SplitWord(Mid(S, 2))
+  End If
   If S = FirstWord Then ConvertValue = S: GoTo DoReplacements
   If S = FirstToken Then ConvertValue = S & "()": GoTo DoReplacements
   
@@ -625,6 +635,7 @@ DoReplacements:
   ConvertValue = Replace(ConvertValue, " And ", " && ")
   ConvertValue = Replace(ConvertValue, " Mod ", " % ")
   ConvertValue = Replace(ConvertValue, " &H", "0x")
+  ConvertValue = Replace(ConvertValue, "New ", "new ")
   If Left(ConvertValue, 2) = "&H" Then ConvertValue = "0x" & Mid(ConvertValue, 3)
   
   ConvertValue = ConvertStrings(ConvertValue)
@@ -730,7 +741,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
   Dim T As Long, A As String
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
-  If S Like "* = *" Then
+  If RegExTest(S, "^" & patToken & " = ") Then
     T = InStr(S, "=")
     A = Trim(Left(S, T - 1))
     SubParamAssign A
@@ -778,18 +789,16 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
       Ind = Ind + SpIndent
-If IsInStr(L, "dtpArrearControlDate_Change") Then Stop
-If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
     ElseIf L Like "*Property *" Then
       AddProperty Str
       Exit Function    ' repacked later...  not added here.
-    ElseIf LMatch(L, "End Sub") Or LMatch(L, "End Function") Then
+    ElseIf tLMatch(L, "End Sub") Or tLMatch(L, "End Function") Then
       If returnVariable <> "" Then
         O = O & sSpace(Ind) & "return " & returnVariable & ";" & vbCrLf
       End If
       Ind = Ind - SpIndent
       O = O & sSpace(Ind) & "}"
-    ElseIf LMatch(L, "Exit Function") Or LMatch(L, "Exit Sub") Then
+    ElseIf tLMatch(L, "Exit Function") Or tLMatch(L, "Exit Sub") Then
       If returnVariable <> "" Then
         O = O & sSpace(Ind) & "return " & returnVariable & ";" & vbCrLf
       Else
@@ -802,7 +811,9 @@ If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
     ElseIf tLeft(L, 5) = "Const" Then
       O = sSpace(Ind) & ConvertConstant(L)
     ElseIf tLeft(L, 3) = "If " Then  ' Code sanitization prevents all single-line ifs.
-      O = sSpace(Ind) & "if (" & ConvertValue(Mid(Trim(L), 4, Len(Trim(L)) - 8)) & ") {"
+'If IsInStr(L, "Development") Then Stop
+      T = Mid(Trim(L), 4, Len(Trim(L)) - 8)
+      O = sSpace(Ind) & "if (" & ConvertValue(T) & ") {"
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 7) = "ElseIf " Then
       T = tMid(L, 8)
@@ -827,7 +838,7 @@ If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 5) = "Case " Then
       T = Mid(Res, InStrRev(Res, "switch("))
-      If RegExTest(T, "case [^:]:") Then O = O & sSpace(Ind) & "break;" & vbCrLf: Ind = Ind - SpIndent: inCase = inCase - 1
+      If RegExTest(T, "case [^:]+:") Then O = O & sSpace(Ind) & "break;" & vbCrLf: Ind = Ind - SpIndent: inCase = inCase - 1
       O = O & sSpace(Ind) & "case " & ConvertValue(tMid(L, 6)) & ":"
       inCase = inCase + 1
       Ind = Ind + SpIndent
@@ -859,6 +870,9 @@ If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
     ElseIf tLeft(L, 11) = "Loop Until " Then
       Ind = Ind - SpIndent
       O = O & sSpace(Ind) & "} while(!(" & ConvertValue(tMid(L, 12)) & ");"
+    ElseIf tLeft(L, 4) = "Loop" Then
+      Ind = Ind - SpIndent
+      O = O & sSpace(Ind) & "}"
     ElseIf tLeft(L, 8) = "Exit For" Or tLeft(L, 7) = "Exit Do" Or tLeft(L, 10) = "Exit While" Then
       O = O & sSpace(Ind) & "break;"
     ElseIf tLeft(L, 4) = "Next" Then
@@ -878,6 +892,7 @@ If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
     ElseIf IsInStr(L, "On Error ") Or IsInStr(L, "Resume ") Then
       O = sSpace(Ind) & "// TODO (not supported): " & L
     Else
+'If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
       O = sSpace(Ind) & ConvertCodeLine(L)
     End If
     O = ReComment(O)

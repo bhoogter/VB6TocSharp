@@ -1026,3 +1026,21 @@ Public Function TestCaseFrm2() As String
   
   TestCaseFrm2 = S
 End Function
+
+Public Function TestCaseFunc() As String
+  Dim R As String, N As String, M As String
+  R = "": N = vbCrLf: M = ""
+
+  R = R & M & "Private Function AlreadyMadeSameAsCash() As Boolean"
+'  R = R & N & "  Dim R As Recordset"
+'  R = R & N & "  Set R = GetRecordsetBySQL(""SELECT * FROM [Transactions] WHERE [ArNo]="""""" & ProtectSQL(ArNo) & """""" ORDER BY [TransDate] ASC, [TransactionID] ASC"", , GetDatabaseAtLocation())"
+  R = R & N & "  Do While Not R.EOF"
+'  R = R & N & "    If LCase(Left(R(""Type""), 7)) = LCase(arPT_New) Then AlreadyMadeSameAsCash = False"
+'  R = R & N & "    If LCase(Left(R(""Receipt""), 12)) = ""same as cash"" Then AlreadyMadeSameAsCash = True"
+  R = R & N & "    R.MoveNext"
+  R = R & N & "  Loop"
+  R = R & N & "  DisposeDA R"
+  R = R & N & "End Function"
+
+  TestCaseFunc = R
+End Function
