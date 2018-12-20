@@ -607,8 +607,7 @@ Public Function ConvertValue(ByVal S As String) As String
   Dim FirstToken As String, FirstWord As String
   S = Trim(S)
   
-  If IsInStr(S, "QuickShowSaleTicket") Then Stop
-  
+  If IsInStr(S, "_WithVar3.SetValueDisplay") Then Stop
   SubParamUsedList TokenList(S)
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
@@ -637,6 +636,9 @@ DoReplacements:
   ConvertValue = Replace(ConvertValue, " Mod ", " % ")
   ConvertValue = Replace(ConvertValue, " &H", "0x")
   ConvertValue = Replace(ConvertValue, "New ", "new ")
+  Do While IsInStr(ConvertValue, ", ,")
+    ConvertValue = Replace(ConvertValue, ", ,", ", _,")
+  Loop
   If Left(ConvertValue, 2) = "&H" Then ConvertValue = "0x" & Mid(ConvertValue, 3)
   
   ConvertValue = ConvertStrings(ConvertValue)

@@ -5,7 +5,7 @@ Public Function RegExTest(ByVal Src As String, ByVal Find As String) As Boolean
 On Error Resume Next
   Dim RegEx As Object
   Set RegEx = CreateObject("vbscript.regexp")
-  RegEx.Pattern = Find
+   RegEx.Pattern = Find
   RegExTest = RegEx.Test(Src)
 End Function
 
