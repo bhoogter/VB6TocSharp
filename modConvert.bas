@@ -607,9 +607,11 @@ Public Function ConvertValue(ByVal S As String) As String
   Dim FirstToken As String, FirstWord As String
   S = Trim(S)
   
+  If IsInStr(S, "QuickShowSaleTicket") Then Stop
+  
   SubParamUsedList TokenList(S)
   
-  FirstToken = RegExNMatch(S, patToken, 0)
+  FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)
   If FirstWord = "Not" Then
     S = "!" & Mid(S, 5)
