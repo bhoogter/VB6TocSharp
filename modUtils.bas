@@ -4,7 +4,7 @@ Option Explicit
 Public Const SpIndent As Long = 2
 Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
 Public Const patNotToken As String = "([^a-zA-Z_0-9])"
-Public Const patTokenDot As String = "([a-zA-Z_.][a-zA-Z_0-9]*)"
+Public Const patTokenDot As String = "([a-zA-Z_.][a-zA-Z_0-9.]*)"
 Public Const vbCrLf2 As String = vbCrLf & vbCrLf
 Public Const vbCrLf3 As String = vbCrLf & vbCrLf & vbCrLf
 Public Const vbCrLf4 As String = vbCrLf & vbCrLf & vbCrLf & vbCrLf

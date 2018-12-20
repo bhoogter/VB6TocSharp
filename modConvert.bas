@@ -4,6 +4,7 @@ Option Explicit
 
 Const WithMark = "_WithVar"
 Private EOLComment As String
+
 Dim WithLevel As Long, MaxWithLevel As Long
 
 Public Function ConvertProject(ByVal vbpFile As String)
@@ -533,30 +534,6 @@ Public Function ConvertParameter(ByVal S As String) As String
   ConvertParameter = Trim(Res)
 End Function
 
-Public Function ConvertDefaultDefault(ByVal dType As String) As String
-  Select Case dType
-    Case "Long", "Double", "Currency", "Byte":
-                      ConvertDefaultDefault = 0
-    Case "Date":      ConvertDefaultDefault = "#1/1/2001#"
-    Case "String":    ConvertDefaultDefault = """"""
-    Case Else:        ConvertDefaultDefault = "null"
-  End Select
-End Function
-
-Public Function ConvertDataType(ByVal S As String) As String
-  Select Case S
-    Case "String":    ConvertDataType = "string"
-    Case "Long":      ConvertDataType = "int"
-    Case "Double":    ConvertDataType = "double"
-    Case "Variant":   ConvertDataType = "object"
-    Case "Byte":      ConvertDataType = "byte"
-    Case "Boolean":   ConvertDataType = "bool"
-    Case "Currency":  ConvertDataType = "decimal"
-    Case "RecordSet": ConvertDataType = "recordset"
-    Case Else:        ConvertDataType = "dynamic" ' "object"
-  End Select
-End Function
-
 Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal AsModule As Boolean = False) As String
   Const retToken = "#RET#"
   Dim Res As String
@@ -619,6 +596,7 @@ Public Function ConvertValue(ByVal S As String) As String
   
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
+'If IsInStr(S, "cmdSaleTotals.Move") Then Stop
   
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4")
 
@@ -663,7 +641,7 @@ DoReplacements:
   ConvertValue = ConvertStrings(ConvertValue)
 
   If WithLevel > 0 Then
-    ConvertValue = Trim(Replace(" " & ConvertValue, " .", " " & WithMark & WithLevel & "."))
+    ConvertValue = Trim(RegExReplace(ConvertValue, "([ (])(\.)" & patToken, "$1" & WithMark & WithLevel & "$2$3"))
     If Left(ConvertValue, 1) = "." Then ConvertValue = WithMark & WithLevel & ConvertValue
   End If
 End Function

@@ -1,0 +1,7 @@
+NAME VB6Lib
+LIBRARY VB6
+DESCRIPTION "VB6 Support Module"
+EXPORTS DllMain @1
+        CDate=vbCDate @2
+	Date=vbDate @3
+	DateAdd=vbDateAdd @4
