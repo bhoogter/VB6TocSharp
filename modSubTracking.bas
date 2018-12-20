@@ -1,7 +1,7 @@
 Attribute VB_Name = "modSubTracking"
 Option Explicit
 
-Private Type Variable
+Public Type Variable
   Name As String
   asType As String
   asArray As String
@@ -12,7 +12,7 @@ Private Type Variable
   UsedBeforeAssigned As Boolean
 End Type
 
-Private Type Property
+Public Type Property
   Name As String
   asPublic As Boolean
   asType As String
@@ -26,6 +26,11 @@ Private Lockout As Boolean
 
 Private Vars() As Variable
 Private Props() As Property
+
+
+Public Property Get Analyze() As Boolean
+  Analyze = Lockout
+End Property
 
 Public Sub SubBegin(Optional ByVal setLockout As Boolean = False)
   Dim nVars() As Variable
@@ -42,9 +47,9 @@ NoEntries:
   SubParamIndex = -1
 End Function
 
-Private Function SubParam(ByVal P As String) As Variable
+Public Function SubParam(ByVal P As String) As Variable
 On Error Resume Next
-  SubParam = Vars(SubParamIndex)
+  SubParam = Vars(SubParamIndex(P))
 End Function
 
 Public Sub SubParamDecl(ByVal P As String, ByVal asType As String, ByVal asArray As String, ByVal isParam As Boolean)
@@ -90,7 +95,13 @@ Public Sub SubParamUsed(ByVal P As String)
   End If
 End Sub
 
-
+Public Sub SubParamUsedList(ByVal S As String)
+  Dim Sp, L
+  Sp = Split(S, ",")
+  For Each L In Sp
+    If L <> "" Then SubParamUsed L
+  Next
+End Sub
 
 
 
@@ -184,7 +195,7 @@ On Error Resume Next
             T = .Getter
             T = Replace(T, "Exit Property", "return " & .Name & ";")
             R = R & "    " & T & vbCrLf
-            R = R & "  }"
+            R = R & "  }" & vbCrLf
           End If
           If .Setter <> "" Then
             R = R & "  set {" & vbCrLf

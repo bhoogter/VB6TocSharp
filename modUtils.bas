@@ -274,3 +274,12 @@ Public Function IsInCode(ByVal Src As String, ByVal N As Long)
   Next
   IsInCode = True
 End Function
+
+Public Function TokenList(ByVal S As String) As String
+  Dim I As Long, N As Long, T As String
+  N = RegExCount(S, patToken)
+  For I = 0 To N - 1
+    T = RegExNMatch(S, patToken, I)
+    TokenList = TokenList & "," & T
+  Next
+End Function

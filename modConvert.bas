@@ -66,7 +66,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = "class " & fName & " {" & vbCrLf
-  X = X & "  public static " & fName & "DefaultInstance;" & vbCrLf
+  X = X & "  public static " & fName & " DefaultInstance;" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   F = fName & ".xaml.cs"
@@ -253,20 +253,25 @@ End Function
 
 Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional ByVal isGlobal As Boolean) As String
   Dim Sp, L, SS As String
-  Dim pName As String, pType As String
+  Dim asPrivate As Boolean
+  Dim pName As String, pType As String, pWithEvents As Boolean
   Dim Res As String
   Dim ArraySpec As String, isArr As Boolean, aMax As String, aMin As String, aTodo As String
   Res = ""
   
   SS = S
   
-  If tLeft(S, 4) = "Dim " Then S = Mid(Trim(S), 5)
+  If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
+  If tLeft(S, 4) = "Dim " Then S = Mid(Trim(S), 5): asPrivate = True
+  If tLeft(S, 8) = "Private " Then S = tMid(S, 9): asPrivate = True
   
   Sp = Split(S, ",")
   For Each L In Sp
     L = Trim(L)
+    If LMatch(L, "WithEvents ") Then L = Trim(tMid(L, 12)): Res = Res & "// TODO: WithEvents not supported on " & RegExNMatch(L, patToken) & vbCrLf
     pName = RegExNMatch(L, patToken)
     L = Trim(tMid(L, Len(pName) + 1))
+    If isGlobal Then Res = Res & IIf(asPrivate, "private ", "public ")
     If tLeft(L, 1) = "(" Then
       isArr = True
       ArraySpec = nextBy(Mid(L, 2), ")")
@@ -476,16 +481,17 @@ End Function
 
 Public Function ConvertParameter(ByVal S As String) As String
   Dim isOptional As Boolean
-  Dim isByRef As Boolean
+  Dim isByRef As Boolean, asOut As Boolean
   Dim Res As String
   Dim pName As String, pType As String, pDef As String
   
   S = Trim(S)
   If tLeft(S, 9) = "Optional " Then isOptional = True: S = Mid(S, 10)
   isByRef = True
-  If tLeft(S, 6) = "ByRef " Then isByRef = True: S = Mid(S, 7)
   If tLeft(S, 6) = "ByVal " Then isByRef = False: S = Mid(S, 7)
+  If tLeft(S, 6) = "ByRef " Then isByRef = True: S = Mid(S, 7)
   pName = SplitWord(S, 1)
+  If isByRef And SubParam(pName).AssignedBeforeUsed Then asOut = True
   S = Trim(Mid(S, Len(pName) + 1))
   If tLeft(S, 2) = "As" Then
     S = tMid(S, 4)
@@ -502,9 +508,9 @@ Public Function ConvertParameter(ByVal S As String) As String
   End If
   
   Res = ""
-  If isByRef Then Res = Res & "ref "
+  If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
-  Res = Res & pName & " "
+  Res = Res & IIf(SubParam(pName).Used, pName, pName & "_UNUSED") & " "
   If isOptional Then
     Res = Res & "= " & pDef
   End If
@@ -515,7 +521,8 @@ End Function
 
 Public Function ConvertDefaultDefault(ByVal dType As String) As String
   Select Case dType
-    Case "Long":      ConvertDefaultDefault = 0
+    Case "Long", "Double", "Currency", "Byte":
+                      ConvertDefaultDefault = 0
     Case "Date":      ConvertDefaultDefault = "#1/1/2001#"
     Case "String":    ConvertDefaultDefault = """"""
     Case Else:        ConvertDefaultDefault = "null"
@@ -530,6 +537,7 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Variant":   ConvertDataType = "object"
     Case "Byte":      ConvertDataType = "byte"
     Case "Boolean":   ConvertDataType = "bool"
+    Case "Currency":  ConvertDataType = "decimal"
     Case Else:        ConvertDataType = "dynamic" ' "object"
   End Select
 End Function
@@ -593,7 +601,10 @@ End Function
 Public Function ConvertValue(ByVal S As String) As String
   Dim FirstToken As String, FirstWord As String
   S = Trim(S)
-  FirstToken = RegExNMatch(S, "[a-zA-Z_][a-zA-Z_0-9.]*", 0)
+  
+  SubParamUsedList TokenList(S)
+  
+  FirstToken = RegExNMatch(S, patToken, 0)
   FirstWord = SplitWord(S, 1)
   If S = FirstWord Then ConvertValue = S: GoTo DoReplacements
   If S = FirstToken Then ConvertValue = S & "()": GoTo DoReplacements
@@ -615,6 +626,8 @@ DoReplacements:
   ConvertValue = Replace(ConvertValue, " Mod ", " % ")
   ConvertValue = Replace(ConvertValue, " &H", "0x")
   If Left(ConvertValue, 2) = "&H" Then ConvertValue = "0x" & Mid(ConvertValue, 3)
+  
+  ConvertValue = ConvertStrings(ConvertValue)
 
   If WithLevel > 0 Then
     ConvertValue = Trim(Replace(" " & ConvertValue, " .", " " & WithMark & WithLevel & "."))
@@ -655,6 +668,7 @@ Public Function ConvertStrings(ByVal S As String)
 End Function
 
 Public Function ConvertString(ByVal S As String)
+  S = Replace(S, "\", "\\")
   S = Replace(S, """""", "\""")
   ConvertString = S
 End Function
@@ -689,13 +703,13 @@ Public Function ConvertGlobals(ByVal Str As String) As String
       End If
     ElseIf L Like "Option *" Then
       O = "// " & L
-    ElseIf RegExTest(L, "(Public |Private |)Declare ") Then
+    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Declare ") Then
       O = ConvertAPIDef(L)
-    ElseIf RegExTest(L, "(Public |Private |)Const ") Then
+    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Const ") Then
       O = ConvertConstant(L, True)
-    ElseIf RegExTest(L, "(Public |Private |)Enum ") Then
+    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Enum ") Then
       Building = L
-    ElseIf RegExTest(L, "(Public |Private |)Type ") Then
+    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Type ") Then
       Building = L
     ElseIf tLeft(L, 8) = "Private " Or tLeft(L, 7) = "Public " Or tLeft(L, 4) = "Dim " Then
       O = ConvertDeclare(L, 0, True)
@@ -713,13 +727,15 @@ Public Function ConvertGlobals(ByVal Str As String) As String
 End Function
 
 Public Function ConvertCodeLine(ByVal S As String) As String
-  Dim T As Long
+  Dim T As Long, A As String
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
   If S Like "* = *" Then
     T = InStr(S, "=")
-    SubParamAssign Trim(Left(S, T - 1))
-    ConvertCodeLine = Trim(Left(S, T - 1)) & " = " & ConvertValue(Trim(Mid(S, T + 1)))
+    A = Trim(Left(S, T - 1))
+    SubParamAssign A
+    If Left(A, 1) = "." Then A = WithMark & WithLevel & A
+    ConvertCodeLine = A & " = " & ConvertValue(Trim(Mid(S, T + 1)))
   Else
 'Debug.Print S
       ConvertCodeLine = ConvertValue(S)
@@ -733,7 +749,8 @@ End Function
 Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim oStr As String
   Dim Res As String
-  Dim S, L, O As String
+  Dim S, L, O As String, T As String
+  Dim K As Long
   Dim Ind As Long
   Dim inCase As Long
   Dim returnVariable As String
@@ -747,6 +764,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     Case vbFalse:       SubBegin True
   End Select
   
+
+  
   Res = ""
   Str = Replace(Str, vbLf, "")
   S = Split(Str, vbCr)
@@ -759,16 +778,18 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
       Ind = Ind + SpIndent
+If IsInStr(L, "dtpArrearControlDate_Change") Then Stop
+If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
     ElseIf L Like "*Property *" Then
       AddProperty Str
       Exit Function    ' repacked later...  not added here.
-    ElseIf L Like "End Sub" Or L Like "End Function" Then
+    ElseIf LMatch(L, "End Sub") Or LMatch(L, "End Function") Then
       If returnVariable <> "" Then
         O = O & sSpace(Ind) & "return " & returnVariable & ";" & vbCrLf
       End If
       Ind = Ind - SpIndent
       O = O & sSpace(Ind) & "}"
-    ElseIf tLeft(L, 13) = "Exit Function" Or tLeft(L, 8) = "Exit Sub" Then
+    ElseIf LMatch(L, "Exit Function") Or LMatch(L, "Exit Sub") Then
       If returnVariable <> "" Then
         O = O & sSpace(Ind) & "return " & returnVariable & ";" & vbCrLf
       Else
@@ -784,7 +805,9 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
       O = sSpace(Ind) & "if (" & ConvertValue(Mid(Trim(L), 4, Len(Trim(L)) - 8)) & ") {"
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 7) = "ElseIf " Then
-      O = sSpace(Ind - SpIndent) & "} else if (" & ConvertValue(Mid(L, 8)) & ") {"
+      T = tMid(L, 8)
+      If Right(Trim(L), 5) = " Then" Then T = Left(T, Len(T) - 5)
+      O = sSpace(Ind - SpIndent) & "} else if (" & ConvertValue(T) & ") {"
     ElseIf tLeft(L, 4) = "Else" Then
       O = sSpace(Ind - SpIndent) & "} else {"
     ElseIf tLeft(L, 6) = "End If" Then
@@ -803,7 +826,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
       inCase = inCase + 1
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 5) = "Case " Then
-      If inCase > 0 Then O = O & sSpace(Ind) & "break;" & vbCrLf: Ind = Ind - SpIndent: inCase = inCase - 1
+      T = Mid(Res, InStrRev(Res, "switch("))
+      If RegExTest(T, "case [^:]:") Then O = O & sSpace(Ind) & "break;" & vbCrLf: Ind = Ind - SpIndent: inCase = inCase - 1
       O = O & sSpace(Ind) & "case " & ConvertValue(tMid(L, 6)) & ":"
       inCase = inCase + 1
       Ind = Ind + SpIndent
