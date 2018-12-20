@@ -69,6 +69,9 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   X = X & "  public static " & fName & " DefaultInstance;" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
+  
+  X = deNL(X)
+  
   F = fName & ".xaml.cs"
   WriteOut F, X, frmFile
 End Function
@@ -143,12 +146,19 @@ Public Function SanitizeCode(ByVal Str As String)
     End If
     
     L = DeComment(L)
+'If IsInStr(L, "CustRec <> 0") Then Stop
+    
     FinishSplitIf = False
     If tLeft(L, 3) = "If " And Right(RTrim(L), 5) <> " Then" Then
       FinishSplitIf = True
       F = nextBy(L, " Then ") & " Then"
       R = R & N & F
       L = Mid(L, Len(F) + 2)
+      If nextBy(L, " Else ", 2) <> "" Then
+        R = R & N & SanitizeCode(nextBy(L, " Else ", 1))
+        R = R & N & "Else"
+        L = nextBy(L, "Else ", 2)
+      End If
     End If
     
     If nextBy(L, ":") <> L Then
@@ -607,7 +617,11 @@ Public Function ConvertValue(ByVal S As String) As String
   Dim FirstToken As String, FirstWord As String
   S = Trim(S)
   
-  If IsInStr(S, "_WithVar3.SetValueDisplay") Then Stop
+'If IsInStr(S, "RS!") Then Stop
+'If IsInStr(S, ".SetValueDisplay Row") Then Stop
+  
+  S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4")
+
   SubParamUsedList TokenList(S)
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
@@ -625,21 +639,26 @@ Public Function ConvertValue(ByVal S As String) As String
     ConvertValue = S
   End If
   
+  
 DoReplacements:
   ConvertValue = Replace(ConvertValue, " & ", " + ")
   ConvertValue = Replace(ConvertValue, ":=", ": ")
-  ConvertValue = Replace(ConvertValue, "=", "==")
+  ConvertValue = Replace(ConvertValue, " = ", " == ")
   ConvertValue = Replace(ConvertValue, "<>", "!=")
   ConvertValue = Replace(ConvertValue, " Not ", " !")
   ConvertValue = Replace(ConvertValue, " Or ", " || ")
   ConvertValue = Replace(ConvertValue, " And ", " && ")
   ConvertValue = Replace(ConvertValue, " Mod ", " % ")
-  ConvertValue = Replace(ConvertValue, " &H", "0x")
   ConvertValue = Replace(ConvertValue, "New ", "new ")
   Do While IsInStr(ConvertValue, ", ,")
     ConvertValue = Replace(ConvertValue, ", ,", ", _,")
   Loop
-  If Left(ConvertValue, 2) = "&H" Then ConvertValue = "0x" & Mid(ConvertValue, 3)
+  ConvertValue = Replace(ConvertValue, "(,", "(_,")
+'If IsInStr(ConvertValue, "&H") And Right(ConvertValue, 1) = "&" Then Stop
+  If Left(ConvertValue, 2) = "&H" Then
+    ConvertValue = "0x" & Mid(ConvertValue, 3)
+    If Right(ConvertValue, 1) = "&" Then ConvertValue = Left(ConvertValue, Len(ConvertValue) - 1)
+  End If
   
   ConvertValue = ConvertStrings(ConvertValue)
 
@@ -744,9 +763,10 @@ Public Function ConvertCodeLine(ByVal S As String) As String
   Dim T As Long, A As String
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
-  If RegExTest(Trim(S), "^[a-zA-Z0-9_.]+ \= ") Then
+  If RegExTest(Trim(S), "^[a-zA-Z0-9_.()""]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.]+ \= ") Then
     T = InStr(S, "=")
     A = Trim(Left(S, T - 1))
+    If tLeft(A, 4) = "Set " Then A = Trim(Mid(A, 5))
     SubParamAssign A
     If Left(A, 1) = "." Then A = WithMark & WithLevel & A
     ConvertCodeLine = A & " = " & ConvertValue(Trim(Mid(S, T + 1)))
@@ -763,7 +783,8 @@ End Function
 Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim oStr As String
   Dim Res As String
-  Dim S, L, O As String, T As String
+  Dim S, L, O As String, T As String, U As String
+  Dim cM As Long, cN As Long
   Dim K As Long
   Dim Ind As Long
   Dim inCase As Long
@@ -787,6 +808,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
   For Each L In S
     L = DeComment(L)
     O = ""
+
 
 'If ScanFirst = vbFalse Then Stop
     If L Like "*Sub *" Or L Like "*Function *" Then
@@ -812,7 +834,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     ElseIf tLeft(L, 3) = "Dim" Then
       O = ConvertDeclare(L, Ind)
     ElseIf tLeft(L, 5) = "Const" Then
-      O = sSpace(Ind) & ConvertConstant(L)
+      O = sSpace(Ind) & ConvertConstant(L, False)
     ElseIf tLeft(L, 3) = "If " Then  ' Code sanitization prevents all single-line ifs.
 'If IsInStr(L, "Development") Then Stop
       T = Mid(Trim(L), 4, Len(Trim(L)) - 8)
@@ -842,7 +864,29 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     ElseIf tLeft(L, 5) = "Case " Then
       T = Mid(Res, InStrRev(Res, "switch("))
       If RegExTest(T, "case [^:]+:") Then O = O & sSpace(Ind) & "break;" & vbCrLf: Ind = Ind - SpIndent: inCase = inCase - 1
-      O = O & sSpace(Ind) & "case " & ConvertValue(tMid(L, 6)) & ":"
+      T = tMid(L, 6)
+      If tLeft(T, 5) = "Like " Or tLeft(T, 3) = "Is " Or T Like "* = *" Then
+        O = O & "// TODO: Cannot convert case: " & T & vbCrLf
+        O = O & sSpace(Ind) & "case 0: "
+      ElseIf nextBy(T, ",", 2) <> "" Then
+        O = O & sSpace(Ind)
+        Do
+          U = nextBy(T, ", ")
+          If U = "" Then Exit Do
+          T = Trim(Mid(T, Len(U) + 1))
+          O = O & "case " & ConvertValue(U) & ": "
+        Loop While True
+      ElseIf T Like "* To *" Then
+        O = O & "// CONVERSION: Case was " & T & vbCrLf
+        O = O & sSpace(Ind)
+        cN = Val(SplitWord(T, 1, " To "))
+        cM = Val(SplitWord(T, 2, " To "))
+        For K = cN To cM
+          O = O & "case " & K & ": "
+        Next
+      Else
+        O = O & sSpace(Ind) & "case " & ConvertValue(T) & ":"
+      End If
       inCase = inCase + 1
       Ind = Ind + SpIndent
     ElseIf Trim(L) = "Do" Then
@@ -856,7 +900,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 9) = "For Each " Then
       L = tMid(L, 10)
-      O = O & sSpace(Ind) & "foreach(" & SplitWord(L, 1, " In ") & " in " & SplitWord(L, 2, " In ") & ") {"
+      O = O & sSpace(Ind) & "foreach(var " & SplitWord(L, 1, " In ") & " in " & SplitWord(L, 2, " In ") & ") {"
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 4) = "For " Then
       Dim forKey As String, forStr As String, forEnd As String
@@ -873,12 +917,12 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     ElseIf tLeft(L, 11) = "Loop Until " Then
       Ind = Ind - SpIndent
       O = O & sSpace(Ind) & "} while(!(" & ConvertValue(tMid(L, 12)) & ");"
-    ElseIf tLeft(L, 4) = "Loop" Then
+    ElseIf tLeft(L, 5) = "Loop" Then
       Ind = Ind - SpIndent
       O = O & sSpace(Ind) & "}"
     ElseIf tLeft(L, 8) = "Exit For" Or tLeft(L, 7) = "Exit Do" Or tLeft(L, 10) = "Exit While" Then
       O = O & sSpace(Ind) & "break;"
-    ElseIf tLeft(L, 4) = "Next" Then
+    ElseIf tLeft(L, 5) = "Next" Then
       Ind = Ind - SpIndent
       O = sSpace(Ind) & "}"
     ElseIf tLeft(L, 5) = "With " Then

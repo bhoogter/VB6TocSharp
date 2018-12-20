@@ -3,7 +3,8 @@ Option Explicit
 
 Public Const SpIndent As Long = 2
 Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
-Public Const patTokenDot As String = "([a-zA-Z_][a-zA-Z_0-9.]*)"
+Public Const patNotToken As String = "([^a-zA-Z_0-9])"
+Public Const patTokenDot As String = "([a-zA-Z_.][a-zA-Z_0-9]*)"
 Public Const vbCrLf2 As String = vbCrLf & vbCrLf
 Public Const vbCrLf3 As String = vbCrLf & vbCrLf & vbCrLf
 Public Const vbCrLf4 As String = vbCrLf & vbCrLf & vbCrLf & vbCrLf
@@ -21,6 +22,7 @@ Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: 
 Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: tLMatch = Left(LTrim(Src), Len(tMatch)) = tMatch: End Function
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
+Public Function deNL(ByVal S As String) As String: deNL = S: Do While IsInStr(deNL, vbCrLf4): deNL = Replace(deNL, vbCrLf4, vbCrLf3): Loop: End Function
 
 Public Function WriteOut(ByVal F As String, ByVal S As String, ByVal O As String) As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
 
