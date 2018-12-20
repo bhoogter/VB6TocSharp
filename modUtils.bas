@@ -23,6 +23,7 @@ Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean:
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
 Public Function deNL(ByVal S As String) As String: deNL = S: Do While IsInStr(deNL, vbCrLf4): deNL = Replace(deNL, vbCrLf4, vbCrLf3): Loop: End Function
+Public Function deWS(ByVal S As String) As String: deWS = S: Do While IsInStr(deWS, " " & vbCrLf): deWS = Replace(deWS, " " & vbCrLf, vbCrLf): Loop: End Function
 
 Public Function WriteOut(ByVal F As String, ByVal S As String, ByVal O As String) As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
 
@@ -286,4 +287,9 @@ Public Function TokenList(ByVal S As String) As String
     T = RegExNMatch(S, patToken, I)
     TokenList = TokenList & "," & T
   Next
+End Function
+
+Public Function Random(Optional ByVal Max As Long = 10000) As Long
+  Randomize
+  Random = ((Rnd * Max) + 1)
 End Function

@@ -98,3 +98,47 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
   End Select
 End Function
 
+ 
+Public Function ConvertVb6Specific(ByVal S As String)
+  Dim W As String, R As String
+  
+  W = SplitWord(Trim(S))
+  R = SplitWord(Trim(S), 2, , , True)
+  Select Case W
+    Case "Kill": S = "File.Delete(" & R & ")"
+    Case "Format": S = Replace(S, W, "VB6.Format")
+    Case "Open":    S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
+    Case "Print": S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
+    Case "Close": S = "VBCloseFile(" & Replace(R, "#", "") & ")"
+    Case "ReDim":
+      Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String
+      If tLMatch(R, "Preserve ") Then
+        R = Trim(tMid(R, 10))
+        RedimPres = True
+      End If
+      
+      RedimVar = RegExNMatch(R, patToken)
+      RedimTyp = ConvertDataType(SubParam(RedimVar).asType)
+      R = Trim(Replace(R, RedimVar, ""))
+      If tLeft(R, 1) = "(" Then R = Mid(Trim(R), 2)
+      RedimMax = Val(nextBy(R, ")"))
+      RedimTmp = RedimVar & "_" & Random & "_tmp"
+      RedimIter = "redim_iter_" & Random
+      S = ""
+      S = S & "List<" & RedimTyp & "> " & RedimTmp & " = new List<" & RedimTyp & ">();" & vbCrLf
+
+      S = S & "for (int " & RedimIter & "=0;i<" & RedimMax & ";" & RedimIter & "++) {"
+      If RedimPres Then
+        S = S & RedimVar & ".Add(" & RedimIter & "<" & RedimVar & ".Count ? " & RedimVar & "(" & RedimIter & ") : " & ConvertDefaultDefault(SubParam(RedimVar).asType) & ");"
+      Else
+        S = S & RedimVar & ".Add(" & ConvertDefaultDefault(SubParam(RedimVar).asType) & ");"
+      End If
+      S = S & "}"
+  End Select
+  
+  If IsInStr(S, ".Print ") Then
+    S = Replace(S, ";", ",")
+  End If
+  
+  ConvertVb6Specific = S
+End Function

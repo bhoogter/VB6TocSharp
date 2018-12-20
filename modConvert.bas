@@ -66,12 +66,15 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   Globals = ConvertGlobals(Left(Code, J))
   Functions = ConvertCodeSegment(Mid(Code, J))
   
-  X = "class " & fName & " {" & vbCrLf
+  X = ""
+  X = X & UsingEverything(fName) & vbCrLf
+  X = X & vbCrLf
+  X = X & "class " & fName & " {" & vbCrLf
   X = X & "  public static " & fName & " DefaultInstance;" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
-  X = deNL(X)
+  X = deNL(deWS(X))
   
   F = fName & ".xaml.cs"
   WriteOut F, X, frmFile
@@ -94,6 +97,8 @@ Public Function ConvertModule(ByVal basFile As String)
   Functions = ConvertCodeSegment(Mid(Code, J), True)
   
   X = ""
+  X = X & UsingEverything(fName) & vbCrLf
+  X = X & vbCrLf
   X = X & "static class " & fName & " {" & vbCrLf
   X = X & nlTrim(Globals & vbCrLf & vbCrLf & Functions)
   X = X & vbCrLf & "}"
@@ -119,7 +124,10 @@ Public Function ConvertClass(ByVal clsFile As String)
   Globals = ConvertGlobals(Left(Code, J - 1))
   Functions = ConvertCodeSegment(Mid(Code, J))
   
-  X = "class " & fName & " {" & vbCrLf
+  X = ""
+  X = X & UsingEverything(fName) & vbCrLf
+  X = X & vbCrLf
+  X = X & "class " & fName & " {" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
@@ -599,6 +607,8 @@ Public Function ConvertValue(ByVal S As String) As String
 'If IsInStr(S, "cmdSaleTotals.Move") Then Stop
   
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4")
+  
+  S = ConvertVb6Specific(S)
 
   SubParamUsedList TokenList(S)
   
@@ -633,6 +643,7 @@ DoReplacements:
   Loop
   ConvertValue = Replace(ConvertValue, "(,", "(_,")
 'If IsInStr(ConvertValue, "&H") And Right(ConvertValue, 1) = "&" Then Stop
+  ConvertValue = RegExReplace(ConvertValue, "([0-9])#", "$1")
   If Left(ConvertValue, 2) = "&H" Then
     ConvertValue = "0x" & Mid(ConvertValue, 3)
     If Right(ConvertValue, 1) = "&" Then ConvertValue = Left(ConvertValue, Len(ConvertValue) - 1)
@@ -787,7 +798,6 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     L = DeComment(L)
     O = ""
 
-
 'If ScanFirst = vbFalse Then Stop
     If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
@@ -822,7 +832,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
       T = tMid(L, 8)
       If Right(Trim(L), 5) = " Then" Then T = Left(T, Len(T) - 5)
       O = sSpace(Ind - SpIndent) & "} else if (" & ConvertValue(T) & ") {"
-    ElseIf tLeft(L, 4) = "Else" Then
+    ElseIf tLeft(L, 5) = "Else" Then
       O = sSpace(Ind - SpIndent) & "} else {"
     ElseIf tLeft(L, 6) = "End If" Then
       Ind = Ind - SpIndent
