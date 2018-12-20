@@ -600,6 +600,7 @@ End Function
 
 Public Function ConvertValue(ByVal S As String) As String
   Dim FirstToken As String, FirstWord As String
+  Dim T As String, Complete As Boolean
   S = Trim(S)
   
 'If IsInStr(S, "RS!") Then Stop
@@ -608,7 +609,8 @@ Public Function ConvertValue(ByVal S As String) As String
   
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4")
   
-  S = ConvertVb6Specific(S)
+  S = ConvertVb6Specific(S, Complete)
+  If Complete Then ConvertValue = S: Exit Function
 
   SubParamUsedList TokenList(S)
   
@@ -634,6 +636,7 @@ DoReplacements:
   ConvertValue = Replace(ConvertValue, " = ", " == ")
   ConvertValue = Replace(ConvertValue, "<>", "!=")
   ConvertValue = Replace(ConvertValue, " Not ", " !")
+  ConvertValue = Replace(ConvertValue, "(Not ", "(!")
   ConvertValue = Replace(ConvertValue, " Or ", " || ")
   ConvertValue = Replace(ConvertValue, " And ", " && ")
   ConvertValue = Replace(ConvertValue, " Mod ", " % ")
@@ -642,8 +645,13 @@ DoReplacements:
     ConvertValue = Replace(ConvertValue, ", ,", ", _,")
   Loop
   ConvertValue = Replace(ConvertValue, "(,", "(_,")
+
 'If IsInStr(ConvertValue, "&H") And Right(ConvertValue, 1) = "&" Then Stop
+If IsInStr(ConvertValue, "1/1/2001") Then Stop
+
   ConvertValue = RegExReplace(ConvertValue, "([0-9])#", "$1")
+  ConvertValue = RegExReplace(ConvertValue, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", """$1/$2/$3""")
+  
   If Left(ConvertValue, 2) = "&H" Then
     ConvertValue = "0x" & Mid(ConvertValue, 3)
     If Right(ConvertValue, 1) = "&" Then ConvertValue = Left(ConvertValue, Len(ConvertValue) - 1)
@@ -798,6 +806,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     L = DeComment(L)
     O = ""
 
+If IsInStr(L, "1/1/2001") Then Stop
 'If ScanFirst = vbFalse Then Stop
     If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)

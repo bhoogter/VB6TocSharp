@@ -5,7 +5,7 @@ Public Function ConvertDefaultDefault(ByVal dType As String) As String
   Select Case dType
     Case "Long", "Double", "Currency", "Byte":
                       ConvertDefaultDefault = 0
-    Case "Date":      ConvertDefaultDefault = "#1/1/2001#"
+    Case "Date":      ConvertDefaultDefault = """1/1/2001"""
     Case "String":    ConvertDefaultDefault = """"""
     Case Else:        ConvertDefaultDefault = "null"
   End Select
@@ -99,9 +99,10 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
 End Function
 
  
-Public Function ConvertVb6Specific(ByVal S As String)
+Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As Boolean)
   Dim W As String, R As String
   
+  Complete = False
   W = SplitWord(Trim(S))
   R = SplitWord(Trim(S), 2, , , True)
   Select Case W
@@ -111,6 +112,7 @@ Public Function ConvertVb6Specific(ByVal S As String)
     Case "Print": S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close": S = "VBCloseFile(" & Replace(R, "#", "") & ")"
     Case "ReDim":
+      Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String
       If tLMatch(R, "Preserve ") Then
         R = Trim(tMid(R, 10))
@@ -138,6 +140,10 @@ Public Function ConvertVb6Specific(ByVal S As String)
   
   If IsInStr(S, ".Print ") Then
     S = Replace(S, ";", ",")
+    If IsInStr(S, ",)") Then
+      S = Replace(S, ".Print ", ".PrintNNL ")
+      S = S & Replace(S, ",)", ")")
+    End If
   End If
   
   ConvertVb6Specific = S
