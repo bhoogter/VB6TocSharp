@@ -606,7 +606,7 @@ Public Function ConvertValue(ByVal S As String) As String
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
 'If IsInStr(S, "cmdSaleTotals.Move") Then Stop
-If IsInStr(S, "2830") Then Stop
+'If IsInStr(S, "2830") Then Stop
   
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4")
   
@@ -648,7 +648,7 @@ DoReplacements:
   ConvertValue = Replace(ConvertValue, "(,", "(_,")
 
 'If IsInStr(ConvertValue, "&H") And Right(ConvertValue, 1) = "&" Then Stop
-If IsInStr(ConvertValue, "1/1/2001") Then Stop
+'If IsInStr(ConvertValue, "1/1/2001") Then Stop
 
   ConvertValue = RegExReplace(ConvertValue, "([0-9])#", "$1")
   ConvertValue = RegExReplace(ConvertValue, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", """$1/$2/$3""")
@@ -807,7 +807,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     L = DeComment(L)
     O = ""
 
-If IsInStr(L, "1/1/2001") Then Stop
+'If IsInStr(L, "1/1/2001") Then Stop
 'If ScanFirst = vbFalse Then Stop
     If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)

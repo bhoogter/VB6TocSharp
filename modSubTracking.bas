@@ -120,7 +120,7 @@ NoEntries:
 End Function
 
 Public Sub AddProperty(ByVal S As String)
-  Dim X As Long
+  Dim X As Long, PP As Property
   Dim Pro As String, asPublic As Boolean
   Dim asFunc As Boolean
   Dim GSL As String, pName As String, pArgs As String, pArgName As String, pType As String
@@ -160,20 +160,20 @@ Public Sub AddProperty(ByVal S As String)
 On Error Resume Next
     X = UBound(Props) + 1
 On Error GoTo 0
-    ReDim Preserve Props(X)
+  ReDim Preserve Props(X)
   End If
   
-  With Props(X)
-    .Name = pName
-    If asPublic Then .asPublic = True  ' if one is public, both are...
-    Select Case GSL
-      Case "get"
-                          .Getter = ConvertSub(S, , vbFalse)
-                          .asType = ConvertDataType(pType)
-      Case "set", "let":  .Setter = ConvertSub(S, , vbFalse)
-                          .origArgName = pArgName
-    End Select
-  End With
+  PP = Props(X)
+
+  PP.Name = pName
+  If asPublic Then PP.asPublic = True  ' if one is public, both are...
+  Select Case GSL
+    Case "get"
+                        PP.Getter = ConvertSub(S, , vbFalse)
+                        PP.asType = ConvertDataType(pType)
+    Case "set", "let":  PP.Setter = ConvertSub(S, , vbFalse)
+                        PP.origArgName = pArgName
+  End Select
 End Sub
 
 Public Function ReadOutProperties() As String
