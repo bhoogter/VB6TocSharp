@@ -22,8 +22,6 @@ Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: 
 Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: tLMatch = Left(LTrim(Src), Len(tMatch)) = tMatch: End Function
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
-Public Function deNL(ByVal S As String) As String: deNL = S: Do While IsInStr(deNL, vbCrLf4): deNL = Replace(deNL, vbCrLf4, vbCrLf3): Loop: End Function
-Public Function deWS(ByVal S As String) As String: deWS = S: Do While IsInStr(deWS, " " & vbCrLf): deWS = Replace(deWS, " " & vbCrLf, vbCrLf): Loop: End Function
 
 Public Function WriteOut(ByVal F As String, ByVal S As String, ByVal O As String) As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
 
@@ -38,6 +36,19 @@ Public Function deQuote(ByVal Src As String) As String
   If Left(Src, 1) = """" Then Src = Mid(Src, 2)
   If Right(Src, 1) = """" Then Src = Left(Src, Len(Src) - 1)
   deQuote = Src
+End Function
+
+Public Function deWS(ByVal S As String) As String
+  Do While IsInStr(S, " " & vbCrLf)
+    S = Replace(S, " " & vbCrLf, vbCrLf)
+  Loop
+  Do While IsInStr(S, vbCrLf4)
+    S = Replace(S, vbCrLf4, vbCrLf3)
+  Loop
+  
+  S = Replace(S, "{" & vbCrLf2, "{" & vbCrLf)
+  S = RegExReplace(S, "(" & vbCrLf2 & ")([ ]*{)", vbCrLf & "$2")
+  deWS = S
 End Function
 
 Public Function nlTrim(ByVal Str As String)

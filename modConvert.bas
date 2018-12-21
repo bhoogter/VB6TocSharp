@@ -74,7 +74,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
-  X = deNL(deWS(X))
+  X = deWS(X)
   
   F = fName & ".xaml.cs"
   WriteOut F, X, frmFile
