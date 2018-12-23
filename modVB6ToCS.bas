@@ -106,6 +106,8 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   W = SplitWord(Trim(S))
   R = SplitWord(Trim(S), 2, , , True)
   Select Case W
+    Case "True": S = "true"
+    Case "False": S = "false"
     Case "Kill": S = "File.Delete(" & R & ")"
     Case "Format": S = Replace(S, W, "VB6.Format")
     Case "Open":    S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"

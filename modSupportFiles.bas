@@ -71,6 +71,8 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "    <WarningLevel>4</WarningLevel>"
   S = S & N & "  </PropertyGroup>"
   S = S & N & "  <ItemGroup>"
+  S = S & N & "    <Reference Include=""Microsoft.VisualBasic.Compatibility"" />"
+  S = S & N & "    <Reference Include=""Microsoft.VisualBasic.Compatibility.Data"" />"
   S = S & N & "    <Reference Include=""System"" />"
   S = S & N & "    <Reference Include=""System.Data"" />"
   S = S & N & "    <Reference Include=""System.Xml"" />"

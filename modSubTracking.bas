@@ -33,8 +33,11 @@ Public Property Get Analyze() As Boolean
 End Property
 
 Public Sub SubBegin(Optional ByVal setLockout As Boolean = False)
-  Dim nVars() As Variable
-  Vars = nVars
+  If Not setLockout Then
+    Dim nVars() As Variable
+    Vars = nVars
+  End If
+  
   Lockout = Lockout
 End Sub
 
@@ -96,6 +99,8 @@ End Sub
 
 Public Sub SubParamUsedList(ByVal S As String)
   Dim Sp, L
+  If Lockout Then Exit Sub
+  
   Sp = Split(S, ",")
   For Each L In Sp
     If L <> "" Then SubParamUsed L
@@ -180,7 +185,9 @@ On Error Resume Next
   Dim I As Long, R As String, P As Property
   Dim T As String
   R = ""
+  I = -1
   For I = LBound(Props) To UBound(Props)
+    If I = -1 Then GoTo NoItems
     With Props(I)
       If .Name <> "" And Not (.Getter = "" And .Setter = "") Then
         If Not .asFunc Then
@@ -211,6 +218,7 @@ On Error Resume Next
       End If
     End With
   Next
-  
+NoItems:
+
   ReadOutProperties = R
 End Function

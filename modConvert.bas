@@ -756,6 +756,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 End Function
 
 
+
 Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim oStr As String
   Dim Res As String
