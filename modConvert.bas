@@ -103,6 +103,9 @@ Public Function ConvertModule(ByVal basFile As String)
   X = X & "static class " & fName & " {" & vbCrLf
   X = X & nlTrim(Globals & vbCrLf & vbCrLf & Functions)
   X = X & vbCrLf & "}"
+  
+  X = deWS(X)
+  
   F = fName & ".cs"
   WriteOut F, X, basFile
 End Function
@@ -131,6 +134,8 @@ Public Function ConvertClass(ByVal clsFile As String)
   X = X & "public class " & fName & " {" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
+  
+  X = deWS(X)
   
   F = fName & ".cs"
   WriteOut F, X, clsFile
@@ -502,7 +507,7 @@ Public Function ConvertParameter(ByVal S As String) As String
     pType = "Variant"
   End If
   If Left(S, 1) = "=" Then
-    pDef = Trim(Mid(Trim(S), 2))
+    pDef = ConvertValue(Trim(Mid(Trim(S), 2)))
     S = ""
   Else
     pDef = ConvertDefaultDefault(pType)
@@ -585,8 +590,14 @@ Public Function ConvertValue(ByVal S As String) As String
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
 'If IsInStr(S, "cmdSaleTotals.Move") Then Stop
 'If IsInStr(S, "2830") Then Stop
+'If IsInStr(S, "True") Then Stop
   
-  S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4")
+  S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
+  
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])True([^a-zA-Z0-9_.])", "$1true$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])False([^a-zA-Z0-9_.])", "$1false$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])Null([^a-zA-Z0-9_.])", "$1null$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])Date([^a-zA-Z0-9_.])", "$1Today$2")
   
   S = ConvertVb6Specific(S, Complete)
   If Complete Then ConvertValue = S: Exit Function

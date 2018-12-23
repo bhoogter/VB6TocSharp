@@ -7,6 +7,7 @@ Public Function ConvertDefaultDefault(ByVal dType As String) As String
                       ConvertDefaultDefault = 0
     Case "Date":      ConvertDefaultDefault = """1/1/2001"""
     Case "String":    ConvertDefaultDefault = """"""
+    Case "Boolean":   ConvertDefaultDefault = "false"
     Case Else:        ConvertDefaultDefault = "null"
   End Select
 End Function
@@ -14,14 +15,14 @@ End Function
 Public Function ConvertDataType(ByVal S As String) As String
   Select Case S
     Case "String":    ConvertDataType = "string"
-    Case "Long":      ConvertDataType = "int"
+    Case "Long":      ConvertDataType = "long"
     Case "Double":    ConvertDataType = "double"
     Case "Variant":   ConvertDataType = "object"
     Case "Byte":      ConvertDataType = "byte"
     Case "Boolean":   ConvertDataType = "bool"
     Case "Currency":  ConvertDataType = "decimal"
     Case "RecordSet": ConvertDataType = "recordset"
-    Case "Date":      ConvertDataType = "DateTime"
+    Case "Date":      ConvertDataType = "System.DateTime"
     Case Else:        ConvertDataType = "dynamic" ' "object"
   End Select
 End Function
@@ -109,7 +110,6 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "True": S = "true"
     Case "False": S = "false"
     Case "Kill": S = "File.Delete(" & R & ")"
-    Case "Format": S = Replace(S, W, "VB6.Format")
     Case "Open":    S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
     Case "Print": S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close": S = "VBCloseFile(" & Replace(R, "#", "") & ")"

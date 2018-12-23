@@ -6,6 +6,10 @@ Public Function CreateProjectSupportFiles() As Boolean
   S = ApplicationXAML()
   F = "application.xaml"
   WriteOut F, S, ""
+  
+  S = VBExtensionClass()
+  F = "VBExtension.cs"
+  WriteOut F, S, ""
 End Function
 
 Public Function ApplicationXAML() As String
@@ -71,6 +75,7 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "    <WarningLevel>4</WarningLevel>"
   S = S & N & "  </PropertyGroup>"
   S = S & N & "  <ItemGroup>"
+  S = S & N & "    <Reference Include=""Microsoft.VisualBasic"" />"
   S = S & N & "    <Reference Include=""Microsoft.VisualBasic.Compatibility"" />"
   S = S & N & "    <Reference Include=""Microsoft.VisualBasic.Compatibility.Data"" />"
   S = S & N & "    <Reference Include=""System"" />"
@@ -110,6 +115,7 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   Next
 
   
+  S = S & N & "    <Compile Include=""VBExtension.cs"" />"
   For Each L In Split(VBPClasses(vbpFile) & vbCrLf & VBPModules(vbpFile), vbCrLf)
   S = S & N & "    <Compile Include=""" & OutputSubFolder(L) & ChgExt(L, ".cs") & """ />"
   Next
@@ -149,3 +155,38 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   WriteOut ChgExt(FileName(vbpFile), ".csproj"), S
 End Function
 
+Public Function VBExtensionClass() As String
+  Dim S As String, M As String, N As String
+  Dim L
+  S = ""
+  M = ""
+  N = vbCrLf
+  
+  S = S & M & ""
+  S = S & M & UsingEverything
+  S = S & N
+  S = S & M & "public static class VBExtension {"
+  S = S & N & "  public static object IIf(bool A, object B, object C) { return !!A ? B : C; }"
+  S = S & N & "  public static bool IIf(bool A, bool B, bool C) { return !!A ? B : C; }"
+  S = S & N & "  public static string IIf(bool A, string B, string C) { return !!A ? B : C; }"
+  S = S & N & "  public static double IIf(bool A, double B, double C) { return !!A ? B : C; }"
+  S = S & N & "  public static decimal IIf(bool A, decimal B, decimal C) { return !!A ? B : C; }"
+  S = S & N & "  public static long IIf(bool A, long B, long C) { return !!A ? B : C; }"
+  S = S & N
+  S = S & N & "  public static bool IsMissing(object A) { return false; }"
+  S = S & N & "  public static bool IsNull(object A) { return A == null; }"
+  S = S & N
+  S = S & N & "  public static System.DateTime NullDate() { try { return System.DateTime.Parse(""1/1/2001""); } catch { return Today; } }"
+  S = S & N & "  public static bool IsDate(string D) { try { System.DateTime.Parse(D); } catch { return false; } return true; }"
+  S = S & N
+  S = S & N & "  public static System.DateTime CDate(object A) { return IsDate(A.ToString()) ? NullDate() : System.DateTime.Parse(A.ToString()); }"
+  S = S & N & "  public static string CStr(object A) { return A.ToString(); }"
+  S = S & N & "  public static bool CBool(object A) { return !!A; }"
+  S = S & N
+  S = S & N & "  public static System.DateTime DateValue(object A) { return CDate(A); }"
+  S = S & M
+  S = S & N & "}"
+  
+  
+  VBExtensionClass = S
+End Function
