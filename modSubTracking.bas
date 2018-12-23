@@ -55,12 +55,14 @@ End Function
 Public Sub SubParamDecl(ByVal P As String, ByVal asType As String, ByVal asArray As String, ByVal isParam As Boolean)
   If Lockout Then Exit Sub
 
-  Dim K As Variable
+  Dim K As Variable, N As Long
   K.Name = P
   K.Param = isParam
 On Error Resume Next
-  ReDim Preserve Vars(UBound(Vars) + 1)
-  With Vars(UBound(Vars))
+  N = 0
+  N = UBound(Vars) + 1
+  ReDim Preserve Vars(N)
+  With Vars(N)
     .Name = P
     .asType = asType
     .Param = isParam
@@ -88,10 +90,7 @@ Public Sub SubParamUsed(ByVal P As String)
   K = SubParamIndex(P)
   If K >= 0 Then Vars(K).Used = True
   If K >= 0 Then
-    With Vars(K)
-      .Used = True
-      If Not .Used Then .UsedBeforeAssigned = True
-    End With
+    If Not Vars(K).Assigned Then Vars(K).UsedBeforeAssigned = True
   End If
 End Sub
 

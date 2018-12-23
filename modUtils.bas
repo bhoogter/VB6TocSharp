@@ -233,8 +233,7 @@ Public Function OutputSubFolder(ByVal F As String) As String
 End Function
 
 Public Function OutputFolder(Optional ByVal F As String) As String
-
-  OutputFolder = "C:\Users\benja\workspace\VS2017\WinCDS.NET\WinCDS.NET" & OutputSubFolder(F)
+  OutputFolder = "C:\Users\benja\workspace\VS2017\WinCDS.NET\WinCDS.NET\" & OutputSubFolder(F)
 End Function
 
 
@@ -267,7 +266,7 @@ Public Function P(ByVal Str As String) As String
   P = Str
 End Function
 
-Public Function ModuleName(ByVal S As String) String
+Public Function ModuleName(ByVal S As String) As String
   Dim J As Long, K As Long
   Const NameTag As String = "Attribute VB_Name = """
   J = InStr(S, NameTag) + Len(NameTag)

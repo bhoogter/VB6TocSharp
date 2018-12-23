@@ -34,7 +34,7 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   N = vbCrLf
   
 
-  S = S & N & "<?xml version=""1.0"" encoding=""utf-8""?>"
+  S = S & M & "<?xml version=""1.0"" encoding=""utf-8""?>"
   S = S & N & "<Project ToolsVersion=""15.0"" xmlns=""http://schemas.microsoft.com/developer/msbuild/2003"">"
   S = S & N & "  <Import Project=""$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props"" Condition=""Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')"" />"
   S = S & N & "  <PropertyGroup>"
@@ -96,7 +96,7 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "      <SubType>Code</SubType>"
   S = S & N & "    </Compile>"
   
-  For Each L In VBPForms(vbpFile)
+  For Each L In Split(VBPForms(vbpFile), vbCrLf)
   S = S & N & "    <Page Include=""" & OutputSubFolder(L) & ChgExt(L, ".xaml") & """>"
   S = S & N & "      <SubType>Designer</SubType>"
   S = S & N & "      <Generator>MSBuild:Compile</Generator>"
@@ -105,12 +105,12 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "      <DependentUpon>" & ChgExt(L, ".xaml") & "</DependentUpon>"
   S = S & N & "      <SubType>Code</SubType>"
   S = S & N & "    </Compile>"
-  Loop
+  Next
 
   
   For Each L In Split(VBPClasses(vbpFile) & vbCrLf & VBPModules(vbpFile), vbCrLf)
   S = S & N & "    <Compile Include=""" & OutputSubFolder(L) & ChgExt(L, ".cs") & """ />"
-  Loop
+  Next
   
   S = S & N & "  </ItemGroup>"
   S = S & N & "  <ItemGroup>"
@@ -144,6 +144,6 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   
   CreateProjectFile = S
   
-  WriteOut ChgExt(vbpFile, ".csproj"), S
+  WriteOut ChgExt(FileName(vbpFile), ".csproj"), S
 End Function
 
