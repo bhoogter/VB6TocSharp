@@ -8,6 +8,7 @@ Private EOLComment As String
 Dim WithLevel As Long, MaxWithLevel As Long
 
 Public Function ConvertProject(ByVal vbpFile As String)
+  CreateProjectFile vbpFile
   CreateProjectSupportFiles
   ConvertFileList FilePath(vbpFile), VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) & vbCrLf & VBPUserControls(vbpFile)
   MsgBox "Complete."
@@ -69,7 +70,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   X = ""
   X = X & UsingEverything(fName) & vbCrLf
   X = X & vbCrLf
-  X = X & "class " & fName & " {" & vbCrLf
+  X = X & "public class " & fName & " {" & vbCrLf
   X = X & "  public static " & fName & " DefaultInstance;" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
@@ -127,7 +128,7 @@ Public Function ConvertClass(ByVal clsFile As String)
   X = ""
   X = X & UsingEverything(fName) & vbCrLf
   X = X & vbCrLf
-  X = X & "class " & fName & " {" & vbCrLf
+  X = X & "public class " & fName & " {" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
@@ -195,29 +196,6 @@ NextLine:
   Next
   
   SanitizeCode = R
-End Function
-
-Public Function CreateProjectSupportFiles() As Boolean
-  Dim S As String, F As String
-  S = ApplicationXAML()
-  F = "application.xaml"
-  WriteOut F, S, ""
-End Function
-
-Public Function ApplicationXAML() As String
-  Dim R As String, M As String, N As String
-  R = "": M = "": N = vbCrLf
-  
-  R = R & M & "<Application x:Class=""Application"" "
-  R = R & N & "xmlns = ""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" "
-  R = R & N & "xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" "
-  R = R & N & "xmlns:local=""clr-namespace:WpfApp1"" "
-  R = R & N & "StartupUri=""MainWindow.xaml""> "
-  R = R & N & "  <Application.Resources>"
-  R = R & N & "  </Application.Resources>"
-  R = R & N & "</Application>"
-
-  ApplicationXAML = R
 End Function
 
 Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As Boolean = False) As String

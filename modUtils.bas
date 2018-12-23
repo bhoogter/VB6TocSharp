@@ -23,7 +23,7 @@ Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean:
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
 
-Public Function WriteOut(ByVal F As String, ByVal S As String, ByVal O As String) As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
+Public Function WriteOut(ByVal F As String, ByVal S As String, Optional ByVal O As String = "") As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
 
 Public Function FileExt(ByVal Fn As String, Optional ByVal vLCase As Boolean = True) As String
   If Fn = "" Then Exit Function
@@ -223,18 +223,18 @@ Public Function CodeSectionGlobalEndLoc(ByVal S As String)
   CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 1
 End Function
 
+Public Function OutputSubFolder(ByVal F As String) As String
+  Select Case FileExt(F)
+    Case ".bas": OutputSubFolder = "Modules\"
+    Case ".cls": OutputSubFolder = "Classes\"
+    Case ".frm": OutputSubFolder = "Forms\"
+    Case Else:   OutputSubFolder = ""
+  End Select
+End Function
+
 Public Function OutputFolder(Optional ByVal F As String) As String
-  Dim oWSHShell As Object
-  Set oWSHShell = CreateObject("WScript.Shell")
-  OutputFolder = oWSHShell.SpecialFolders("Desktop") & "\test\"
-  Set oWSHShell = Nothing
-  
-  OutputFolder = "C:\Users\benja\workspace\VS2017\WPF1\WpfApp1\WpfApp1\"
-  If FileExt(F) = ".bas" Then OutputFolder = OutputFolder & "Modules\"
-  If FileExt(F) = ".cls" Then OutputFolder = OutputFolder & "Classes\"
-  If FileExt(F) = ".frm" Then OutputFolder = OutputFolder & "Forms\"
-  
-  If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
+
+  OutputFolder = "C:\Users\benja\workspace\VS2017\WinCDS.NET\WinCDS.NET" & OutputSubFolder(F)
 End Function
 
 
@@ -262,10 +262,12 @@ End Function
 
 Public Function P(ByVal Str As String) As String
   Str = Replace(Str, "&", "&amp;")
+  Str = Replace(Str, "<", "&lt;")
+  Str = Replace(Str, ">", "&gt;")
   P = Str
 End Function
 
-Public Function ModuleName(ByVal S As String) As String
+Public Function ModuleName(ByVal S As String) String
   Dim J As Long, K As Long
   Const NameTag As String = "Attribute VB_Name = """
   J = InStr(S, NameTag) + Len(NameTag)

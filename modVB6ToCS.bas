@@ -56,15 +56,15 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "VB.OLE":                    Name = "OLE": Def = "OLE": Features = ""
     
     ' MS Windows Common Controls 6.0
-    Case "MSComCtlLib.TabStrip":
-    Case "MSComCtlLib.ToolBar":
-    Case "MSComCtlLib.StatusBar":       Name = "StatusBar": Def = "Text": Features = "Tooltiptext"
+    Case "MSComctlLib.TabStrip":
+    Case "MSComctlLib.ToolBar":
+    Case "MSComctlLib.StatusBar":       Name = "StatusBar": Def = "Text": Features = "Tooltiptext"
     Case "MSComctlLib.ProgressBar":     Name = "ProgressBar": Def = "Value": Features = "Tooltiptext"
     Case "MSComctlLib.TreeView":        Name = "TreeView": Features = "Tooltiptext"
-    Case "MSComCtlLib.ListView":        Name = "ListView": Features = "Tooltiptext"
-    Case "MSComCtlLib.ImageList":       Name = "ImageList": Features = "Tooltiptext"
-    Case "MSComCtlLib.Slider":
-    Case "MSComCtlLib.ImageCombo":
+    Case "MSComctlLib.ListView":        Name = "ListView": Features = "Tooltiptext"
+    Case "MSComctlLib.ImageList":       Name = "ImageList": Features = "Tooltiptext"
+    Case "MSComctlLib.Slider":          Name = "Slider"
+    Case "MSComctlLib.ImageCombo":
 
     ' MS Windows Common Controls-2 6.0
 '    Case "MSComCtl2.Animation":
