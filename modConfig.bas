@@ -2,6 +2,7 @@ Attribute VB_Name = "modConfig"
 Option Explicit
 
 Public Const SpIndent As Long = 2
+Public Const DefaultDataType As String = "dynamic"
 
 Public Const PackagePrefix As String = ""
 Private Const def_vbpFile As String = "C:\wincds\wincds\wincds.vbp"

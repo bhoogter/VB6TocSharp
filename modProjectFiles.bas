@@ -1,10 +1,11 @@
 Attribute VB_Name = "modProjectFiles"
 Option Explicit
 
-Public Function VBPModules(ByVal ProjectFile As String) As String
+Public Function VBPModules(Optional ByVal ProjectFile As String) As String
   Dim S As String, L
   Dim T As String
   Const C As String = "Module="
+  If ProjectFile = "" Then ProjectFile = vbpFile
   S = ReadEntireFile(ProjectFile)
   For Each L In Split(S, vbCrLf)
     If Left(L, Len(C)) = C Then
@@ -17,11 +18,12 @@ Public Function VBPModules(ByVal ProjectFile As String) As String
 NextItem:
   Next
 End Function
-Public Function VBPForms(ByVal ProjectFile As String) As String
+Public Function VBPForms(Optional ByVal ProjectFile As String) As String
   Const WithExt As Boolean = True
   Dim S As String, L
   Dim T As String
   Const C As String = "Form="
+  If ProjectFile = "" Then ProjectFile = vbpFile
   S = ReadEntireFile(ProjectFile)
   For Each L In Split(S, vbCrLf)
     If Left(L, Len(C)) = C Then
@@ -44,10 +46,11 @@ NextItem:
 End Function
 
 
-Public Function VBPClasses(ByVal ProjectFile As String) As String
+Public Function VBPClasses(Optional ByVal ProjectFile As String, Optional ByVal ClassNames As Boolean = False) As String
   Dim S As String, L
   Dim T As String
   Const C As String = "Class="
+  If ProjectFile = "" Then ProjectFile = vbpFile
   S = ReadEntireFile(ProjectFile)
   For Each L In Split(S, vbCrLf)
     If Left(L, Len(C)) = C Then
@@ -57,12 +60,14 @@ Public Function VBPClasses(ByVal ProjectFile As String) As String
     End If
 NextItem:
   Next
+  VBPClasses = Replace(VBPClasses, ".cls", "")
 End Function
 
-Public Function VBPUserControls(ByVal ProjectFile As String) As String
+Public Function VBPUserControls(Optional ByVal ProjectFile As String) As String
   Dim S As String, L
   Dim T As String
   Const C As String = "UserControl="
+  If ProjectFile = "" Then ProjectFile = vbpFile
   S = ReadEntireFile(ProjectFile)
   For Each L In Split(S, vbCrLf)
     If Left(L, Len(C)) = C Then

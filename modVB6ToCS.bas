@@ -21,9 +21,16 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Byte":      ConvertDataType = "byte"
     Case "Boolean":   ConvertDataType = "bool"
     Case "Currency":  ConvertDataType = "decimal"
-    Case "RecordSet": ConvertDataType = "recordset"
+    Case "RecordSet", "ADODB.Recordset":
+                      ConvertDataType = "Recordset"
     Case "Date":      ConvertDataType = "System.DateTime"
-    Case Else:        ConvertDataType = "dynamic" ' "object"
+    Case Else
+      If IsInStr(VBPClasses(ClassNames:=True), S) Then
+        ConvertDataType = S
+      Else
+        ConvertDataType = DefaultDataType
+        Debug.Print "Unknown Data Type: " & S
+      End If
   End Select
 End Function
 

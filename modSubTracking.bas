@@ -6,6 +6,7 @@ Public Type Variable
   asType As String
   asArray As String
   Param As Boolean
+  RetVal As Boolean
   Assigned As Boolean
   Used As Boolean
   AssignedBeforeUsed As Boolean
@@ -55,7 +56,7 @@ On Error Resume Next
   SubParam = Vars(SubParamIndex(P))
 End Function
 
-Public Sub SubParamDecl(ByVal P As String, ByVal asType As String, ByVal asArray As String, ByVal isParam As Boolean)
+Public Sub SubParamDecl(ByVal P As String, ByVal asType As String, ByVal asArray As String, ByVal isParam As Boolean, ByVal isReturn As Boolean)
   If Lockout Then Exit Sub
 
   Dim K As Variable, N As Long
@@ -69,6 +70,7 @@ On Error Resume Next
     .Name = P
     .asType = asType
     .Param = isParam
+    .RetVal = isReturn
   End With
 End Sub
 

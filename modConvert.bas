@@ -6,6 +6,7 @@ Const WithMark = "_WithVar"
 Private EOLComment As String
 
 Dim WithLevel As Long, MaxWithLevel As Long
+Dim WithVars As String, WithTypes As String, WithAssign As String
 
 Public Function ConvertProject(ByVal vbpFile As String)
   CreateProjectFile vbpFile
@@ -214,7 +215,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As
   
   S = SanitizeCode(S)
   Do
-    P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "\("
+    P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "[ ]*\("
     N = -1
     Do
       N = N + 1
@@ -316,7 +317,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
       End If
     End If
     
-    SubParamDecl pName, pType, isArr, False
+    SubParamDecl pName, pType, isArr, False, False
   Next
   
   ConvertDeclare = Res
@@ -522,7 +523,7 @@ Public Function ConvertParameter(ByVal S As String) As String
     Res = Res & "= " & pDef
   End If
   
-  SubParamDecl pName, pType, False, True
+  SubParamDecl pName, pType, False, True, False
   ConvertParameter = Trim(Res)
 End Function
 
@@ -544,10 +545,12 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   If tLeft(S, 9) = "Function " Then Res = Res & retToken & " ": S = Mid(S, 10)
   
   fName = Trim(SplitWord(Trim(S), 1, "("))
-  S = Mid(S, Len(fName) + 2)
+  S = Trim(tMid(S, Len(fName) + 2))
+  If Left(S, 1) = "(" Then S = Trim(tMid(S, 2))
   fArgs = Trim(nextBy(S, ")"))
   S = Mid(S, Len(fArgs) + 2)
-  
+  If Left(S, 1) = ")" Then S = Trim(tMid(S, 2))
+    
   If Not isSub Then
     If tLeft(S, 2) = "As" Then
       retType = Trim(Mid(Trim(S), 3))
@@ -573,6 +576,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   If retType <> "" Then
     returnVariable = fName
     Res = Res & vbCrLf & sSpace(SpIndent) & ConvertDataType(retType) & " " & returnVariable & " = " & ConvertDefaultDefault(retType) & ";"
+    SubParamDecl returnVariable, retType, False, False, True
   End If
   
   ConvertPrototype = Trim(Res)
@@ -599,6 +603,7 @@ Public Function ConvertValue(ByVal S As String) As String
   S = RegExReplace(S, "([^a-zA-Z0-9_.])False([^a-zA-Z0-9_.])", "$1false$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])Null([^a-zA-Z0-9_.])", "$1null$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])Date([^a-zA-Z0-9_.])", "$1Today$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])NullDate([^a-zA-Z0-9_.])", "$1NullDate()$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])vbUseDefault([^a-zA-Z0-9_.])", "$1vbTriState.vbUseDefault$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])vbTrue([^a-zA-Z0-9_.])", "$1vbTriState.vbTrue$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])vbFalse([^a-zA-Z0-9_.])", "$1vbTriState.vbFalse$2")
@@ -635,6 +640,7 @@ DoReplacements:
   ConvertValue = Replace(ConvertValue, " And ", " && ")
   ConvertValue = Replace(ConvertValue, " Mod ", " % ")
   ConvertValue = Replace(ConvertValue, "New ", "new ")
+  ConvertValue = Replace(ConvertValue, "NullDate", "NullDate")
   Do While IsInStr(ConvertValue, ", ,")
     ConvertValue = Replace(ConvertValue, ", ,", ", _,")
   Loop
@@ -919,14 +925,27 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
       O = sSpace(Ind) & "}"
     ElseIf tLeft(L, 5) = "With " Then
       WithLevel = WithLevel + 1
-      If WithLevel > MaxWithLevel Then
-        O = O & sSpace(Ind) & "object " & WithMark & WithLevel & ";" & vbCrLf
-        MaxWithLevel = MaxWithLevel + 1
-      End If
-      O = O & sSpace(Ind) & WithMark & " = " & tMid(L, 6) & ";"
+      O = WithMark & WithLevel
+      T = tMid(L, 6)
+      U = ConvertDataType(SubParam(T).asType)
+      If U = "" Then U = DefaultDataType
+      
+      Stack WithVars, O
+      Stack WithAssign, T
+      Stack WithTypes, U
+      
+      O = O & sSpace(Ind) & U & " " & O & ";" & vbCrLf
+      MaxWithLevel = MaxWithLevel + 1
+      O = O & sSpace(Ind) & O & " = " & T & ";"
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 8) = "End With" Then
       WithLevel = WithLevel - 1
+      O = Stack(WithVars)
+      T = Stack(WithAssign)
+      U = Stack(WithTypes)
+      If SubParam(T).Name <> "" Then
+        O = O & sSpace(Ind) & T & " = " & O & ";"
+      End If
       Ind = Ind - SpIndent
     ElseIf IsInStr(L, "On Error ") Or IsInStr(L, "Resume ") Then
       O = sSpace(Ind) & "// TODO (not supported): " & L

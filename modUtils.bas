@@ -306,3 +306,18 @@ Public Function Random(Optional ByVal Max As Long = 10000) As Long
   Randomize
   Random = ((Rnd * Max) + 1)
 End Function
+
+Public Function Stack(ByRef Src As String, Optional ByVal Val As String = "##REM##") As String
+  If Val = "##REM##" Then
+    Stack = nextBy(Src, ",")
+    Src = Mid(Src, Len(Stack) + 2)
+    Stack = Replace(Stack, """""", """")
+    If Left(Stack, 1) = """" Then
+      Stack = Mid(Stack, 2)
+      Stack = Left(Stack, Len(Stack) - 1)
+    End If
+  Else
+    Src = """" & Replace(Val, """", """""") & """," & Src
+    Stack = Val
+  End If
+End Function

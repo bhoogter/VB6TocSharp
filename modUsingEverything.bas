@@ -38,6 +38,7 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.PrinterObjectConstants;"
     E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.ScaleModeConstants;"
     E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.SystemColorConstants;"
+    E = E & N & "using ADODB;"
     
     Path = FilePath(vbpFile)
     For Each L In Split(VBPModules(vbpFile) & vbCrLf & VBPForms(vbpFile), vbCrLf)
