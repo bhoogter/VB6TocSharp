@@ -34,6 +34,7 @@ NextItem:
 End Function
 
 Public Function ConvertFile(ByVal someFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean
+  If Not IsInStr(someFile, "\") Then someFile = vbpPath & someFile
   Select Case LCase(FileExt(someFile))
     Case ".bas": ConvertFile = ConvertModule(someFile)
     Case ".cls": ConvertFile = ConvertClass(someFile)
@@ -516,7 +517,7 @@ Public Function ConvertParameter(ByVal S As String) As String
   Res = ""
   If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
-  Res = Res & IIf(SubParam(pName).Used, pName, pName & "_UNUSED") & " "
+  Res = Res & IIf(SubParam(pName).Used Or (SubParam(pName).Assigned And SubParam(pName).Param), pName, pName & "_UNUSED") & " "
   If isOptional Then
     Res = Res & "= " & pDef
   End If
@@ -598,6 +599,9 @@ Public Function ConvertValue(ByVal S As String) As String
   S = RegExReplace(S, "([^a-zA-Z0-9_.])False([^a-zA-Z0-9_.])", "$1false$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])Null([^a-zA-Z0-9_.])", "$1null$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])Date([^a-zA-Z0-9_.])", "$1Today$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])vbUseDefault([^a-zA-Z0-9_.])", "$1vbTriState.vbUseDefault$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])vbTrue([^a-zA-Z0-9_.])", "$1vbTriState.vbTrue$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])vbFalse([^a-zA-Z0-9_.])", "$1vbTriState.vbFalse$2")
   
   S = ConvertVb6Specific(S, Complete)
   If Complete Then ConvertValue = S: Exit Function
@@ -640,7 +644,7 @@ DoReplacements:
 'If IsInStr(ConvertValue, "1/1/2001") Then Stop
 
   ConvertValue = RegExReplace(ConvertValue, "([0-9])#", "$1")
-  ConvertValue = RegExReplace(ConvertValue, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", """$1/$2/$3""")
+  ConvertValue = RegExReplace(ConvertValue, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", "DateValue(""$1/$2/$3"")")
   
   If Left(ConvertValue, 2) = "&H" Then
     ConvertValue = "0x" & Mid(ConvertValue, 3)

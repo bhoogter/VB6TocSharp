@@ -78,6 +78,8 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "    <Reference Include=""Microsoft.VisualBasic"" />"
   S = S & N & "    <Reference Include=""Microsoft.VisualBasic.Compatibility"" />"
   S = S & N & "    <Reference Include=""Microsoft.VisualBasic.Compatibility.Data"" />"
+  S = S & N & "    <Reference Include=""Microsoft.VisualBasic.PowerPacks, Version=9.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"" />"
+  S = S & N & "    <Reference Include=""Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"" />"
   S = S & N & "    <Reference Include=""System"" />"
   S = S & N & "    <Reference Include=""System.Data"" />"
   S = S & N & "    <Reference Include=""System.Xml"" />"
@@ -166,6 +168,8 @@ Public Function VBExtensionClass() As String
   S = S & M & UsingEverything
   S = S & N
   S = S & M & "public static class VBExtension {"
+  S = S & N & "  public enum vbTriState {  vbFalse = 0, vbTrue = -1, vbDefault = -2 }"
+  S = S & N
   S = S & N & "  public static object IIf(bool A, object B, object C) { return !!A ? B : C; }"
   S = S & N & "  public static bool IIf(bool A, bool B, bool C) { return !!A ? B : C; }"
   S = S & N & "  public static string IIf(bool A, string B, string C) { return !!A ? B : C; }"
@@ -174,19 +178,22 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static long IIf(bool A, long B, long C) { return !!A ? B : C; }"
   S = S & N
   S = S & N & "  public static bool IsMissing(object A) { return false; }"
-  S = S & N & "  public static bool IsNull(object A) { return A == null; }"
+  S = S & N & "  public static bool IsNull(object A) { return A == null || (A is System.DBNull); }"
+  S = S & N & "  public static bool IsNothing(object A) { return IsNull(A); }"
   S = S & N
   S = S & N & "  public static System.DateTime NullDate() { try { return System.DateTime.Parse(""1/1/2001""); } catch { return Today; } }"
   S = S & N & "  public static bool IsDate(string D) { try { System.DateTime.Parse(D); } catch { return false; } return true; }"
   S = S & N
   S = S & N & "  public static System.DateTime CDate(object A) { return IsDate(A.ToString()) ? NullDate() : System.DateTime.Parse(A.ToString()); }"
+  S = S & N & "  public static double CDbl(object A)  { return (A is System.IConvertible) ? ((System.IConvertible)A).ToDouble(null) : 0; }"
+  S = S & N & "  public static double CLng(object A) { return (A is System.IConvertible) ? ((System.IConvertible)A).ToInt64(null) : 0; }"
+  S = S & N & "  public static double CInt(object A) { return (A is System.IConvertible) ? ((System.IConvertible)A).ToInt32(null) : 0; }"
   S = S & N & "  public static string CStr(object A) { return A.ToString(); }"
-  S = S & N & "  public static bool CBool(object A) { return !!A; }"
+  S = S & N & "  public static bool CBool(object A) { { return (A is System.IConvertible) ? ((System.IConvertible)A).ToBoolean(null) : false; } }"
   S = S & N
   S = S & N & "  public static System.DateTime DateValue(object A) { return CDate(A); }"
   S = S & M
   S = S & N & "}"
-  
   
   VBExtensionClass = S
 End Function

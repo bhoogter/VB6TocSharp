@@ -21,6 +21,7 @@ Module=modSubTracking; modSubTracking.bas
 Module=modVB6ToCS; modVB6ToCS.bas
 Module=modUsingEverything; modUsingEverything.bas
 Module=modSupportFiles; modSupportFiles.bas
+Module=modConfig; modConfig.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""

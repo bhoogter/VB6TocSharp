@@ -1,7 +1,7 @@
 Attribute VB_Name = "modUtils"
 Option Explicit
 
-Public Const SpIndent As Long = 2
+
 Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
 Public Const patNotToken As String = "([^a-zA-Z_0-9])"
 Public Const patTokenDot As String = "([a-zA-Z_.][a-zA-Z_0-9.]*)"

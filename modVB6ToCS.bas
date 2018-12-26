@@ -35,7 +35,7 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "VB.MDIForm":                Name = "Window": Cont = True
       Cont = True
     
-    Case "VB.PictureBox":             Name = "Canvas": Cont = True: Def = "Picture": Features = "Tooltiptext"
+    Case "VB.PictureBox":             Name = "Image": Cont = True: Def = "Picture": Features = "Tooltiptext"
     Case "VB.Label":                  Name = "Label": Features = "": Features = "Font,Content,Tooltiptext"
     Case "VB.TextBox":                Name = "TextBox": Def = "Text": Features = "Font,Text,Tooltiptext"
     Case "VB.Frame":                  Name = "GroupBox": Features = "Tooltiptext"
@@ -52,9 +52,11 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "VB.FileListBox":            Name = "FileListBox": Def = "Path": Features = ""
     Case "VB.Shape":                  Name = "Shape": Def = "Visible": Features = ""
     Case "VB.Line":                   Name = "Line": Def = "Visible": Features = ""
-    Case "VB.Image":                  Name = "Canvas": Def = "Picture": Features = "Tooltiptext"
+    Case "VB.Image":                  Name = "Image": Def = "Picture": Features = "Tooltiptext"
     Case "VB.Data":                   Name = "Data": Def = "DataSource": Features = ""
     Case "VB.OLE":                    Name = "OLE": Def = "OLE": Features = ""
+    
+    Case "VB.Menu":                   Name = "Menu"
     
     ' MS Windows Common Controls 6.0
     Case "MSComctlLib.TabStrip":
@@ -88,10 +90,14 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "WinCDS.ucPBar":             Name = "ProgressBar"
     Case "WinCDS.PrinterSelector":    Name = "Label"
     Case "WinCDS.RichTextBoxNew":     Name = "TextBlock"
+    Case "WinCDS.MaskedPicture":      Name = "Image"
     
     Case "VJCZIPLib.VjcZip":          Name = "Label"
     Case "MSChart20Lib.MSChart":      Name = "Label"
     Case "MapPointCtl.MappointControl": Name = "Label"
+    
+    Case "LaVolpeAlphaImg.AlphaImgCtl": Name = "Image"
+    Case "GIF89LibCtl.Gif89a":        Name = "Image"
     
     Case Else
       Debug.Print "Unknown Control Type: " & cType

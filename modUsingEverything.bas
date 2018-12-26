@@ -2,10 +2,7 @@ Attribute VB_Name = "modUsingEverything"
 Option Explicit
 
 Private Everything As String
-
 Private Const VB6Compat As String = "Microsoft.VisualBasic.Compatibility.VB6"
-Private Const PackagePrefix As String = ""
-Private Const vbpFile As String = "C:\wincds\wincds\wincds.vbp"
 
 
 Public Function UsingEverything(Optional ByVal PackageName As String) As String
@@ -23,11 +20,24 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
   If Everything = "" Then
     E = E & M & "using VB6 = " & VB6Compat & ";"
     E = E & N & "using static VBExtension;"
+    
     E = E & N & "using static System.DateTime;"
+    E = E & N & "using static System.Math;"
+    
     E = E & N & "using static Microsoft.VisualBasic.Information;"
     E = E & N & "using static Microsoft.VisualBasic.Conversion;"
     E = E & N & "using static Microsoft.VisualBasic.Strings;"
     E = E & N & "using static Microsoft.VisualBasic.VBMath;"
+    
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.ColorConstants;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.DrawStyleConstants;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.FillStyleConstants;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.GlobalModule;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.Printer;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.PrinterCollection;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.PrinterObjectConstants;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.ScaleModeConstants;"
+    E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.SystemColorConstants;"
     
     Path = FilePath(vbpFile)
     For Each L In Split(VBPModules(vbpFile) & vbCrLf & VBPForms(vbpFile), vbCrLf)
