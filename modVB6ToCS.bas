@@ -14,16 +14,20 @@ End Function
 
 Public Function ConvertDataType(ByVal S As String) As String
   Select Case S
-    Case "String":    ConvertDataType = "string"
-    Case "Long":      ConvertDataType = "long"
-    Case "Double":    ConvertDataType = "double"
-    Case "Variant":   ConvertDataType = "object"
-    Case "Byte":      ConvertDataType = "byte"
-    Case "Boolean":   ConvertDataType = "bool"
-    Case "Currency":  ConvertDataType = "decimal"
+    Case "String":                ConvertDataType = "string"
+    Case "Long":                  ConvertDataType = "long"
+    Case "Double":                ConvertDataType = "double"
+    Case "Variant":               ConvertDataType = "object"
+    Case "Byte":                  ConvertDataType = "byte"
+    Case "Boolean":               ConvertDataType = "bool"
+    Case "Currency":              ConvertDataType = "decimal"
     Case "RecordSet", "ADODB.Recordset":
-                      ConvertDataType = "Recordset"
-    Case "Date":      ConvertDataType = "System.DateTime"
+                                  ConvertDataType = "Recordset"
+    Case "Connection", "ADODB.Connection":
+                                  ConvertDataType = "Connection"
+    Case "ADODB.Error":           ConvertDataType = "ADODB.Error"
+    Case "ADODB.EventStatusEnum": ConvertDataType = "ADODB.EventStatusEnum"
+    Case "Date":                  ConvertDataType = "System.DateTime"
     Case Else
       If IsInStr(VBPClasses(ClassNames:=True), S) Then
         ConvertDataType = S
@@ -122,11 +126,15 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   Select Case W
     Case "True": S = "true"
     Case "False": S = "false"
+    Case "Nothing": S = "null"
+    Case "vbTrue": S = "vbTriState.vbTrue"
+    Case "vbFalse": S = "vbTriState.vbFalse"
+    Case "vbUseDefault": S = "vbTriState.vbUseDefault"
     Case "Kill": S = "File.Delete(" & R & ")"
     Case "Open":    S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
     Case "Print": S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close": S = "VBCloseFile(" & Replace(R, "#", "") & ")"
-    Case "New": S = S & "new " & R & "()": Complete = True
+    Case "New": S = "new " & R & "()": Complete = True
     Case "ReDim":
       Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String

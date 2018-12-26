@@ -22,7 +22,7 @@ Public Type Property
   Setter As String
   origArgName As String
 End Type
-  
+
 Private Lockout As Boolean
 
 Private Vars() As Variable
@@ -169,24 +169,27 @@ On Error GoTo 0
   ReDim Preserve Props(X)
   End If
   
-  PP = Props(X)
-
-  PP.Name = pName
-  If asPublic Then PP.asPublic = True  ' if one is public, both are...
-  Select Case GSL
-    Case "get"
-                        PP.Getter = ConvertSub(S, , vbFalse)
-                        PP.asType = ConvertDataType(pType)
-    Case "set", "let":  PP.Setter = ConvertSub(S, , vbFalse)
-                        PP.origArgName = pArgName
-  End Select
+  With Props(X)
+    .Name = pName
+    If asPublic Then .asPublic = True  ' if one is public, both are...
+    Select Case GSL
+      Case "get"
+                          .Getter = ConvertSub(S, , vbFalse)
+                          .asType = ConvertDataType(pType)
+      Case "set", "let":  .Setter = ConvertSub(S, , vbFalse)
+                          .origArgName = pArgName
+    End Select
+  End With
 End Sub
 
 Public Function ReadOutProperties() As String
 On Error Resume Next
   Dim I As Long, R As String, P As Property
+  Dim N As String, M As String
   Dim T As String
   R = ""
+  M = ""
+  N = vbCrLf
   I = -1
   For I = LBound(Props) To UBound(Props)
     If I = -1 Then GoTo NoItems
@@ -194,27 +197,29 @@ On Error Resume Next
       If .Name <> "" And Not (.Getter = "" And .Setter = "") Then
         If Not .asFunc Then
           If .asPublic Then R = R & "public "
-          If .Getter = "" Then R = R & "writeonly "
-          If .Setter = "" Then R = R & "readonly "
-          R = R & .asType & " " & .Name & " {" & vbCrLf
+'          If .Getter = "" Then R = R & "writeonly "
+'          If .Setter = "" Then R = R & "readonly "
+          R = R & M & .asType & " " & .Name & " {"
           If .Getter <> "" Then
-            R = R & "  get {" & vbCrLf
-            R = R & "    " & .asType & " " & .Name & ";" & vbCrLf
+            R = R & N & "  get {"
+            R = R & N & "    " & .asType & " " & .Name & ";"
             T = .Getter
             T = Replace(T, "Exit Property", "return " & .Name & ";")
-            R = R & "    " & T & vbCrLf
-            R = R & "  }" & vbCrLf
+            R = R & N & "    " & T
+            R = R & N & "  return " & .Name & ";"
+            R = R & N & "  }"
           End If
           If .Setter <> "" Then
-            R = R & "  set {" & vbCrLf
+            R = R & N & "  set {"
             T = .Setter
             T = ReplaceToken(T, "value", "valueOrig")
             T = Replace(T, .origArgName, "value")
-            T = Replace(T, "Exit Property", "return;") & vbCrLf
-            R = R & "    " & T & vbCrLf
-            R = R & "  }" & vbCrLf
+            T = Replace(T, "Exit Property", "return;")
+            R = R & N & "    " & T
+            R = R & N & "  }"
           End If
-          R = R & "}" & vbCrLf2
+          R = R & N & "}"
+          R = R & N
         Else
         End If
       End If

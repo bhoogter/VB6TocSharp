@@ -76,7 +76,7 @@ Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """",
   If Ind <= 1 Then
     nextBy = Left(Src, L - 1)
   Else
-    nextBy = nextBy(Mid(Src, L + 1), Del, Ind - 1)
+    nextBy = nextBy(Mid(Src, L + Len(Del)), Del, Ind - 1)
   End If
 End Function
 
@@ -125,7 +125,7 @@ Public Function nextByP(ByVal Src As String, Optional ByVal Del As String = """"
     M = M + 1
     If M > 100 Then Exit Do
     N = N + 1
-    T = nextBy(Mid(Src, IIf(F = "", 1, Len(F) + 1 + Len(Del))), Del, N)
+    T = nextBy(Src, Del, N)
     R = R & IIf(Len(R) = 0, "", Del) & T
   Loop Until StrQCnt(R, "(") = StrQCnt(R, ")")
   If Ind <= 1 Then
@@ -139,6 +139,7 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   Dim A As String, S As String, D As String, M As String, C As String, E As String
   Dim cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
   Dim lA As String, lO As String, lM As String, lL As String
+  Dim xIs As String, xLk As String
   Dim P As String, K As Long
   A = nextByP(Src, " + ")
   S = nextByP(Src, " - ")
@@ -158,6 +159,9 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   lM = nextByP(Src, " Mod ")
   lL = nextByP(Src, " Like ")
   
+  xIs = nextByP(Src, " Is ")
+  xLk = nextByP(Src, " Like ")
+  
   P = A: K = 3
   If Len(P) > Len(S) Then P = S: K = 3
   If Len(P) > Len(M) Then P = M: K = 3
@@ -175,6 +179,9 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   If Len(P) > Len(lO) Then P = lO: K = 4
   If Len(P) > Len(lM) Then P = lM: K = 5
   If Len(P) > Len(lL) Then P = lL: K = 6
+  
+  If Len(P) > Len(xLk) Then P = xLk: K = 6
+  If Len(P) > Len(xIs) Then P = xIs: K = 4
 
   NextByOp = P
   If Ind <= 1 Then

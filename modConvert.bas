@@ -518,7 +518,7 @@ Public Function ConvertParameter(ByVal S As String) As String
   Res = ""
   If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
-  Res = Res & IIf(SubParam(pName).Used Or (SubParam(pName).Assigned And SubParam(pName).Param), pName, pName & "_UNUSED") & " "
+  Res = Res & IIf(SubParam(pName).Used And Not (SubParam(pName).Assigned And SubParam(pName).Param), pName, pName & "_UNUSED") & " "
   If isOptional Then
     Res = Res & "= " & pDef
   End If
@@ -550,7 +550,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   fArgs = Trim(nextBy(S, ")"))
   S = Mid(S, Len(fArgs) + 2)
   If Left(S, 1) = ")" Then S = Trim(tMid(S, 2))
-    
+  
   If Not isSub Then
     If tLeft(S, 2) = "As" Then
       retType = Trim(Mid(Trim(S), 3))
@@ -598,6 +598,7 @@ Public Function ConvertElement(ByVal S As String) As String
 'If IsInStr(S, "2830") Then Stop
 'If IsInStr(S, "True") Then Stop
 'If IsInStr(S, ":=") Then Stop
+'If IsInStr(S, "New CDbAccessGeneral") Then Stop
 
 
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
@@ -607,6 +608,7 @@ Public Function ConvertElement(ByVal S As String) As String
   S = RegExReplace(S, "([^a-zA-Z0-9_.])Null([^a-zA-Z0-9_.])", "$1null$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])Date([^a-zA-Z0-9_.])", "$1Today$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])NullDate([^a-zA-Z0-9_.])", "$1NullDate()$2")
+  S = RegExReplace(S, "([^a-zA-Z0-9_.])Nothing([^a-zA-Z0-9_.])", "$1null$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])vbUseDefault([^a-zA-Z0-9_.])", "$1vbTriState.vbUseDefault$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])vbTrue([^a-zA-Z0-9_.])", "$1vbTriState.vbTrue$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])vbFalse([^a-zA-Z0-9_.])", "$1vbTriState.vbFalse$2")
@@ -622,8 +624,8 @@ Public Function ConvertElement(ByVal S As String) As String
     S = "!" & Mid(S, 5)
     FirstWord = SplitWord(Mid(S, 2))
   End If
-  If S = FirstWord Then ConvertElement = S: GoTo DoReplacements
-  If S = FirstToken Then ConvertElement = S & "()": GoTo DoReplacements
+  If S = FirstWord Then ConvertElement = S: GoTo ManageFunctions
+  If S = FirstToken Then ConvertElement = S & "()": GoTo ManageFunctions
   
   If FirstToken = FirstWord And Not isOperator(SplitWord(S, 2)) Then ' Sub without parenthesis
     ConvertElement = FirstWord & "(" & SplitWord(S, 2, , , True) & ")"
@@ -631,13 +633,15 @@ Public Function ConvertElement(ByVal S As String) As String
     ConvertElement = S
   End If
   
+ManageFunctions:
   If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]*\(") Then
     Dim I As Long, N As Long, TB As String, TS As String, TName As String
+    Dim TV As String
     TB = ""
     TName = RegExNMatch(ConvertElement, "^[a-zA-Z9-9_.]*")
     TB = TB & TName
 
-    TS = Mid(ConvertElement, Len(TB) + 1)
+    TS = Mid(ConvertElement, Len(TName) + 2)
     TS = Left(TS, Len(TS) - 1)
     If ConvertDataType(SubParam(TName).asType) = "Recordset" Then
       TB = TB & ".Fields["
@@ -648,7 +652,8 @@ Public Function ConvertElement(ByVal S As String) As String
       TB = TB & "("
       For I = 1 To N
         If I <> 1 Then TB = TB & ", "
-        TB = TB & ConvertValue(nextByP(TS, ",", I))
+        TV = nextByP(TS, ",", I)
+        TB = TB & ConvertValue(TV)
       Next
       TB = TB & ")"
     End If
@@ -665,7 +670,6 @@ DoReplacements:
   ConvertElement = Replace(ConvertElement, " Or ", " || ")
   ConvertElement = Replace(ConvertElement, " And ", " && ")
   ConvertElement = Replace(ConvertElement, " Mod ", " % ")
-  ConvertElement = Replace(ConvertElement, "New ", "new ")
   ConvertElement = Replace(ConvertElement, "NullDate", "NullDate")
   Do While IsInStr(ConvertElement, ", ,")
     ConvertElement = Replace(ConvertElement, ", ,", ", _,")
@@ -677,7 +681,6 @@ DoReplacements:
 
   ConvertElement = RegExReplace(ConvertElement, "([0-9])#", "$1")
   ConvertElement = RegExReplace(ConvertElement, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", "DateValue(""$1/$2/$3"")")
-  ConvertElement = RegExReplace(ConvertElement, "(New\()" & patToken & "(\))", "new $2()")
   
   If Left(ConvertElement, 2) = "&H" Then
     ConvertElement = "0x" & Mid(ConvertElement, 3)
@@ -699,7 +702,9 @@ Public Function ConvertValue(ByVal S As String) As String
   O = ""
   
 'If IsInStr(S, "GetMaxFieldValue") Then Stop
-If IsInStr(S, "DBAccessGeneral") Then Stop
+'If IsInStr(S, "DBAccessGeneral") Then Stop
+'If IsInStr(S, "ZeroValue") Then Stop
+'If Left(S, 3) = "RS(" Then Stop
   
   Do While True
     F = NextByOp(S, 1, Op)
@@ -805,9 +810,11 @@ End Function
 
 Public Function ConvertCodeLine(ByVal S As String) As String
   Dim T As Long, A As String, B As String
-  
+  Dim FirstWord As String, Rest As String
 
-  
+'If IsInStr(S, "dbClose") Then Stop
+'If IsInStr(S, "Nothing") Then Stop
+
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
   If RegExTest(Trim(S), "^[a-zA-Z0-9_.()""]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.]+ \= ") Then
@@ -817,13 +824,19 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     SubParamAssign A
     If Left(A, 1) = "." Then A = Stack(WithVars, , True) & A
     B = ConvertValue(Trim(Mid(S, T + 1)))
-If A = "GetMaxFieldValue" Then Stop
     ConvertCodeLine = A & " = " & B
   Else
 'Debug.Print S
-If IsInStr(S, "dbOpen") Then Stop
-      
-      ConvertCodeLine = ConvertValue(S)
+      FirstWord = SplitWord(Trim(S))
+      Rest = SplitWord(Trim(S), 2, , , True)
+      If Rest = "" Then
+        ConvertCodeLine = S & "()"
+      ElseIf StrQCnt(FirstWord, "(") = 0 Then
+        ConvertCodeLine = FirstWord & "(" & ConvertValue(Rest) & ")"
+      Else
+        ConvertCodeLine = ConvertValue(S)
+      End If
+      If WithLevel > 0 And Left(Trim(ConvertCodeLine), 1) = "." Then ConvertCodeLine = Stack(WithVars, , True) & Trim(ConvertCodeLine)
   End If
   
   ConvertCodeLine = ConvertCodeLine & ";"
