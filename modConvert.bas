@@ -697,7 +697,7 @@ DoReplacements:
 End Function
 
 Public Function ConvertValue(ByVal S As String) As String
-  Dim F As String, Op As String
+  Dim F As String, Op As String, OpN As String
   Dim O As String
   O = ""
   
@@ -705,11 +705,20 @@ Public Function ConvertValue(ByVal S As String) As String
 'If IsInStr(S, "DBAccessGeneral") Then Stop
 'If IsInStr(S, "ZeroValue") Then Stop
 'If Left(S, 3) = "RS(" Then Stop
+'If Left(S, 6) = "DBName" Then Stop
   
   Do While True
     F = NextByOp(S, 1, Op)
     If F = "" Then Exit Do
-    O = O & ConvertElement(F) & Op
+    Select Case Trim(Op)
+      Case "=": OpN = " == "
+      Case "<>": OpN = " != "
+      Case "&": OpN = " + "
+      Case "Is": OpN = " == "
+      Case "Like": OpN = " == "
+      Case Else: OpN = Op
+    End Select
+    O = O & ConvertElement(F) & OpN
     If Op = "" Then Exit Do
     S = Mid(S, Len(F) + Len(Op) + 1)
     If S = "" Or Op = "" Then Exit Do

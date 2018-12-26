@@ -27,7 +27,7 @@ Public Function ConvertDataType(ByVal S As String) As String
                                   ConvertDataType = "Connection"
     Case "ADODB.Error":           ConvertDataType = "ADODB.Error"
     Case "ADODB.EventStatusEnum": ConvertDataType = "ADODB.EventStatusEnum"
-    Case "Date":                  ConvertDataType = "System.DateTime"
+    Case "Date":                  ConvertDataType = "DateTime"
     Case Else
       If IsInStr(VBPClasses(ClassNames:=True), S) Then
         ConvertDataType = S

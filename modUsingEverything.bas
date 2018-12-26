@@ -21,6 +21,7 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & M & "using VB6 = " & VB6Compat & ";"
     E = E & N & "using static VBExtension;"
     
+    E = E & N & "using System;"
     E = E & N & "using static System.DateTime;"
     E = E & N & "using static System.Math;"
     
@@ -28,6 +29,7 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using static Microsoft.VisualBasic.Conversion;"
     E = E & N & "using static Microsoft.VisualBasic.Strings;"
     E = E & N & "using static Microsoft.VisualBasic.VBMath;"
+    E = E & N & "using static Microsoft.VisualBasic.DateAndTime;"
     
     E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.ColorConstants;"
     E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.DrawStyleConstants;"
