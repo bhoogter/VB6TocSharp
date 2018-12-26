@@ -48,6 +48,7 @@ Public Function deWS(ByVal S As String) As String
   
   S = Replace(S, "{" & vbCrLf2, "{" & vbCrLf)
   S = RegExReplace(S, "(" & vbCrLf2 & ")([ ]*{)", vbCrLf & "$2")
+  S = RegExReplace(S, "([ ]*case .*:)" & vbCrLf2, "$1" & vbCrLf)
   deWS = S
 End Function
 

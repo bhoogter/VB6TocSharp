@@ -192,6 +192,12 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static bool CBool(object A) { { return (A is System.IConvertible) ? ((System.IConvertible)A).ToBoolean(null) : false; } }"
   S = S & N
   S = S & N & "  public static System.DateTime DateValue(object A) { return CDate(A); }"
+  S = S & N
+  S = S & N & "  public static bool IsList(object A) { return A != null && (A is System.Collections.IList); }"
+  S = S & N & "  public static long LBound(object A) { return 0; }"
+  S = S & N & "  public static long UBound(object A) { return A != null && (A is System.Collections.IList) ? ((System.Collections.IList)A).Count - 1 : 0; }"
+  S = S & N
+  S = S & N & "  public static bool IsLike(string A, string B) { return Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(A, B, Microsoft.VisualBasic.CompareMethod.Binary); }"
   S = S & M
   S = S & N & "}"
   
