@@ -2,7 +2,7 @@ Attribute VB_Name = "modConvert"
 Option Explicit
 
 
-Const WithMark = "_WithVar"
+Const WithMark = "_WithVar_"
 Private EOLComment As String
 
 Dim WithLevel As Long, MaxWithLevel As Long
@@ -586,17 +586,20 @@ Public Function ConvertCondition(ByVal S As String) As String
   ConvertCondition = "(" & S & ")"
 End Function
 
-Public Function ConvertValue(ByVal S As String) As String
+Public Function ConvertElement(ByVal S As String) As String
   Dim FirstToken As String, FirstWord As String
   Dim T As String, Complete As Boolean
   S = Trim(S)
   
+ 
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
 'If IsInStr(S, "cmdSaleTotals.Move") Then Stop
 'If IsInStr(S, "2830") Then Stop
 'If IsInStr(S, "True") Then Stop
-  
+'If IsInStr(S, ":=") Then Stop
+
+
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
   
   S = RegExReplace(S, "([^a-zA-Z0-9_.])True([^a-zA-Z0-9_.])", "$1true$2")
@@ -609,7 +612,7 @@ Public Function ConvertValue(ByVal S As String) As String
   S = RegExReplace(S, "([^a-zA-Z0-9_.])vbFalse([^a-zA-Z0-9_.])", "$1vbTriState.vbFalse$2")
   
   S = ConvertVb6Specific(S, Complete)
-  If Complete Then ConvertValue = S: Exit Function
+  If Complete Then ConvertElement = S: Exit Function
 
   SubParamUsedList TokenList(S)
   
@@ -619,50 +622,94 @@ Public Function ConvertValue(ByVal S As String) As String
     S = "!" & Mid(S, 5)
     FirstWord = SplitWord(Mid(S, 2))
   End If
-  If S = FirstWord Then ConvertValue = S: GoTo DoReplacements
-  If S = FirstToken Then ConvertValue = S & "()": GoTo DoReplacements
+  If S = FirstWord Then ConvertElement = S: GoTo DoReplacements
+  If S = FirstToken Then ConvertElement = S & "()": GoTo DoReplacements
   
   If FirstToken = FirstWord And Not isOperator(SplitWord(S, 2)) Then ' Sub without parenthesis
-    ConvertValue = FirstWord & "(" & SplitWord(S, 2, , , True) & ")"
+    ConvertElement = FirstWord & "(" & SplitWord(S, 2, , , True) & ")"
   Else
-    ConvertValue = S
+    ConvertElement = S
   End If
   
-  
+  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]*\(") Then
+    Dim I As Long, N As Long, TB As String, TS As String, TName As String
+    TB = ""
+    TName = RegExNMatch(ConvertElement, "^[a-zA-Z9-9_.]*")
+    TB = TB & TName
+
+    TS = Mid(ConvertElement, Len(TB) + 1)
+    TS = Left(TS, Len(TS) - 1)
+    If ConvertDataType(SubParam(TName).asType) = "Recordset" Then
+      TB = TB & ".Fields["
+      TB = TB & ConvertValue(TS)
+      TB = TB & "].Value"
+    Else
+      N = nextByPCt(TS, ",")
+      TB = TB & "("
+      For I = 1 To N
+        If I <> 1 Then TB = TB & ", "
+        TB = TB & ConvertValue(nextByP(TS, ",", I))
+      Next
+      TB = TB & ")"
+    End If
+    ConvertElement = TB
+  End If
+
 DoReplacements:
-  ConvertValue = Replace(ConvertValue, " & ", " + ")
-  ConvertValue = Replace(ConvertValue, ":=", ": ")
-  ConvertValue = Replace(ConvertValue, " = ", " == ")
-  ConvertValue = Replace(ConvertValue, "<>", "!=")
-  ConvertValue = Replace(ConvertValue, " Not ", " !")
-  ConvertValue = Replace(ConvertValue, "(Not ", "(!")
-  ConvertValue = Replace(ConvertValue, " Or ", " || ")
-  ConvertValue = Replace(ConvertValue, " And ", " && ")
-  ConvertValue = Replace(ConvertValue, " Mod ", " % ")
-  ConvertValue = Replace(ConvertValue, "New ", "new ")
-  ConvertValue = Replace(ConvertValue, "NullDate", "NullDate")
-  Do While IsInStr(ConvertValue, ", ,")
-    ConvertValue = Replace(ConvertValue, ", ,", ", _,")
+  ConvertElement = Replace(ConvertElement, " & ", " + ")
+  ConvertElement = Replace(ConvertElement, ":=", ": ")
+  ConvertElement = Replace(ConvertElement, " = ", " == ")
+  ConvertElement = Replace(ConvertElement, "<>", "!=")
+  ConvertElement = Replace(ConvertElement, " Not ", " !")
+  ConvertElement = Replace(ConvertElement, "(Not ", "(!")
+  ConvertElement = Replace(ConvertElement, " Or ", " || ")
+  ConvertElement = Replace(ConvertElement, " And ", " && ")
+  ConvertElement = Replace(ConvertElement, " Mod ", " % ")
+  ConvertElement = Replace(ConvertElement, "New ", "new ")
+  ConvertElement = Replace(ConvertElement, "NullDate", "NullDate")
+  Do While IsInStr(ConvertElement, ", ,")
+    ConvertElement = Replace(ConvertElement, ", ,", ", _,")
   Loop
-  ConvertValue = Replace(ConvertValue, "(,", "(_,")
+  ConvertElement = Replace(ConvertElement, "(,", "(_,")
 
-'If IsInStr(ConvertValue, "&H") And Right(ConvertValue, 1) = "&" Then Stop
-'If IsInStr(ConvertValue, "1/1/2001") Then Stop
+'If IsInStr(ConvertElement, "&H") And Right(ConvertElement, 1) = "&" Then Stop
+'If IsInStr(ConvertElement, "1/1/2001") Then Stop
 
-  ConvertValue = RegExReplace(ConvertValue, "([0-9])#", "$1")
-  ConvertValue = RegExReplace(ConvertValue, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", "DateValue(""$1/$2/$3"")")
+  ConvertElement = RegExReplace(ConvertElement, "([0-9])#", "$1")
+  ConvertElement = RegExReplace(ConvertElement, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", "DateValue(""$1/$2/$3"")")
+  ConvertElement = RegExReplace(ConvertElement, "(New\()" & patToken & "(\))", "new $2()")
   
-  If Left(ConvertValue, 2) = "&H" Then
-    ConvertValue = "0x" & Mid(ConvertValue, 3)
-    If Right(ConvertValue, 1) = "&" Then ConvertValue = Left(ConvertValue, Len(ConvertValue) - 1)
+  If Left(ConvertElement, 2) = "&H" Then
+    ConvertElement = "0x" & Mid(ConvertElement, 3)
+    If Right(ConvertElement, 1) = "&" Then ConvertElement = Left(ConvertElement, Len(ConvertElement) - 1)
   End If
   
-  ConvertValue = ConvertStrings(ConvertValue)
+  ConvertElement = ConvertStrings(ConvertElement)
 
   If WithLevel > 0 Then
-    ConvertValue = Trim(RegExReplace(ConvertValue, "([ (])(\.)" & patToken, "$1" & WithMark & WithLevel & "$2$3"))
-    If Left(ConvertValue, 1) = "." Then ConvertValue = WithMark & WithLevel & ConvertValue
+    T = Stack(WithVars, , True)
+    ConvertElement = Trim(RegExReplace(ConvertElement, "([ (])(\.)" & patToken, "$1" & T & "$2$3"))
+    If Left(ConvertElement, 1) = "." Then ConvertElement = T & ConvertElement
   End If
+End Function
+
+Public Function ConvertValue(ByVal S As String) As String
+  Dim F As String, Op As String
+  Dim O As String
+  O = ""
+  
+'If IsInStr(S, "GetMaxFieldValue") Then Stop
+If IsInStr(S, "DBAccessGeneral") Then Stop
+  
+  Do While True
+    F = NextByOp(S, 1, Op)
+    If F = "" Then Exit Do
+    O = O & ConvertElement(F) & Op
+    If Op = "" Then Exit Do
+    S = Mid(S, Len(F) + Len(Op) + 1)
+    If S = "" Or Op = "" Then Exit Do
+  Loop
+  ConvertValue = O
 End Function
 
 Public Function TestConvertStrings()
@@ -757,7 +804,10 @@ Public Function ConvertGlobals(ByVal Str As String) As String
 End Function
 
 Public Function ConvertCodeLine(ByVal S As String) As String
-  Dim T As Long, A As String
+  Dim T As Long, A As String, B As String
+  
+
+  
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   
   If RegExTest(Trim(S), "^[a-zA-Z0-9_.()""]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.]+ \= ") Then
@@ -765,10 +815,14 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     A = Trim(Left(S, T - 1))
     If tLeft(A, 4) = "Set " Then A = Trim(Mid(A, 5))
     SubParamAssign A
-    If Left(A, 1) = "." Then A = WithMark & WithLevel & A
-    ConvertCodeLine = A & " = " & ConvertValue(Trim(Mid(S, T + 1)))
+    If Left(A, 1) = "." Then A = Stack(WithVars, , True) & A
+    B = ConvertValue(Trim(Mid(S, T + 1)))
+If A = "GetMaxFieldValue" Then Stop
+    ConvertCodeLine = A & " = " & B
   Else
 'Debug.Print S
+If IsInStr(S, "dbOpen") Then Stop
+      
       ConvertCodeLine = ConvertValue(S)
   End If
   
@@ -781,7 +835,7 @@ End Function
 Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim oStr As String
   Dim Res As String
-  Dim S, L, O As String, T As String, U As String
+  Dim S, L, O As String, T As String, U As String, V As String
   Dim cM As Long, cN As Long
   Dim K As Long
   Dim Ind As Long
@@ -925,26 +979,27 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
       O = sSpace(Ind) & "}"
     ElseIf tLeft(L, 5) = "With " Then
       WithLevel = WithLevel + 1
-      O = WithMark & WithLevel
-      T = tMid(L, 6)
+
+      T = ConvertValue(tMid(L, 6))
       U = ConvertDataType(SubParam(T).asType)
+      V = WithMark & IIf(SubParam(T).Name <> "", T, Random)
       If U = "" Then U = DefaultDataType
       
-      Stack WithVars, O
       Stack WithAssign, T
       Stack WithTypes, U
+      Stack WithVars, V
       
-      O = O & sSpace(Ind) & U & " " & O & ";" & vbCrLf
+      O = O & sSpace(Ind) & U & " " & V & ";" & vbCrLf
       MaxWithLevel = MaxWithLevel + 1
-      O = O & sSpace(Ind) & O & " = " & T & ";"
+      O = O & sSpace(Ind) & V & " = " & T & ";"
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 8) = "End With" Then
       WithLevel = WithLevel - 1
-      O = Stack(WithVars)
       T = Stack(WithAssign)
       U = Stack(WithTypes)
+      V = Stack(WithVars)
       If SubParam(T).Name <> "" Then
-        O = O & sSpace(Ind) & T & " = " & O & ";"
+        O = O & sSpace(Ind) & T & " = " & V & ";"
       End If
       Ind = Ind - SpIndent
     ElseIf IsInStr(L, "On Error ") Or IsInStr(L, "Resume ") Then

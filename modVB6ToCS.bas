@@ -126,6 +126,7 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "Open":    S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
     Case "Print": S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close": S = "VBCloseFile(" & Replace(R, "#", "") & ")"
+    Case "New": S = S & "new " & R & "()": Complete = True
     Case "ReDim":
       Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String

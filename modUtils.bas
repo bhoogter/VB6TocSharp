@@ -80,6 +80,112 @@ Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """",
   End If
 End Function
 
+Public Function StrQCnt(ByVal Src As String, ByVal Str As String) As Long
+  Dim N As Long, I As Long, C As String
+  Dim Q As Boolean
+  
+  StrQCnt = 0
+  N = Len(Src)
+  For I = 1 To N
+    C = Mid(Src, I, 1)
+    If C = """" Then
+      Q = Not Q
+    Else
+      If Not Q Then
+        If LMatch(Mid(Src, I), Str) Then StrQCnt = StrQCnt + 1
+      End If
+    End If
+  Next
+End Function
+
+
+Public Function nextByPCt(ByVal Src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1) As Long
+  Dim M As Long, N As Long, F As String
+  N = 0
+  Do
+    N = N + 1
+    If N > 1000 Then Exit Do
+    F = nextByP(Src, Del, N)
+    If F = "" Then
+      M = M + 1
+      If M >= 10 Then Exit Do
+    Else
+      M = 0
+    End If
+  Loop While True
+  nextByPCt = N - M
+End Function
+
+Public Function nextByP(ByVal Src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1) As String
+  Dim F As String, N As Long, M As Long
+  Dim R As String, T As String
+  N = 0
+  F = ""
+  Do
+    M = M + 1
+    If M > 100 Then Exit Do
+    N = N + 1
+    T = nextBy(Mid(Src, IIf(F = "", 1, Len(F) + 1 + Len(Del))), Del, N)
+    R = R & IIf(Len(R) = 0, "", Del) & T
+  Loop Until StrQCnt(R, "(") = StrQCnt(R, ")")
+  If Ind <= 1 Then
+    nextByP = R
+  Else
+    nextByP = nextByP(Mid(Src, Len(R) + Len(Del) + 1), Del, Ind - 1)
+  End If
+End Function
+
+Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String)
+  Dim A As String, S As String, D As String, M As String, C As String, E As String
+  Dim cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
+  Dim lA As String, lO As String, lM As String, lL As String
+  Dim P As String, K As Long
+  A = nextByP(Src, " + ")
+  S = nextByP(Src, " - ")
+  M = nextByP(Src, " * ")
+  D = nextByP(Src, " / ")
+  C = nextByP(Src, " & ")
+  E = nextByP(Src, " ^ ")
+  
+  cLT = nextByP(Src, " < ")
+  cGT = nextByP(Src, " > ")
+  cLE = nextByP(Src, " <= ")
+  cGE = nextByP(Src, " >= ")
+  cEQ = nextByP(Src, " = ")
+  
+  lA = nextByP(Src, " And ")
+  lO = nextByP(Src, " Or ")
+  lM = nextByP(Src, " Mod ")
+  lL = nextByP(Src, " Like ")
+  
+  P = A: K = 3
+  If Len(P) > Len(S) Then P = S: K = 3
+  If Len(P) > Len(M) Then P = M: K = 3
+  If Len(P) > Len(D) Then P = D: K = 3
+  If Len(P) > Len(C) Then P = C: K = 3
+  If Len(P) > Len(E) Then P = E: K = 3
+  
+  If Len(P) > Len(cLT) Then P = cLT: K = 4
+  If Len(P) > Len(cGT) Then P = cGT: K = 4
+  If Len(P) > Len(cLE) Then P = cLE: K = 4
+  If Len(P) > Len(cGE) Then P = cGE: K = 4
+  If Len(P) > Len(cEQ) Then P = cEQ: K = 3
+  
+  If Len(P) > Len(lA) Then P = lA: K = 5
+  If Len(P) > Len(lO) Then P = lO: K = 4
+  If Len(P) > Len(lM) Then P = lM: K = 5
+  If Len(P) > Len(lL) Then P = lL: K = 6
+
+  NextByOp = P
+  If Ind <= 1 Then
+    Op = Mid(Src, Len(P) + 1, K)
+    NextByOp = P
+  Else
+    NextByOp = NextByOp(Trim(Mid(Src, Len(P) + 3)), Ind - 1, Op)
+  End If
+End Function
+
+
 Public Function ReplaceToken(ByVal Src As String, ByVal OrigToken As String, ByVal NewToken As String) As String
   ReplaceToken = RegExReplace(Src, "([^a-zA-Z_0-9])(" & OrigToken & ")([^a-zA-Z_0-9])", "$1" & NewToken & "$3")
 End Function
@@ -307,10 +413,10 @@ Public Function Random(Optional ByVal Max As Long = 10000) As Long
   Random = ((Rnd * Max) + 1)
 End Function
 
-Public Function Stack(ByRef Src As String, Optional ByVal Val As String = "##REM##") As String
+Public Function Stack(ByRef Src As String, Optional ByVal Val As String = "##REM##", Optional ByVal Peek As Boolean = False) As String
   If Val = "##REM##" Then
     Stack = nextBy(Src, ",")
-    Src = Mid(Src, Len(Stack) + 2)
+    If Not Peek Then Src = Mid(Src, Len(Stack) + 2)
     Stack = Replace(Stack, """""", """")
     If Left(Stack, 1) = """" Then
       Stack = Mid(Stack, 2)
