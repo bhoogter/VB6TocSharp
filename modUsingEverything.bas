@@ -25,6 +25,7 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using static System.DateTime;"
     E = E & N & "using static System.Math;"
     
+    E = E & N & "using static Microsoft.VisualBasic.Constants;"
     E = E & N & "using static Microsoft.VisualBasic.Information;"
     E = E & N & "using static Microsoft.VisualBasic.Conversion;"
     E = E & N & "using static Microsoft.VisualBasic.Strings;"

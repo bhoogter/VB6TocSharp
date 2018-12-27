@@ -525,6 +525,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   Dim isByRef As Boolean, asOut As Boolean
   Dim Res As String
   Dim pName As String, pType As String, pDef As String
+  Dim tName As String
   
   S = Trim(S)
   If tLeft(S, 9) = "Optional " Then isOptional = True: S = Mid(S, 10)
@@ -551,7 +552,13 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   Res = ""
   If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
-  Res = Res & IIf(NeverUnused Or (SubParam(pName).Used And Not (SubParam(pName).Assigned And SubParam(pName).Param)), pName, pName & "_UNUSED") & " "
+  tName = pName
+  If Not NeverUnused Then
+    If Not SubParam(pName).Used And Not (SubParam(pName).Param And SubParam(pName).Assigned) Then
+      tName = tName & "_UNUSED"
+    End If
+  End If
+  Res = Res & tName
   If isOptional Then
     Res = Res & "= " & pDef
   End If
@@ -651,7 +658,7 @@ Public Function ConvertElement(ByVal S As String) As String
   S = ConvertVb6Specific(S, Complete)
   If Complete Then ConvertElement = S: Exit Function
 
-  SubParamUsedList TokenList(S)
+
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)
@@ -670,15 +677,15 @@ Public Function ConvertElement(ByVal S As String) As String
   
 ManageFunctions:
   If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]*\(.*\)$") Then
-    Dim I As Long, N As Long, TB As String, TS As String, TName As String
+    Dim I As Long, N As Long, TB As String, TS As String, tName As String
     Dim TV As String
     TB = ""
-    TName = RegExNMatch(ConvertElement, "^[a-zA-Z0-9_.]*")
-    TB = TB & TName
+    tName = RegExNMatch(ConvertElement, "^[a-zA-Z0-9_.]*")
+    TB = TB & tName
 
-    TS = Mid(ConvertElement, Len(TName) + 2)
+    TS = Mid(ConvertElement, Len(tName) + 2)
     TS = Left(TS, Len(TS) - 1)
-    If ConvertDataType(SubParam(TName).asType) = "Recordset" Then
+    If ConvertDataType(SubParam(tName).asType) = "Recordset" Then
       TB = TB & ".Fields["
       TB = TB & ConvertValue(TS)
       TB = TB & "].Value"
@@ -744,6 +751,9 @@ Public Function ConvertValue(ByVal S As String) As String
 'If IsInStr(S, "tallable") Then Stop
 'If Left(S, 3) = "RS(" Then Stop
 'If Left(S, 6) = "DBName" Then Stop
+'If Left(S, 6) = "fName" Then Stop
+
+  SubParamUsedList TokenList(S)
   
   Do While True
     F = NextByOp(S, 1, Op)
@@ -866,8 +876,11 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 
 'If IsInStr(S, "dbClose") Then Stop
 'If IsInStr(S, "Nothing") Then Stop
+'If IsInStr(S, "Default") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
+  
+  S = ConvertVb6Specific
   
   If RegExTest(Trim(S), "^[a-zA-Z0-9_.()""]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.]+ \= ") Then
     T = InStr(S, "=")
@@ -940,6 +953,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
 
 'If IsInStr(L, "1/1/2001") Then Stop
 'If ScanFirst = vbFalse Then Stop
+'If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
+
     If L Like "*Sub *" Or L Like "*Function *" Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
       Ind = Ind + SpIndent

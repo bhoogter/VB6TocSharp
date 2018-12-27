@@ -93,8 +93,8 @@ Public Sub SubParamUsed(ByVal P As String)
 
   Dim K As Long
   K = SubParamIndex(P)
-  If K >= 0 Then Vars(K).Used = True
   If K >= 0 Then
+    Vars(K).Used = True
     If Not Vars(K).Assigned Then Vars(K).UsedBeforeAssigned = True
   End If
 End Sub
