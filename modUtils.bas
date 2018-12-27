@@ -137,7 +137,7 @@ End Function
 
 Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String)
   Dim A As String, S As String, D As String, M As String, C As String, E As String
-  Dim cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
+  Dim cNE As String, cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
   Dim lA As String, lO As String, lM As String, lL As String
   Dim xIs As String, xLk As String
   Dim P As String, K As Long
@@ -148,6 +148,7 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   C = nextByP(Src, " & ")
   E = nextByP(Src, " ^ ")
   
+  cNE = nextByP(Src, " <> ")
   cLT = nextByP(Src, " < ")
   cGT = nextByP(Src, " > ")
   cLE = nextByP(Src, " <= ")
@@ -169,8 +170,9 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   If Len(P) > Len(C) Then P = C: K = 3
   If Len(P) > Len(E) Then P = E: K = 3
   
-  If Len(P) > Len(cLT) Then P = cLT: K = 4
-  If Len(P) > Len(cGT) Then P = cGT: K = 4
+  If Len(P) > Len(cNE) Then P = cNE: K = 4
+  If Len(P) > Len(cLT) Then P = cLT: K = 3
+  If Len(P) > Len(cGT) Then P = cGT: K = 3
   If Len(P) > Len(cLE) Then P = cLE: K = 4
   If Len(P) > Len(cGE) Then P = cGE: K = 4
   If Len(P) > Len(cEQ) Then P = cEQ: K = 3

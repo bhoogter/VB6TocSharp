@@ -635,7 +635,8 @@ Public Function ConvertElement(ByVal S As String) As String
 
 
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
-  
+  S = RegExReplace(S, "^" & patToken & "!" & patToken & patNotToken, "$1(""$2"")$3") ' RS!Field -> RS("Field")
+
   S = RegExReplace(S, "([^a-zA-Z0-9_.])True([^a-zA-Z0-9_.])", "$1true$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])False([^a-zA-Z0-9_.])", "$1false$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])Null([^a-zA-Z0-9_.])", "$1null$2")
@@ -738,7 +739,7 @@ Public Function ConvertValue(ByVal S As String) As String
   
 'If IsInStr(S, "GetMaxFieldValue") Then Stop
 'If IsInStr(S, "DBAccessGeneral") Then Stop
-'If IsInStr(S, "ZeroValue") Then Stop
+'If IsInStr(S, "tallable") Then Stop
 'If Left(S, 3) = "RS(" Then Stop
 'If Left(S, 6) = "DBName" Then Stop
   
