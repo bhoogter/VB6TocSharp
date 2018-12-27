@@ -3,7 +3,7 @@ Option Explicit
 
 Public Function ConvertDefaultDefault(ByVal dType As String) As String
   Select Case dType
-    Case "Long", "Double", "Currency", "Byte":
+    Case "Long", "Double", "Currency", "Byte", "Single"
                       ConvertDefaultDefault = 0
     Case "Date":      ConvertDefaultDefault = """1/1/2001"""
     Case "String":    ConvertDefaultDefault = """"""
@@ -16,12 +16,12 @@ Public Function ConvertDataType(ByVal S As String) As String
   Select Case S
     Case "String":                ConvertDataType = "string"
     Case "Long":                  ConvertDataType = "long"
-    Case "Double":                ConvertDataType = "double"
+    Case "Double", "Single":      ConvertDataType = "double"
     Case "Variant":               ConvertDataType = "object"
     Case "Byte":                  ConvertDataType = "byte"
     Case "Boolean":               ConvertDataType = "bool"
     Case "Currency":              ConvertDataType = "decimal"
-    Case "RecordSet", "ADODB.Recordset":
+    Case "Recordset", "ADODB.Recordset":
                                   ConvertDataType = "Recordset"
     Case "Connection", "ADODB.Connection":
                                   ConvertDataType = "Connection"
