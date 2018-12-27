@@ -17,7 +17,7 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Object", "Variant", "Variant()":
                                   ConvertDataType = DefaultDataType
     Case "Form", "Control":       ConvertDataType = "Form"
-    Case "String":                ConvertDataType = "string"
+    Case "String", "String()":    ConvertDataType = "string"
     Case "Long":                  ConvertDataType = "long"
     Case "Integer":               ConvertDataType = "long"
     Case "Double", "Single":      ConvertDataType = "double"
@@ -45,11 +45,12 @@ Public Function ConvertDataType(ByVal S As String) As String
     
     Case "Date":                  ConvertDataType = "DateTime"
     Case "VbMsgBoxResult", "VbCompareMethod", "AlignConstants", _
-         "PictureBox", "Textbox", "Command", "ListBox", _
          "stdole.IUnknown", "olelib.UUID", "olelib.STGMEDIUM", "olelib.FORMATETC", "olelib.BSCF", "olelib.IBinding", _
          "olelib.BINDINFO", "olelib.BINDF", "olelib.BINDSTATUS"
                                   ConvertDataType = S
     Case "XCTransaction2.XChargeTransaction", "PINPad"
+                                  ConvertDataType = S
+    Case "PictureBox", "Textbox", "Command", "ListBox", "ComboBox"
                                   ConvertDataType = S
     Case Else
       If IsInStr(VBPClasses(ClassNames:=True), S) Then
@@ -144,7 +145,7 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   Dim W As String, R As String
   
   Complete = False
-  W = SplitWord(Trim(S))
+  W = RegExNMatch(Trim(S), patToken)
   R = SplitWord(Trim(S), 2, , , True)
   Select Case W
     Case "True":          S = "true"
@@ -200,4 +201,25 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   End If
   
   ConvertVb6Specific = S
+End Function
+
+Public Function ConvertVb6Syntax(ByVal S As String) As String
+  Dim W As String, R As String
+  W = RegExNMatch(Trim(S), patToken)
+  R = SplitWord(Trim(S), 2, , , True)
+  Select Case W
+    Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
+    Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
+    Case "Input":         S = "VBReadFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
+    Case "Line":          S = "VBReadFileLine(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
+    Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"
+    Case "New":           S = "new " & R & "()"
+    Case "RaiseEvent":
+                          W = RegExNMatch(R, patToken)
+                          R = Mid(R, Len(W) + 1)
+                          If R = "" Then R = "()"
+                          S = "event" & W & "?.Invoke" & R
+  End Select
+  
+  ConvertVb6Syntax = S
 End Function

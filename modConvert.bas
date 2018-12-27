@@ -657,8 +657,6 @@ Public Function ConvertElement(ByVal S As String) As String
   
   S = ConvertVb6Specific(S, Complete)
   If Complete Then ConvertElement = S: Exit Function
-
-
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)
@@ -876,11 +874,10 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 
 'If IsInStr(S, "dbClose") Then Stop
 'If IsInStr(S, "Nothing") Then Stop
-'If IsInStr(S, "Default") Then Stop
+'If IsInStr(S, "Close ") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
-  
-  S = ConvertVb6Specific
+  S = ConvertVb6Syntax(S)
   
   If RegExTest(Trim(S), "^[a-zA-Z0-9_.()""]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.]+ \= ") Then
     T = InStr(S, "=")
@@ -895,7 +892,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     FirstWord = SplitWord(Trim(S))
     Rest = SplitWord(Trim(S), 2, , , True)
     If Rest = "" Then
-      ConvertCodeLine = S & "()"
+      ConvertCodeLine = S & IIf(Right(S, 1) <> ")", "()", "")
     ElseIf FirstWord = "RaiseEvent" Then
       ConvertCodeLine = ConvertValue(S)
     ElseIf StrQCnt(FirstWord, "(") = 0 Then
