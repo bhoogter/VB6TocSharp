@@ -96,7 +96,7 @@ Public Function ConvertModule(ByVal basFile As String)
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
-  Globals = ConvertGlobals(Left(Code, J - 1))
+  Globals = ConvertGlobals(Left(Code, J - 1), True)
   Functions = ConvertCodeSegment(Mid(Code, J), True)
   
   X = ""
@@ -205,7 +205,7 @@ NextLine:
   SanitizeCode = R
 End Function
 
-Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As Boolean = False) As String
+Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As Boolean = False) As String
   Dim P As String, N As Long
   Dim F As String, T As Long, E As Long, K As String, X As Long
   Dim Pre As String, Body As String
@@ -241,7 +241,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal AsModule As
       
     S = nlTrim(Mid(S, E + 1))
     
-    R = R & CommentBlock(Pre) & ConvertSub(Body, AsModule) & vbCrLf
+    R = R & CommentBlock(Pre) & ConvertSub(Body, asModule) & vbCrLf
   Loop While True
   
   R = ReadOutProperties & vbCrLf2 & R
@@ -259,7 +259,7 @@ Public Function CommentBlock(ByVal Str As String) As String
   CommentBlock = S
 End Function
 
-Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional ByVal isGlobal As Boolean) As String
+Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional ByVal isGlobal As Boolean, Optional ByVal asModule As Boolean = False) As String
   Dim Sp, L, SS As String
   Dim asPrivate As Boolean
   Dim pName As String, pType As String, pWithEvents As Boolean
@@ -280,6 +280,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
     pName = RegExNMatch(L, patToken)
     L = Trim(tMid(L, Len(pName) + 1))
     If isGlobal Then Res = Res & IIf(asPrivate, "private ", "public ")
+    If asModule Then Res = Res & "static "
     If tLeft(L, 1) = "(" Then
       isArr = True
       ArraySpec = nextBy(Mid(L, 2), ")")
@@ -567,7 +568,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   ConvertParameter = Trim(Res)
 End Function
 
-Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal AsModule As Boolean = False) As String
+Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False) As String
   Const retToken = "#RET#"
   Dim Res As String
   Dim fName As String, fArgs As String, retType As String, T As String
@@ -580,7 +581,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   isSub = False
   If tLeft(S, 7) = "Public " Then Res = Res & "public ": S = Mid(S, 8)
   If tLeft(S, 8) = "Private " Then Res = Res & "private ": S = Mid(S, 9)
-  If AsModule Then Res = Res & "static "
+  If asModule Then Res = Res & "static "
   If tLeft(S, 4) = "Sub " Then Res = Res & "void ": S = Mid(S, 5): isSub = True
   If tLeft(S, 9) = "Function " Then Res = Res & retToken & " ": S = Mid(S, 10)
   
@@ -760,6 +761,7 @@ Public Function ConvertValue(ByVal S As String) As String
       Case "=":    OpN = " == "
       Case "<>":   OpN = " != "
       Case "&":    OpN = " + "
+      Case "Mod":  OpN = " % "
       Case "Is":   OpN = " == "
       Case "Like": OpN = " == "
       Case "And":  OpN = " && "
@@ -812,7 +814,7 @@ Public Function ConvertString(ByVal S As String)
   ConvertString = S
 End Function
 
-Public Function ConvertGlobals(ByVal Str As String) As String
+Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As Boolean = False) As String
   Dim Res As String
   Dim S, L, O As String
   Dim Ind As Long
@@ -853,7 +855,7 @@ Public Function ConvertGlobals(ByVal Str As String) As String
     ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Type ") Then
       Building = L
     ElseIf tLeft(L, 8) = "Private " Or tLeft(L, 7) = "Public " Or tLeft(L, 4) = "Dim " Then
-      O = ConvertDeclare(L, 0, True)
+      O = ConvertDeclare(L, 0, True, asModule)
     End If
       
     O = ReComment(O)
@@ -919,7 +921,7 @@ End Function
 
 
 
-Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
+Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim oStr As String
   Dim Res As String
   Dim S, L, O As String, T As String, U As String, V As String
@@ -931,8 +933,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
   
   Select Case ScanFirst
     Case vbUseDefault:  oStr = Str
-                        ConvertSub oStr, AsModule, vbTrue
-                        ConvertSub = ConvertSub(oStr, AsModule, vbFalse)
+                        ConvertSub oStr, asModule, vbTrue
+                        ConvertSub = ConvertSub(oStr, asModule, vbFalse)
                         Exit Function
     Case vbTrue:        SubBegin
     Case vbFalse:       SubBegin True
@@ -953,7 +955,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
 'If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
 
     If L Like "*Sub *" Or L Like "*Function *" Then
-      O = sSpace(Ind) & ConvertPrototype(L, returnVariable, AsModule)
+      O = sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then
       AddProperty Str
