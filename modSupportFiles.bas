@@ -191,6 +191,7 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static bool IsMissing(object A) { return false; }"
   S = S & N & "  public static bool IsNull(object A) { return A == null || (A is System.DBNull); }"
   S = S & N & "  public static bool IsNothing(object A) { return IsNull(A); }"
+  S = S & N & "  public static bool IsObject(object A) { return !IsNothing(A); }"
   S = S & N
   S = S & N & "  public static System.DateTime NullDate() { try { return System.DateTime.Parse(""1/1/2001""); } catch { return Today; } }"
   S = S & N & "  public static bool IsDate(string D) { try { System.DateTime.Parse(D); } catch { return false; } return true; }"

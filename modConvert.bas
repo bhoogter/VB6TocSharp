@@ -413,6 +413,26 @@ Public Function ConvertConstant(ByVal S As String, Optional ByVal isGlobal As Bo
   ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") & "const " & ConvertDataType(cType) & " " & cName & " = " & cVal & ";"
 End Function
 
+
+Public Function ConvertEvent(ByVal S As String) As String
+  Dim cName As String, cArgs As String, cVal As String, isPrivate As Boolean
+  Dim R As String, N As String, M As String
+  If tLeft(S, 7) = "Public " Then S = Mid(Trim(S), 8)
+  If tLeft(S, 8) = "Private " Then S = Mid(Trim(S), 9): isPrivate = True
+  If tLeft(S, 6) = "Const " Then S = Mid(Trim(S), 7)
+  cName = SplitWord(S, 1)
+  cArgs = Trim(Mid(Trim(S), Len(cName) + 1))
+  
+  N = vbCrLf
+  M = ""
+  R = ""
+  R = R & M & "public delegate void " & cName & "Handler(" & cArgs & ");"
+  R = R & N & "public event " & cName & "Handler event" & cName & ";"
+  
+  ConvertEvent = R
+End Function
+
+
 Public Function ConvertEnum(ByVal S As String)
   Dim isPrivate As Boolean, eName As String
   Dim Res As String, has As Boolean
@@ -711,12 +731,14 @@ Public Function ConvertValue(ByVal S As String) As String
     F = NextByOp(S, 1, Op)
     If F = "" Then Exit Do
     Select Case Trim(Op)
-      Case "=": OpN = " == "
-      Case "<>": OpN = " != "
-      Case "&": OpN = " + "
-      Case "Is": OpN = " == "
+      Case "=":    OpN = " == "
+      Case "<>":   OpN = " != "
+      Case "&":    OpN = " + "
+      Case "Is":   OpN = " == "
       Case "Like": OpN = " == "
-      Case Else: OpN = Op
+      Case "And":  OpN = " && "
+      Case "Or":   OpN = " || "
+      Case Else:   OpN = Op
     End Select
     O = O & ConvertElement(F) & OpN
     If Op = "" Then Exit Do
@@ -798,6 +820,8 @@ Public Function ConvertGlobals(ByVal Str As String) As String
       O = ConvertAPIDef(L)
     ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Const ") Then
       O = ConvertConstant(L, True)
+    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Event ") Then
+      O = ConvertEvent(L)
     ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Enum ") Then
       Building = L
     ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Type ") Then
