@@ -60,7 +60,7 @@ Public Function VBPClasses(Optional ByVal ProjectFile As String, Optional ByVal 
     End If
 NextItem:
   Next
-  VBPClasses = Replace(VBPClasses, ".cls", "")
+  If ClassNames Then VBPClasses = Replace(VBPClasses, ".cls", "")
 End Function
 
 Public Function VBPUserControls(Optional ByVal ProjectFile As String) As String

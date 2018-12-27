@@ -705,6 +705,7 @@ DoReplacements:
   ConvertElement = Replace(ConvertElement, " And ", " && ")
   ConvertElement = Replace(ConvertElement, " Mod ", " % ")
   ConvertElement = Replace(ConvertElement, "Err.", "Err().")
+  ConvertElement = Replace(ConvertElement, "Debug.Print", "Console.WriteLn")
   
   ConvertElement = Replace(ConvertElement, "NullDate", "NullDate")
   Do While IsInStr(ConvertElement, ", ,")
