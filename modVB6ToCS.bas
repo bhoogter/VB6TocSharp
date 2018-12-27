@@ -124,18 +124,21 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   W = SplitWord(Trim(S))
   R = SplitWord(Trim(S), 2, , , True)
   Select Case W
-    Case "True": S = "true"
-    Case "False": S = "false"
-    Case "Nothing": S = "null"
-    Case "vbTrue": S = "vbTriState.vbTrue"
-    Case "vbFalse": S = "vbTriState.vbFalse"
-    Case "vbUseDefault": S = "vbTriState.vbUseDefault"
-    Case "Kill": S = "File.Delete(" & R & ")"
-    Case "Open":    S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
-    Case "Print": S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
-    Case "Close": S = "VBCloseFile(" & Replace(R, "#", "") & ")"
-    Case "New": S = "new " & R & "()": Complete = True
-    Case "RaiseEvent": S = "event" & R & " && " & ConvertValue("event" & R) & ";"
+    Case "True":          S = "true"
+    Case "False":         S = "false"
+    Case "Nothing":       S = "null"
+    Case "vbTrue":        S = "vbTriState.vbTrue"
+    Case "vbFalse":       S = "vbTriState.vbFalse"
+    Case "vbUseDefault":  S = "vbTriState.vbUseDefault"
+    Case "Kill":          S = "File.Delete(" & R & ")"
+    Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
+    Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
+    Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"
+    Case "New":           S = "new " & R & "()": Complete = True
+    Case "RaiseEvent":
+                          W = RegExNMatch(R, patToken)
+                          R = Mid(R, Len(W) + 1)
+                          S = "event" & W & " && " & ConvertValue("event" & W & R) & ";"
     Case "ReDim":
       Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String

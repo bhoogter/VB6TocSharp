@@ -415,18 +415,31 @@ End Function
 
 
 Public Function ConvertEvent(ByVal S As String) As String
-  Dim cName As String, cArgs As String, cVal As String, isPrivate As Boolean
+  Dim cName As String, cArgs As String, tArgs As String, isPrivate As Boolean
   Dim R As String, N As String, M As String
+  Dim I As Long, J As Long
+  Dim A As String
   If tLeft(S, 7) = "Public " Then S = Mid(Trim(S), 8)
   If tLeft(S, 8) = "Private " Then S = Mid(Trim(S), 9): isPrivate = True
-  If tLeft(S, 6) = "Const " Then S = Mid(Trim(S), 7)
-  cName = SplitWord(S, 1)
+  If tLeft(S, 6) = "Event " Then S = Mid(Trim(S), 7)
+  cName = RegExNMatch(S, patToken)
   cArgs = Trim(Mid(Trim(S), Len(cName) + 1))
+  If Left(cArgs, 1) = "(" Then cArgs = Mid(cArgs, 2)
+  If Right(cArgs, 1) = ")" Then cArgs = Left(cArgs, Len(cArgs) - 1)
+  
+  N = 0
+  Do
+    N = N + 1
+    A = nextBy(cArgs, ",", N)
+    If A = "" Then Exit Do
+    tArgs = tArgs & IIf(N = 1, "", ", ")
+    tArgs = tArgs & ConvertParameter(A, True)
+  Loop While True
   
   N = vbCrLf
   M = ""
   R = ""
-  R = R & M & "public delegate void " & cName & "Handler(" & cArgs & ");"
+  R = R & M & "public delegate void " & cName & "Handler(" & tArgs & ");"
   R = R & N & "public event " & cName & "Handler event" & cName & ";"
   
   ConvertEvent = R
@@ -507,7 +520,7 @@ Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As 
   If Left(LTrim(ReComment), 2) = Pr Then ReComment = LTrim(ReComment)
 End Function
 
-Public Function ConvertParameter(ByVal S As String) As String
+Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused As Boolean = False) As String
   Dim isOptional As Boolean
   Dim isByRef As Boolean, asOut As Boolean
   Dim Res As String
@@ -538,7 +551,7 @@ Public Function ConvertParameter(ByVal S As String) As String
   Res = ""
   If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
-  Res = Res & IIf(SubParam(pName).Used And Not (SubParam(pName).Assigned And SubParam(pName).Param), pName, pName & "_UNUSED") & " "
+  Res = Res & IIf(NeverUnused Or (SubParam(pName).Used And Not (SubParam(pName).Assigned And SubParam(pName).Param)), pName, pName & "_UNUSED") & " "
   If isOptional Then
     Res = Res & "= " & pDef
   End If
@@ -618,7 +631,7 @@ Public Function ConvertElement(ByVal S As String) As String
 'If IsInStr(S, "2830") Then Stop
 'If IsInStr(S, "True") Then Stop
 'If IsInStr(S, ":=") Then Stop
-'If IsInStr(S, "New CDbAccessGeneral") Then Stop
+If IsInStr(S, "GetRecordNotFound") Then Stop
 
 
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
@@ -860,16 +873,18 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     ConvertCodeLine = A & " = " & B
   Else
 'Debug.Print S
-      FirstWord = SplitWord(Trim(S))
-      Rest = SplitWord(Trim(S), 2, , , True)
-      If Rest = "" Then
-        ConvertCodeLine = S & "()"
-      ElseIf StrQCnt(FirstWord, "(") = 0 Then
-        ConvertCodeLine = FirstWord & "(" & ConvertValue(Rest) & ")"
-      Else
-        ConvertCodeLine = ConvertValue(S)
-      End If
-      If WithLevel > 0 And Left(Trim(ConvertCodeLine), 1) = "." Then ConvertCodeLine = Stack(WithVars, , True) & Trim(ConvertCodeLine)
+    FirstWord = SplitWord(Trim(S))
+    Rest = SplitWord(Trim(S), 2, , , True)
+    If Rest = "" Then
+      ConvertCodeLine = S & "()"
+    ElseIf FirstWord = "RaiseEvent" Then
+      ConvertCodeLine = ConvertValue(S)
+    ElseIf StrQCnt(FirstWord, "(") = 0 Then
+      ConvertCodeLine = FirstWord & "(" & ConvertValue(Rest) & ")"
+    Else
+      ConvertCodeLine = ConvertValue(S)
+    End If
+    If WithLevel > 0 And Left(Trim(ConvertCodeLine), 1) = "." Then ConvertCodeLine = Stack(WithVars, , True) & Trim(ConvertCodeLine)
   End If
   
   ConvertCodeLine = ConvertCodeLine & ";"
