@@ -136,7 +136,7 @@ Public Function nextByP(ByVal Src As String, Optional ByVal Del As String = """"
 End Function
 
 Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String)
-  Dim A As String, S As String, D As String, M As String, C As String, E As String
+  Dim A As String, S As String, D As String, M As String, C As String, E As String, I As String
   Dim cNE As String, cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
   Dim lA As String, lO As String, lM As String, lL As String
   Dim xIs As String, xLk As String
@@ -145,6 +145,7 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   S = nextByP(Src, " - ")
   M = nextByP(Src, " * ")
   D = nextByP(Src, " / ")
+  I = nextByP(Src, " \ ")
   C = nextByP(Src, " & ")
   E = nextByP(Src, " ^ ")
   
@@ -167,6 +168,7 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   If Len(P) > Len(S) Then P = S: K = 3
   If Len(P) > Len(M) Then P = M: K = 3
   If Len(P) > Len(D) Then P = D: K = 3
+  If Len(P) > Len(I) Then P = I: K = 3
   If Len(P) > Len(C) Then P = C: K = 3
   If Len(P) > Len(E) Then P = E: K = 3
   
@@ -337,19 +339,6 @@ Public Function CodeSectionGlobalEndLoc(ByVal S As String)
     If Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "Private " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 8
   End If
   CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 1
-End Function
-
-Public Function OutputSubFolder(ByVal F As String) As String
-  Select Case FileExt(F)
-    Case ".bas": OutputSubFolder = "Modules\"
-    Case ".cls": OutputSubFolder = "Classes\"
-    Case ".frm": OutputSubFolder = "Forms\"
-    Case Else:   OutputSubFolder = ""
-  End Select
-End Function
-
-Public Function OutputFolder(Optional ByVal F As String) As String
-  OutputFolder = "C:\Users\benja\workspace\VS2017\WinCDS.NET\WinCDS.NET\" & OutputSubFolder(F)
 End Function
 
 

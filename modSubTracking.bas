@@ -169,17 +169,15 @@ On Error GoTo 0
   ReDim Preserve Props(X)
   End If
   
-  With Props(X)
-    .Name = pName
-    If asPublic Then .asPublic = True  ' if one is public, both are...
-    Select Case GSL
-      Case "get"
-                          .Getter = ConvertSub(S, , vbFalse)
-                          .asType = ConvertDataType(pType)
-      Case "set", "let":  .Setter = ConvertSub(S, , vbFalse)
-                          .origArgName = pArgName
-    End Select
-  End With
+  Props(X).Name = pName
+  If asPublic Then Props(X).asPublic = True  ' if one is public, both are...
+  Select Case GSL
+    Case "get"
+                        Props(X).Getter = ConvertSub(S, , vbFalse)
+                        Props(X).asType = ConvertDataType(pType)
+    Case "set", "let":  Props(X).Setter = ConvertSub(S, , vbFalse)
+                        Props(X).origArgName = pArgName
+  End Select
 End Sub
 
 Public Function ReadOutProperties() As String

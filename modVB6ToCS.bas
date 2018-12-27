@@ -14,25 +14,48 @@ End Function
 
 Public Function ConvertDataType(ByVal S As String) As String
   Select Case S
+    Case "Object", "Variant", "Variant()":
+                                  ConvertDataType = DefaultDataType
+    Case "Form", "Control":       ConvertDataType = "Form"
     Case "String":                ConvertDataType = "string"
     Case "Long":                  ConvertDataType = "long"
+    Case "Integer":               ConvertDataType = "long"
     Case "Double", "Single":      ConvertDataType = "double"
     Case "Variant":               ConvertDataType = "object"
     Case "Byte":                  ConvertDataType = "byte"
     Case "Boolean":               ConvertDataType = "bool"
     Case "Currency":              ConvertDataType = "decimal"
+    Case "VbTriState":            ConvertDataType = "vbTriState"
+    Case "Collection":            ConvertDataType = "vbCollection"
+    Case "TSPNode":               ConvertDataType = "TSPNode"
+    Case "TSPNetwork":            ConvertDataType = "TSPNetwork"
+    Case "FindResults":           ConvertDataType = "FindResults"
+    Case "Pushpin":               ConvertDataType = "Pushpin"
+    Case "Map":                   ConvertDataType = "Map"
+    
     Case "Recordset", "ADODB.Recordset":
                                   ConvertDataType = "Recordset"
     Case "Connection", "ADODB.Connection":
                                   ConvertDataType = "Connection"
     Case "ADODB.Error":           ConvertDataType = "ADODB.Error"
     Case "ADODB.EventStatusEnum": ConvertDataType = "ADODB.EventStatusEnum"
+    Case "SpeechLib.SpeechEngineConfidence", "SpeechLib.SpeechRecognitionType", "SpeechLib.ISpeechRecoResult", _
+         "SpeechLib.SpeechInterference", "SpInprocRecognizer", "SpeechEngineConfidence", "ISpeechRecoGrammar", "SpSharedRecoContext"
+      ConvertDataType = DefaultDataType
+    
     Case "Date":                  ConvertDataType = "DateTime"
+    Case "VbMsgBoxResult", "VbCompareMethod", "AlignConstants", _
+         "PictureBox", "Textbox", "Command", "ListBox", _
+         "stdole.IUnknown", "olelib.UUID", "olelib.STGMEDIUM", "olelib.FORMATETC", "olelib.BSCF", "olelib.IBinding", _
+         "olelib.BINDINFO", "olelib.BINDF", "olelib.BINDSTATUS"
+                                  ConvertDataType = S
+    Case "XCTransaction2.XChargeTransaction", "PINPad"
+                                  ConvertDataType = S
     Case Else
       If IsInStr(VBPClasses(ClassNames:=True), S) Then
         ConvertDataType = S
       Else
-        ConvertDataType = DefaultDataType
+        ConvertDataType = S
         Debug.Print "Unknown Data Type: " & S
       End If
   End Select

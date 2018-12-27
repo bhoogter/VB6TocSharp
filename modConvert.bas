@@ -623,6 +623,7 @@ Public Function ConvertElement(ByVal S As String) As String
   Dim FirstToken As String, FirstWord As String
   Dim T As String, Complete As Boolean
   S = Trim(S)
+  If S = "" Then Exit Function
   
  
 'If IsInStr(S, "RS!") Then Stop
@@ -668,11 +669,11 @@ Public Function ConvertElement(ByVal S As String) As String
   End If
   
 ManageFunctions:
-  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]*\(") Then
+  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]*\(.*\)$") Then
     Dim I As Long, N As Long, TB As String, TS As String, TName As String
     Dim TV As String
     TB = ""
-    TName = RegExNMatch(ConvertElement, "^[a-zA-Z9-9_.]*")
+    TName = RegExNMatch(ConvertElement, "^[a-zA-Z0-9_.]*")
     TB = TB & TName
 
     TS = Mid(ConvertElement, Len(TName) + 2)
@@ -861,6 +862,7 @@ End Function
 Public Function ConvertCodeLine(ByVal S As String) As String
   Dim T As Long, A As String, B As String
   Dim FirstWord As String, Rest As String
+  Dim N As Long
 
 'If IsInStr(S, "dbClose") Then Stop
 'If IsInStr(S, "Nothing") Then Stop
@@ -884,13 +886,23 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     ElseIf FirstWord = "RaiseEvent" Then
       ConvertCodeLine = ConvertValue(S)
     ElseIf StrQCnt(FirstWord, "(") = 0 Then
-      ConvertCodeLine = FirstWord & "(" & ConvertValue(Rest) & ")"
+      ConvertCodeLine = ""
+      ConvertCodeLine = ConvertCodeLine & FirstWord & "("
+      N = 0
+      Do
+        N = N + 1
+        B = nextByP(Rest, ", ", N)
+        If B = "" Then Exit Do
+        ConvertCodeLine = ConvertCodeLine & IIf(N = 1, "", ", ") & ConvertValue(B)
+      Loop While True
+      ConvertCodeLine = ConvertCodeLine & ")"
     Else
       ConvertCodeLine = ConvertValue(S)
     End If
     If WithLevel > 0 And Left(Trim(ConvertCodeLine), 1) = "." Then ConvertCodeLine = Stack(WithVars, , True) & Trim(ConvertCodeLine)
   End If
   
+If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
   ConvertCodeLine = ConvertCodeLine & ";"
 'Debug.Print ConvertCodeLine
 End Function
@@ -901,7 +913,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
   Dim oStr As String
   Dim Res As String
   Dim S, L, O As String, T As String, U As String, V As String
-  Dim cM As Long, cN As Long
+  Dim CM As Long, cN As Long
   Dim K As Long
   Dim Ind As Long
   Dim inCase As Long
@@ -972,6 +984,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
     ElseIf tLeft(L, 10) = "End Select" Then
       If inCase > 0 Then Ind = Ind - SpIndent: inCase = inCase - 1
       Ind = Ind - SpIndent
+      O = O & "break;" & vbCrLf
       O = O & "}"
     ElseIf tLeft(L, 9) = "Case Else" Then
       If inCase > 0 Then O = O & sSpace(Ind) & "break;" & vbCrLf: Ind = Ind - SpIndent: inCase = inCase - 1
@@ -997,8 +1010,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal AsModule As Boole
         O = O & "// CONVERSION: Case was " & T & vbCrLf
         O = O & sSpace(Ind)
         cN = Val(SplitWord(T, 1, " To "))
-        cM = Val(SplitWord(T, 2, " To "))
-        For K = cN To cM
+        CM = Val(SplitWord(T, 2, " To "))
+        For K = cN To CM
           O = O & "case " & K & ": "
         Next
       Else
