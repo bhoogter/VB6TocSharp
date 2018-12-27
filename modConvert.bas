@@ -631,7 +631,7 @@ Public Function ConvertElement(ByVal S As String) As String
 'If IsInStr(S, "2830") Then Stop
 'If IsInStr(S, "True") Then Stop
 'If IsInStr(S, ":=") Then Stop
-If IsInStr(S, "GetRecordNotFound") Then Stop
+'If IsInStr(S, "GetRecordNotFound") Then Stop
 
 
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
@@ -703,6 +703,8 @@ DoReplacements:
   ConvertElement = Replace(ConvertElement, " Or ", " || ")
   ConvertElement = Replace(ConvertElement, " And ", " && ")
   ConvertElement = Replace(ConvertElement, " Mod ", " % ")
+  ConvertElement = Replace(ConvertElement, "Err.", "Err().")
+  
   ConvertElement = Replace(ConvertElement, "NullDate", "NullDate")
   Do While IsInStr(ConvertElement, ", ,")
     ConvertElement = Replace(ConvertElement, ", ,", ", _,")

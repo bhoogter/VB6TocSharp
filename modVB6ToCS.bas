@@ -138,7 +138,9 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "RaiseEvent":
                           W = RegExNMatch(R, patToken)
                           R = Mid(R, Len(W) + 1)
-                          S = "event" & W & " && " & ConvertValue("event" & W & R) & ";"
+                          If R = "" Then R = "()"
+                          S = "event" & W & "?.Invoke" & R
+                          Complete = True
     Case "ReDim":
       Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String
