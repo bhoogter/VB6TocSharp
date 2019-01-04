@@ -11,7 +11,7 @@ Dim WithVars As String, WithTypes As String, WithAssign As String
 Public Function ConvertProject(ByVal vbpFile As String)
   CreateProjectFile vbpFile
   CreateProjectSupportFiles
-  ConvertFileList FilePath(vbpFile), VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) & vbCrLf & VBPUserControls(vbpFile)
+  ConvertFileList FilePath(vbpFile), VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) '& vbCrLf & VBPUserControls(vbpFile)
   MsgBox "Complete."
 End Function
 
@@ -633,6 +633,11 @@ Public Function ConvertElement(ByVal S As String) As String
   S = Trim(S)
   If S = "" Then Exit Function
   
+  If Left(S, 1) = """" And Right(S, 1) = """" And StrCnt(S, """") Mod 2 = 0 Then
+    ConvertElement = S
+    Exit Function
+  End If
+  
  
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
@@ -744,6 +749,7 @@ Public Function ConvertValue(ByVal S As String) As String
   Dim F As String, Op As String, OpN As String
   Dim O As String
   O = ""
+  If S = "" Then Exit Function
   
 'If IsInStr(S, "GetMaxFieldValue") Then Stop
 'If IsInStr(S, "DBAccessGeneral") Then Stop
