@@ -877,6 +877,7 @@ End Function
 
 Public Function ConvertCodeLine(ByVal S As String) As String
   Dim T As Long, A As String, B As String
+  Dim P As String, V As Variable
   Dim FirstWord As String, Rest As String
   Dim N As Long
 
@@ -892,9 +893,28 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     A = Trim(Left(S, T - 1))
     If tLeft(A, 4) = "Set " Then A = Trim(Mid(A, 5))
     SubParamAssign A
-    If Left(A, 1) = "." Then A = Stack(WithVars, , True) & A
+    If RegExTest(A, "^" & patToken & "\(""[^""]+""\)") Then
+      P = RegExNMatch(A, "^" & patToken)
+      V = SubParam(P)
+      If V.Name = P Then
+        SubParamAssign P
+        Select Case V.asType
+          Case "Recordset", "ADODB.Recordset"
+            ConvertCodeLine = RegExReplace(A, "^" & patToken & "(\("")([^""]+)(""\))", "$1.Fields[""$3""].Value")
+          Case Else
+            If Left(A, 1) = "." Then A = Stack(WithVars, , True) & A
+            ConvertCodeLine = A
+      End Select
+      End If
+    Else
+      If Left(A, 1) = "." Then A = Stack(WithVars, , True) & A
+      ConvertCodeLine = A
+    End If
+    
+    ConvertCodeLine = ConvertCodeLine & " = "
+
     B = ConvertValue(Trim(Mid(S, T + 1)))
-    ConvertCodeLine = A & " = " & B
+    ConvertCodeLine = ConvertCodeLine & B
   Else
 'Debug.Print S
     FirstWord = SplitWord(Trim(S))
