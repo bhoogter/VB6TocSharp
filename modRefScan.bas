@@ -120,3 +120,11 @@ Public Function FuncRefDeclArgCnt(ByVal FName As String) As Long
   Loop While True
 End Function
 
+Public Function FuncRefArgByRef(ByVal FName, ByVal N As Long) As Boolean
+  FuncRefArgByRef = Not IsInStr(FuncRefDeclArgN(FName, N), "ByVal ")
+End Function
+
+Public Function FuncRefArgOptional(ByVal FName, ByVal N As Long) As Boolean
+  FuncRefArgOptional = IsInStr(FuncRefDeclArgN(FName, N), "Optional ")
+End Function
+
