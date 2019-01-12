@@ -1,6 +1,8 @@
 Attribute VB_Name = "modRefScan"
 Option Explicit
 
+Private OutRes As String
+
 Private Function RefList(Optional ByVal KillRef As Boolean = False) As String
 On Error Resume Next
   RefList = App.Path & "\refs.txt"
@@ -10,13 +12,16 @@ End Function
 Public Function ScanRefs() As Long
   Dim L
 On Error Resume Next
-  RefList KillRef:=True
+  OutRes = ""
   ScanRefs = 0
-  For Each L In Split(VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile), vbCrLf)
+  For Each L In Split(VBPModules(vbpFile), vbCrLf)
     If L = "" Then GoTo SkipItem
     ScanRefs = ScanRefs + ScanRefsFile(FilePath(vbpFile) & L)
 SkipItem:
   Next
+  RefList KillRef:=True
+  WriteFile RefList, OutRes
+  OutRes = ""
 End Function
 
 Private Function ScanRefsFile(ByVal FN As String) As Long
@@ -58,7 +63,8 @@ Private Function ScanRefsFile(ByVal FN As String) As Long
       If Left(G, 4) = "Sub " Then G = Mid(G, 5)
       G = nextBy(G, "(")
       
-      WriteFile RefList, M & ":" & G & ":" & F
+      F = M & ":" & G & ":" & F
+      OutRes = OutRes & vbCrLf & F
       ScanRefsFile = ScanRefsFile + 1
     End If
 NextLine:
@@ -69,5 +75,48 @@ Public Function FuncRef(ByVal FName As String) As String
 '  Dim S As String, L
   Static S As String
   If S = "" Then S = ReadEntireFile(RefList)
-  FuncRef = RegExNMatch(S, "^.*:" & FName & ":.*$")
+  FuncRef = RegExNMatch(S, ".*:" & FName & ":.*")
 End Function
+
+Public Function FuncRefModule(ByVal FName As String) As String
+  FuncRefModule = nextBy(FuncRef(FName), ":")
+End Function
+
+Public Function FuncRefDecl(ByVal FName As String) As String
+  FuncRefDecl = nextBy(FuncRef(FName), ":", 3)
+End Function
+
+Public Function FuncRefDeclTyp(ByVal FName As String) As String
+  FuncRefDeclTyp = SplitWord(FuncRefDecl(FName), 1)
+End Function
+
+Public Function FuncRefDeclRet(ByVal FName As String) As String
+  FuncRefDeclRet = FuncRefDecl(FName)
+  FuncRefDeclRet = Trim(Mid(FuncRefDeclRet, InStrRev(FuncRefDeclRet, " ")))
+  If Right(FuncRefDeclRet, 1) = ")" And Right(FuncRefDeclRet, 2) <> "()" Then FuncRefDeclRet = ""
+End Function
+
+Public Function FuncRefDeclArgs(ByVal FName As String) As String
+  FuncRefDeclArgs = FuncRefDecl(FName)
+  FuncRefDeclArgs = Mid(FuncRefDeclArgs, InStr(FuncRefDeclArgs, "(") + 1)
+  FuncRefDeclArgs = Left(FuncRefDeclArgs, InStrRev(FuncRefDeclArgs, ")") - 1)
+  FuncRefDeclArgs = Trim(FuncRefDeclArgs)
+End Function
+
+Public Function FuncRefDeclArgN(ByVal FName As String, ByVal N As Long) As String
+  Dim F As String
+  F = FuncRefDeclArgs(FName)
+  FuncRefDeclArgN = nextBy(F, ", ", N)
+End Function
+
+Public Function FuncRefDeclArgCnt(ByVal FName As String) As Long
+  Dim F As String, K As String
+  F = FuncRefDeclArgs(FName)
+  FuncRefDeclArgCnt = 0
+  Do
+    K = nextBy(F, ", ", FuncRefDeclArgCnt + 1)
+    If K = "" Then Exit Function
+    FuncRefDeclArgCnt = FuncRefDeclArgCnt + 1
+  Loop While True
+End Function
+
