@@ -9,6 +9,8 @@ Dim WithLevel As Long, MaxWithLevel As Long
 Dim WithVars As String, WithTypes As String, WithAssign As String
 
 Public Function ConvertProject(ByVal vbpFile As String)
+  Prg 0, 1, "Preparing..."
+  ScanRefs
   CreateProjectFile vbpFile
   CreateProjectSupportFiles
   ConvertFileList FilePath(vbpFile), VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) '& vbCrLf & VBPUserControls(vbpFile)
@@ -727,7 +729,8 @@ Public Function ConvertFunctionCall(ByVal fCall As String) As String
   Dim I As Long, N As Long, TB As String, TS As String, tName As String
   Dim TV As String
   Dim vP As Variable
-Debug.Print "ConvertFunctionCall: " & fCall
+'Debug.Print "ConvertFunctionCall: " & fCall
+
   TB = ""
   tName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*")
   TB = TB & tName
@@ -752,8 +755,12 @@ Debug.Print "ConvertFunctionCall: " & fCall
       If I <> 1 Then TB = TB & ", "
       TV = nextByP(TS, ",", I)
       If IsFuncRef(tName) Then
-        If FuncRefArgByRef(tName, I) Then TB = TB & "ref "
-        TB = TB & ConvertValue(TV)
+        If Trim(TV) = "" Then
+          TB = TB & FuncRefArgDefault(tName, I)
+        Else
+          If FuncRefArgByRef(tName, I) Then TB = TB & "ref "
+          TB = TB & ConvertValue(TV)
+        End If
       Else
         TB = TB & ConvertValue(TV)
       End If

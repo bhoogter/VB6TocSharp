@@ -24,6 +24,12 @@ Option Explicit
 ':::SEE ALSO
 ':    - modXML, modCSV, modPath
 
+Private mFSO As Object
+Private Property Get FSO() As Object
+  If mFSO Is Nothing Then Set mFSO = CreateObject("Scripting.FileSystemObject")
+  Set FSO = mFSO
+End Property
+
 Public Function ReadEntireFile(ByVal FileName As String) As String
 '::::ReadEntireFile
 ':::SUMMARY
@@ -38,9 +44,7 @@ Public Function ReadEntireFile(ByVal FileName As String) As String
 ':  ReadFile, WriteFile, ReadEntireFileAndDelete
 
 On Error Resume Next
-  With CreateObject("Scripting.FileSystemObject")
-    ReadEntireFile = .OpenTextFile(FileName, 1).ReadAll
-  End With
+  ReadEntireFile = FSO.OpenTextFile(FileName, 1).ReadAll
   
   If FileLen(FileName) / 10 <> Len(ReadEntireFile) / 10 Then
     MsgBox "ReadEntireFile was short: " & FileLen(FileName) & " vs " & Len(ReadEntireFile)
@@ -298,9 +302,9 @@ Public Sub VBFileCountLines_Stat(ByVal FileName As String)
 ':- FileName - The name of the file to read.
 ':::SEE ALSO
 ':  ReadEntireFile, WriteFile, CountLines, VBFileCountLines
-  Dim T As Long, C As Long, B As Long, M As Long
-  If VBFileCountLines(FileName, T, C, B, M) Then
-    MsgBox "File Line Stat: " & vbCrLf & " Totl: " & T & vbCrLf & "Code: " & C & vbCrLf & "Blnk: " & B & vbCrLf & "Cmnt: " & M, vbMsgBoxRtlReading
+  Dim T As Long, c As Long, B As Long, M As Long
+  If VBFileCountLines(FileName, T, c, B, M) Then
+    MsgBox "File Line Stat: " & vbCrLf & " Totl: " & T & vbCrLf & "Code: " & c & vbCrLf & "Blnk: " & B & vbCrLf & "Cmnt: " & M, vbMsgBoxRtlReading
   Else
     MsgBox "File Not Found: " & FileName
   End If

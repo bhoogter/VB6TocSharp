@@ -129,11 +129,15 @@ Option Explicit
 Public pMax As Long
 
 Private Sub cmdAll_Click()
+  IsWorking
   ConvertProject txtSrc
+  IsWorking True
 End Sub
 
 Private Sub cmdClasses_Click()
+  IsWorking
   ConvertFileList FilePath(txtSrc), VBPClasses(txtSrc)
+  IsWorking True
 End Sub
 
 Private Sub cmdExit_Click()
@@ -141,11 +145,25 @@ Private Sub cmdExit_Click()
 End Sub
 
 Private Sub cmdForms_Click()
+  IsWorking
   ConvertFileList FilePath(txtSrc), VBPForms(txtSrc)
+  IsWorking True
 End Sub
 
 Private Sub cmdModules_Click()
+  IsWorking
   ConvertFileList FilePath(txtSrc), VBPModules(txtSrc)
+  IsWorking True
+End Sub
+
+Private Sub IsWorking(Optional ByVal Done As Boolean)
+  cmdAll.Enabled = Done
+  cmdBrowse.Enabled = Done
+  cmdClasses.Enabled = Done
+  cmdExit.Enabled = Done
+  cmdForms.Enabled = Done
+  cmdModules.Enabled = Done
+  txtSrc.Enabled = Done
 End Sub
 
 Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#")

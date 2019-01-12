@@ -87,7 +87,7 @@ Public Function FuncRef(ByVal FName As String) As String
   cFuncRef_Value = FuncRef
 End Function
 
-Public Function IsFuncRef(ByVal FName As strign) As Boolean
+Public Function IsFuncRef(ByVal FName As String) As Boolean
   IsFuncRef = FuncRef(FName) <> ""
 End Function
 
