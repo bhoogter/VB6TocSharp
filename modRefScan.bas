@@ -3,6 +3,7 @@ Option Explicit
 
 Private OutRes As String
 Private cFuncRef_Name As String, cFuncRef_Value As String
+Private Funcs As Collection
 
 Private Function RefList(Optional ByVal KillRef As Boolean = False) As String
 On Error Resume Next
@@ -72,16 +73,33 @@ NextLine:
   Next
 End Function
 
+Private Sub InitFuncs()
+  Dim S As String, L
+  If Dir(RefList) = "" Then ScanRefs
+  S = ReadEntireFile(RefList)
+  If Not (Funcs Is Nothing) Then Exit Sub
+  Set Funcs = New Collection
+On Error Resume Next
+  For Each L In Split(S, vbCrLf)
+    Funcs.Add L, SplitWord(L, 2, ":")
+  Next
+End Sub
+
 Public Function FuncRef(ByVal FName As String) As String
-  Static S As String
-  If S = "" Then S = ReadEntireFile(RefList)
+
+  
+'  Static S As String
+'  If S = "" Then S = ReadEntireFile(RefList)
   
   If FName = cFuncRef_Name Then
     FuncRef = cFuncRef_Value
     Exit Function
   End If
   
-  FuncRef = RegExNMatch(S, ".*:" & FName & ":.*")
+'  FuncRef = RegExNMatch(S, ".*:" & FName & ":.*")
+  InitFuncs
+On Error Resume Next
+  FuncRef = Funcs(FName)
   
   cFuncRef_Name = FName
   cFuncRef_Value = FuncRef

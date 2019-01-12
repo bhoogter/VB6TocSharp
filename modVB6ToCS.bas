@@ -52,6 +52,8 @@ Public Function ConvertDataType(ByVal S As String) As String
                                   ConvertDataType = S
     Case "PictureBox", "Textbox", "Command", "ListBox", "ComboBox"
                                   ConvertDataType = S
+    Case "MSCommLib.MSComm"
+                                  ConvertDataType = S
     Case Else
       If IsInStr(VBPClasses(ClassNames:=True), S) Then
         ConvertDataType = S

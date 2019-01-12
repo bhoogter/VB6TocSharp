@@ -876,15 +876,15 @@ Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As B
       End If
     ElseIf L Like "Option *" Then
       O = "// " & L
-    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Declare ") Then
+    ElseIf RegExTest(L, "(Public |Private |)Declare ") Then
       O = ConvertAPIDef(L)
-    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Const ") Then
+    ElseIf RegExTest(L, "(Public |Private |)Const ") Then
       O = ConvertConstant(L, True)
-    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Event ") Then
+    ElseIf RegExTest(L, "(Public |Private |)Event ") Then
       O = ConvertEvent(L)
-    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Enum ") Then
+    ElseIf RegExTest(L, "(Public |Private |)Enum ") Then
       Building = L
-    ElseIf RegExTest(L, "([^a-zA-Z0-9_])(Public |Private |)Type ") Then
+    ElseIf RegExTest(L, "(Public |Private |)Type ") Then
       Building = L
     ElseIf tLeft(L, 8) = "Private " Or tLeft(L, 7) = "Public " Or tLeft(L, 4) = "Dim " Then
       O = ConvertDeclare(L, 0, True, asModule)
