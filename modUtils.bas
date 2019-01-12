@@ -11,10 +11,11 @@ Public Const vbCrLf4 As String = vbCrLf & vbCrLf & vbCrLf & vbCrLf
 
 
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
-Public Function FileExists(ByVal Fn As String) As Boolean: FileExists = Dir(Fn) <> "": End Function
-Public Function FileName(ByVal Fn As String) As String: FileName = Mid(Fn, InStrRev(Fn, "\") + 1): End Function
-Public Function FilePath(ByVal Fn As String) As String: FilePath = Left(Fn, InStrRev(Fn, "\")): End Function
-Public Function ChgExt(ByVal Fn As String, ByVal NewExt As String) As String: ChgExt = Left(Fn, InStrRev(Fn, ".") - 1) & NewExt: End Function
+Public Function FileExists(ByVal FN As String) As Boolean: FileExists = Dir(FN) <> "": End Function
+Public Function FileName(ByVal FN As String) As String: FileName = Mid(FN, InStrRev(FN, "\") + 1): End Function
+Public Function FileBaseName(ByVal FN As String) As String: FileBaseName = Left(FileName(FN), InStrRev(FileName(FN), ".") - 1): End Function
+Public Function FilePath(ByVal FN As String) As String: FilePath = Left(FN, InStrRev(FN, "\")): End Function
+Public Function ChgExt(ByVal FN As String, ByVal NewExt As String) As String: ChgExt = Left(FN, InStrRev(FN, ".") - 1) & NewExt: End Function
 Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = Left(Trim(Str), N): End Function
 Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As Long = 0) As String: tMid = IIf(M = 0, Mid(Trim(Str), N), Mid(Trim(Str), N, M)): End Function
 Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / Len(Str): End Function
@@ -25,9 +26,9 @@ Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": En
 
 Public Function WriteOut(ByVal F As String, ByVal S As String, Optional ByVal O As String = "") As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
 
-Public Function FileExt(ByVal Fn As String, Optional ByVal vLCase As Boolean = True) As String
-  If Fn = "" Then Exit Function
-  FileExt = Mid(Fn, InStrRev(Fn, "."))
+Public Function FileExt(ByVal FN As String, Optional ByVal vLCase As Boolean = True) As String
+  If FN = "" Then Exit Function
+  FileExt = Mid(FN, InStrRev(FN, "."))
   FileExt = IIf(vLCase, LCase(FileExt), FileExt)
 End Function
 
