@@ -753,8 +753,10 @@ Debug.Print "ConvertFunctionCall: " & fCall
       TV = nextByP(TS, ",", I)
       If IsFuncRef(tName) Then
         If FuncRefArgByRef(tName, I) Then TB = TB & "ref "
+        TB = TB & ConvertValue(TV)
+      Else
+        TB = TB & ConvertValue(TV)
       End If
-      TB = TB & ConvertValue(TV)
     Next
     TB = TB & ")"
   End If
