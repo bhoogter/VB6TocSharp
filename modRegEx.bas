@@ -4,7 +4,7 @@ Option Explicit
 Private mRegEx As Object
 Private Property Get RegEx() As Object
   If mRegEx Is Nothing Then Set mRegEx = CreateObject("vbscript.regexp"): mRegEx.Global = True
-  RegEx = mRegEx
+  Set RegEx = mRegEx
 End Property
 
 Public Function RegExTest(ByVal Src As String, ByVal Find As String) As Boolean

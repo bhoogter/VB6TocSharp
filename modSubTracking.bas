@@ -71,6 +71,7 @@ On Error Resume Next
     .asType = asType
     .Param = isParam
     .RetVal = isReturn
+    .asArray = asArray
   End With
 End Sub
 

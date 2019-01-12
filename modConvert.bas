@@ -320,7 +320,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
       End If
     End If
     
-    SubParamDecl pName, pType, isArr, False, False
+    SubParamDecl pName, pType, IIf(isArr, aMax, ""), False, False
   Next
   
   ConvertDeclare = Res
@@ -743,7 +743,7 @@ Public Function ConvertFunctionCall(ByVal fCall As String) As String
     TB = TB & ".Fields["
     TB = TB & ConvertValue(TS)
     TB = TB & "].Value"
-  ElseIf vP.asArray Then
+  ElseIf vP.asArray <> "" Then
     TB = TB & "["
     TB = TB & ConvertValue(TS)
     TB = TB & "]"
