@@ -3,7 +3,7 @@ Option Explicit
 
 Public Function ConvertDefaultDefault(ByVal dType As String) As String
   Select Case dType
-    Case "Long", "Double", "Currency", "Byte", "Single"
+    Case "Integer", "Long", "Double", "Currency", "Byte", "Single"
                       ConvertDefaultDefault = 0
     Case "Date":      ConvertDefaultDefault = """1/1/2001"""
     Case "String":    ConvertDefaultDefault = """"""

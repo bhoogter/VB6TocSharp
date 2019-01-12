@@ -2,6 +2,7 @@ Attribute VB_Name = "modRefScan"
 Option Explicit
 
 Private OutRes As String
+Private cFuncRef_Name As String, cFuncRef_Value As String
 
 Private Function RefList(Optional ByVal KillRef As Boolean = False) As String
 On Error Resume Next
@@ -72,10 +73,22 @@ NextLine:
 End Function
 
 Public Function FuncRef(ByVal FName As String) As String
-'  Dim S As String, L
   Static S As String
   If S = "" Then S = ReadEntireFile(RefList)
+  
+  If FName = cFuncRef_Name Then
+    FuncRef = cFuncRef_Value
+    Exit Function
+  End If
+  
   FuncRef = RegExNMatch(S, ".*:" & FName & ":.*")
+  
+  cFuncRef_Name = FName
+  cFuncRef_Value = FuncRef
+End Function
+
+Public Function IsFuncRef(ByVal FName As strign) As Boolean
+  IsFuncRef = FuncRef(FName) <> ""
 End Function
 
 Public Function FuncRefModule(ByVal FName As String) As String
@@ -120,6 +133,12 @@ Public Function FuncRefDeclArgCnt(ByVal FName As String) As Long
   Loop While True
 End Function
 
+Public Function FuncRefArgType(ByVal FName, ByVal N As Long) As String
+  FuncRefArgType = FuncRefDeclArgN(FName, N)
+  If FuncRefArgType = "" Then Exit Function
+  FuncRefArgType = SplitWord(FuncRefArgType, 2, " As ")
+End Function
+
 Public Function FuncRefArgByRef(ByVal FName, ByVal N As Long) As Boolean
   FuncRefArgByRef = Not IsInStr(FuncRefDeclArgN(FName, N), "ByVal ")
 End Function
@@ -127,4 +146,12 @@ End Function
 Public Function FuncRefArgOptional(ByVal FName, ByVal N As Long) As Boolean
   FuncRefArgOptional = IsInStr(FuncRefDeclArgN(FName, N), "Optional ")
 End Function
+
+Public Function FuncRefArgDefault(ByVal FName, ByVal N As Long) As String
+  Dim aTyp As String
+  If Not FuncRefArgOptional(FName, N) Then Exit Function
+  FuncRefArgDefault = SplitWord(FuncRefDeclArgN(FName, N), 2, " = ", True, True)
+  If FuncRefArgDefault = "" Then FuncRefArgDefault = ConvertDefaultDefault(FuncRefArgType(FName, N))
+End Function
+
 

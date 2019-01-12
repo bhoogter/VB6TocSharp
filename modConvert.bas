@@ -47,21 +47,21 @@ End Function
 
 Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean
   Dim S As String, J As Long, Preamble As String, Code As String, Globals As String, Functions As String
-  Dim X As String, fName As String
+  Dim X As String, FName As String
   Dim F As String
   If Not FileExists(frmFile) Then
     MsgBox "File not found in ConvertForm: " & frmFile
     Exit Function
   End If
   S = ReadEntireFile(frmFile)
-  fName = ModuleName(S)
+  FName = ModuleName(S)
   
   J = CodeSectionLoc(S)
   Preamble = Left(S, J - 1)
   Code = Mid(S, J)
   
   X = ConvertFormUi(Preamble)
-  F = fName & ".xaml"
+  F = FName & ".xaml"
   WriteOut F, X, frmFile
   If UIOnly Then Exit Function
   
@@ -70,29 +70,29 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = ""
-  X = X & UsingEverything(fName) & vbCrLf
+  X = X & UsingEverything(FName) & vbCrLf
   X = X & vbCrLf
-  X = X & "public class " & fName & " {" & vbCrLf
-  X = X & "  public static " & fName & " DefaultInstance;" & vbCrLf
+  X = X & "public class " & FName & " {" & vbCrLf
+  X = X & "  public static " & FName & " DefaultInstance;" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
   X = deWS(X)
   
-  F = fName & ".xaml.cs"
+  F = FName & ".xaml.cs"
   WriteOut F, X, frmFile
 End Function
 
 
 Public Function ConvertModule(ByVal basFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
-  Dim F As String, X As String, fName As String
+  Dim F As String, X As String, FName As String
   If Not FileExists(basFile) Then
     MsgBox "File not found in ConvertModule: " & basFile
     Exit Function
   End If
   S = ReadEntireFile(basFile)
-  fName = ModuleName(S)
+  FName = ModuleName(S)
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
@@ -100,15 +100,15 @@ Public Function ConvertModule(ByVal basFile As String)
   Functions = ConvertCodeSegment(Mid(Code, J), True)
   
   X = ""
-  X = X & UsingEverything(fName) & vbCrLf
+  X = X & UsingEverything(FName) & vbCrLf
   X = X & vbCrLf
-  X = X & "static class " & fName & " {" & vbCrLf
+  X = X & "static class " & FName & " {" & vbCrLf
   X = X & nlTrim(Globals & vbCrLf & vbCrLf & Functions)
   X = X & vbCrLf & "}"
   
   X = deWS(X)
   
-  F = fName & ".cs"
+  F = FName & ".cs"
   WriteOut F, X, basFile
 End Function
 
@@ -116,14 +116,14 @@ End Function
 
 Public Function ConvertClass(ByVal clsFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
-  Dim F As String, X As String, fName As String
+  Dim F As String, X As String, FName As String
   Dim cName As String
   If Not FileExists(clsFile) Then
     MsgBox "File not found in ConvertModule: " & clsFile
     Exit Function
   End If
   S = ReadEntireFile(clsFile)
-  fName = ModuleName(S)
+  FName = ModuleName(S)
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
@@ -131,15 +131,15 @@ Public Function ConvertClass(ByVal clsFile As String)
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = ""
-  X = X & UsingEverything(fName) & vbCrLf
+  X = X & UsingEverything(FName) & vbCrLf
   X = X & vbCrLf
-  X = X & "public class " & fName & " {" & vbCrLf
+  X = X & "public class " & FName & " {" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
   X = deWS(X)
   
-  F = fName & ".cs"
+  F = FName & ".cs"
   WriteOut F, X, clsFile
 End Function
 
@@ -507,16 +507,16 @@ Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean
 End Function
 
 Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As Boolean = False)
-  Dim C As String
+  Dim c As String
   Dim Pr As String
   Pr = IIf(KeepVBComments, "'", "//")
   If EOLComment = "" Then ReComment = Str: Exit Function
-  C = Pr & EOLComment
+  c = Pr & EOLComment
   EOLComment = ""
   If Not IsInStr(Str, vbCrLf) Then
-    ReComment = Str & IIf(Len(Str) = 0, "", " ") & C
+    ReComment = Str & IIf(Len(Str) = 0, "", " ") & c
   Else
-    ReComment = Replace(Str, vbCrLf, C & vbCrLf, , 1)         ' Always leave on end of first line...
+    ReComment = Replace(Str, vbCrLf, c & vbCrLf, , 1)         ' Always leave on end of first line...
   End If
   If Left(LTrim(ReComment), 2) = Pr Then ReComment = LTrim(ReComment)
 End Function
@@ -571,7 +571,7 @@ End Function
 Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False) As String
   Const retToken = "#RET#"
   Dim Res As String
-  Dim fName As String, fArgs As String, retType As String, T As String
+  Dim FName As String, fArgs As String, retType As String, T As String
   Dim tArg As String
   Dim isSub As Boolean
   Dim hArgs As Boolean
@@ -585,8 +585,8 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   If tLeft(S, 4) = "Sub " Then Res = Res & "void ": S = Mid(S, 5): isSub = True
   If tLeft(S, 9) = "Function " Then Res = Res & retToken & " ": S = Mid(S, 10)
   
-  fName = Trim(SplitWord(Trim(S), 1, "("))
-  S = Trim(tMid(S, Len(fName) + 2))
+  FName = Trim(SplitWord(Trim(S), 1, "("))
+  S = Trim(tMid(S, Len(FName) + 2))
   If Left(S, 1) = "(" Then S = Trim(tMid(S, 2))
   fArgs = Trim(nextBy(S, ")"))
   S = Mid(S, Len(fArgs) + 2)
@@ -601,7 +601,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
     Res = Replace(Res, retToken, ConvertDataType(retType))
   End If
   
-  Res = Res & fName
+  Res = Res & FName
   Res = Res & "("
   hArgs = False
   Do
@@ -615,7 +615,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   
   Res = Res & ") {"
   If retType <> "" Then
-    returnVariable = fName
+    returnVariable = FName
     Res = Res & vbCrLf & sSpace(SpIndent) & ConvertDataType(retType) & " " & returnVariable & " = " & ConvertDefaultDefault(retType) & ";"
     SubParamDecl returnVariable, retType, False, False, True
   End If
@@ -628,6 +628,7 @@ Public Function ConvertCondition(ByVal S As String) As String
 End Function
 
 Public Function ConvertElement(ByVal S As String) As String
+'Debug.Print "ConvertElement: " & S
   Dim FirstToken As String, FirstWord As String
   Dim T As String, Complete As Boolean
   S = Trim(S)
@@ -637,7 +638,6 @@ Public Function ConvertElement(ByVal S As String) As String
     ConvertElement = S
     Exit Function
   End If
-  
  
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
@@ -680,30 +680,8 @@ Public Function ConvertElement(ByVal S As String) As String
   End If
   
 ManageFunctions:
-  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]*\(.*\)$") Then
-    Dim I As Long, N As Long, TB As String, TS As String, tName As String
-    Dim TV As String
-    TB = ""
-    tName = RegExNMatch(ConvertElement, "^[a-zA-Z0-9_.]*")
-    TB = TB & tName
-
-    TS = Mid(ConvertElement, Len(tName) + 2)
-    TS = Left(TS, Len(TS) - 1)
-    If ConvertDataType(SubParam(tName).asType) = "Recordset" Then
-      TB = TB & ".Fields["
-      TB = TB & ConvertValue(TS)
-      TB = TB & "].Value"
-    Else
-      N = nextByPCt(TS, ",")
-      TB = TB & "("
-      For I = 1 To N
-        If I <> 1 Then TB = TB & ", "
-        TV = nextByP(TS, ",", I)
-        TB = TB & ConvertValue(TV)
-      Next
-      TB = TB & ")"
-    End If
-    ConvertElement = TB
+  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]+\(.*\)$") Then
+    ConvertElement = ConvertFunctionCall(ConvertElement)
   End If
 
 DoReplacements:
@@ -744,6 +722,45 @@ DoReplacements:
     If Left(ConvertElement, 1) = "." Then ConvertElement = T & ConvertElement
   End If
 End Function
+
+Public Function ConvertFunctionCall(ByVal fCall As String) As String
+  Dim I As Long, N As Long, TB As String, TS As String, tName As String
+  Dim TV As String
+  Dim vP As Variable
+Debug.Print "ConvertFunctionCall: " & fCall
+  TB = ""
+  tName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*")
+  TB = TB & tName
+
+  TS = Mid(fCall, Len(tName) + 2)
+  TS = Left(TS, Len(TS) - 1)
+  
+  vP = SubParam(tName)
+  If ConvertDataType(vP.asType) = "Recordset" Then
+    TB = TB & ".Fields["
+    TB = TB & ConvertValue(TS)
+    TB = TB & "].Value"
+  ElseIf vP.asArray Then
+    TB = TB & "["
+    TB = TB & ConvertValue(TS)
+    TB = TB & "]"
+    TB = Replace(TB, ", ", "][")
+  Else
+    N = nextByPCt(TS, ",")
+    TB = TB & "("
+    For I = 1 To N
+      If I <> 1 Then TB = TB & ", "
+      TV = nextByP(TS, ",", I)
+      If IsFuncRef(tName) Then
+        If FuncRefArgByRef(tName, I) Then TB = TB & "ref "
+      End If
+      TB = TB & ConvertValue(TV)
+    Next
+    TB = TB & ")"
+  End If
+  ConvertFunctionCall = TB
+End Function
+
 
 Public Function ConvertValue(ByVal S As String) As String
   Dim F As String, Op As String, OpN As String
