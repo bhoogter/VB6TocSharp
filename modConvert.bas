@@ -474,6 +474,8 @@ Public Function ConvertEnum(ByVal S As String)
     End If
   Loop
   Res = Res & vbCrLf & "}"
+  
+  ConvertEnum = Res
 End Function
 
 Public Function ConvertType(ByVal S As String)
@@ -501,6 +503,8 @@ Public Function ConvertType(ByVal S As String)
     Res = Res & vbCrLf & " public " & ConvertDataType(eType) & " " & eName & ";"
   Loop
   Res = Res & vbCrLf & "}"
+  
+  ConvertType = Res
 End Function
 
 Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean = False) As String
