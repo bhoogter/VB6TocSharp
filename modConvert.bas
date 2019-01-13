@@ -394,6 +394,7 @@ End Function
 Public Function ConvertConstant(ByVal S As String, Optional ByVal isGlobal As Boolean = True) As String
   Dim cName As String, cType As String, cVal As String, isPrivate As Boolean
   If tLeft(S, 7) = "Public " Then S = Mid(Trim(S), 8)
+  If tLeft(S, 7) = "Global " Then S = Mid(Trim(S), 8)
   If tLeft(S, 8) = "Private " Then S = Mid(Trim(S), 9): isPrivate = True
   If tLeft(S, 6) = "Const " Then S = Mid(Trim(S), 7)
   cName = SplitWord(S, 1)
@@ -458,7 +459,7 @@ Public Function ConvertEnum(ByVal S As String)
   eName = RegExNMatch(S, patToken, 0)
   S = nlTrim(tMid(S, Len(eName) + 1))
   
-  Res = "enum " & eName & " {"
+  Res = "public enum " & eName & " {"
   
   Do While tLeft(S, 8) <> "End Enum" And S <> ""
     eName = RegExNMatch(S, patToken, 0)
@@ -882,7 +883,7 @@ Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As B
       O = "// " & L
     ElseIf RegExTest(L, "(Public |Private |)Declare ") Then
       O = ConvertAPIDef(L)
-    ElseIf RegExTest(L, "(Public |Private |)Const ") Then
+    ElseIf RegExTest(L, "(Global |Public |Private |)Const ") Then
       O = ConvertConstant(L, True)
     ElseIf RegExTest(L, "(Public |Private |)Event ") Then
       O = ConvertEvent(L)
