@@ -76,8 +76,8 @@ End Function
 Private Sub InitFuncs()
   Dim S As String, L
   If Dir(RefList) = "" Then ScanRefs
-  S = ReadEntireFile(RefList)
   If Not (Funcs Is Nothing) Then Exit Sub
+  S = ReadEntireFile(RefList)
   Set Funcs = New Collection
 On Error Resume Next
   For Each L In Split(S, vbCrLf)
