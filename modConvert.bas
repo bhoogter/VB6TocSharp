@@ -246,7 +246,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As
     R = R & CommentBlock(Pre) & ConvertSub(Body, asModule) & vbCrLf
   Loop While True
   
-  R = ReadOutProperties & vbCrLf2 & R
+  R = ReadOutProperties(asModule) & vbCrLf2 & R
   
   ConvertCodeSegment = R
 End Function
@@ -414,7 +414,11 @@ Public Function ConvertConstant(ByVal S As String, Optional ByVal isGlobal As Bo
     cVal = ConvertDefaultDefault(cType)
   End If
   
-  ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") & "const " & ConvertDataType(cType) & " " & cName & " = " & cVal & ";"
+  If cType = "Date" Then
+    ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") & "static readonly " & ConvertDataType(cType) & " " & cName & " = " & cVal & ";"
+  Else
+    ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") & "const " & ConvertDataType(cType) & " " & cName & " = " & cVal & ";"
+  End If
 End Function
 
 
@@ -514,16 +518,16 @@ Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean
 End Function
 
 Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As Boolean = False)
-  Dim c As String
+  Dim C As String
   Dim Pr As String
   Pr = IIf(KeepVBComments, "'", "//")
   If EOLComment = "" Then ReComment = Str: Exit Function
-  c = Pr & EOLComment
+  C = Pr & EOLComment
   EOLComment = ""
   If Not IsInStr(Str, vbCrLf) Then
-    ReComment = Str & IIf(Len(Str) = 0, "", " ") & c
+    ReComment = Str & IIf(Len(Str) = 0, "", " ") & C
   Else
-    ReComment = Replace(Str, vbCrLf, c & vbCrLf, , 1)         ' Always leave on end of first line...
+    ReComment = Replace(Str, vbCrLf, C & vbCrLf, , 1)         ' Always leave on end of first line...
   End If
   If Left(LTrim(ReComment), 2) = Pr Then ReComment = LTrim(ReComment)
 End Function
@@ -645,6 +649,11 @@ Public Function ConvertElement(ByVal S As String) As String
     ConvertElement = S
     Exit Function
   End If
+  
+  If RegExTest(S, "#[0-9]+/[0-9]+/[0-9]+#") Then
+    ConvertElement = "DateValue(""" & Mid(S, 2, Len(S) - 2) & """)"
+    Exit Function
+  End If
  
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
@@ -654,22 +663,21 @@ Public Function ConvertElement(ByVal S As String) As String
 'If IsInStr(S, ":=") Then Stop
 'If IsInStr(S, "GetRecordNotFound") Then Stop
 
-
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
   S = RegExReplace(S, "^" & patToken & "!" & patToken & patNotToken, "$1(""$2"")$3") ' RS!Field -> RS("Field")
 
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])True([^a-zA-Z0-9_.])", "$1true$2")
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])False([^a-zA-Z0-9_.])", "$1false$2")
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])Null([^a-zA-Z0-9_.])", "$1null$2")
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])Date([^a-zA-Z0-9_.])", "$1Today$2")
   S = RegExReplace(S, "([^a-zA-Z0-9_.])NullDate([^a-zA-Z0-9_.])", "$1NullDate()$2")
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])Nothing([^a-zA-Z0-9_.])", "$1null$2")
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])vbUseDefault([^a-zA-Z0-9_.])", "$1vbTriState.vbUseDefault$2")
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])vbTrue([^a-zA-Z0-9_.])", "$1vbTriState.vbTrue$2")
-  S = RegExReplace(S, "([^a-zA-Z0-9_.])vbFalse([^a-zA-Z0-9_.])", "$1vbTriState.vbFalse$2")
   
   S = ConvertVb6Specific(S, Complete)
   If Complete Then ConvertElement = S: Exit Function
+  
+  If RegExTest(Trim(S), "^" & patToken & "$") Then
+    If IsFuncRef(Trim(S)) Then
+      ConvertElement = Trim(S) & "()"
+      Exit Function
+    End If
+  End If
+
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)
@@ -714,7 +722,6 @@ DoReplacements:
 'If IsInStr(ConvertElement, "1/1/2001") Then Stop
 
   ConvertElement = RegExReplace(ConvertElement, "([0-9])#", "$1")
-  ConvertElement = RegExReplace(ConvertElement, "#([0-9]?[0-9])/([0-9]?[0-9])/([0-9][0-9][0-9][0-9])#", "DateValue(""$1/$2/$3"")")
   
   If Left(ConvertElement, 2) = "&H" Then
     ConvertElement = "0x" & Mid(ConvertElement, 3)
@@ -752,7 +759,7 @@ Public Function ConvertFunctionCall(ByVal fCall As String) As String
     TB = TB & "["
     TB = TB & ConvertValue(TS)
     TB = TB & "]"
-    TB = Replace(TB, ", ", "][")
+'    TB = Replace(TB, ", ", "][")
   Else
     N = nextByPCt(TS, ",")
     TB = TB & "("

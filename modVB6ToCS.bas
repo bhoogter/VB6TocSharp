@@ -5,7 +5,7 @@ Public Function ConvertDefaultDefault(ByVal dType As String) As String
   Select Case dType
     Case "Integer", "Long", "Double", "Currency", "Byte", "Single"
                       ConvertDefaultDefault = 0
-    Case "Date":      ConvertDefaultDefault = """1/1/2001"""
+    Case "Date":      ConvertDefaultDefault = "DateTime.MinValue"
     Case "String":    ConvertDefaultDefault = """"""
     Case "Boolean":   ConvertDefaultDefault = "false"
     Case Else:        ConvertDefaultDefault = "null"
@@ -150,23 +150,25 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   W = RegExNMatch(Trim(S), patToken)
   R = SplitWord(Trim(S), 2, , , True)
   Select Case W
-    Case "True":          S = "true"
-    Case "False":         S = "false"
-    Case "Nothing":       S = "null"
-    Case "vbTrue":        S = "vbTriState.vbTrue"
-    Case "vbFalse":       S = "vbTriState.vbFalse"
-    Case "vbUseDefault":  S = "vbTriState.vbUseDefault"
+    Case "True":          Complete = True: S = "true"
+    Case "False":         Complete = True: S = "false"
+    Case "Nothing":       Complete = True: S = "null"
+    Case "vbTrue":        Complete = True: S = "vbTriState.vbTrue"
+    Case "vbFalse":       Complete = True: S = "vbTriState.vbFalse"
+    Case "vbUseDefault":  Complete = True: S = "vbTriState.vbUseDefault"
+    Case "Date", "Today": Complete = True: S = "DateTime.Today"
+    Case "Now":           Complete = True: S = "DateTime.Now"
     Case "Kill":          S = "File.Delete(" & R & ")"
     Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
     Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"
-    Case "New":           S = "new " & R & "()": Complete = True
+    Case "New":           Complete = True: S = "new " & R & "()"
     Case "RaiseEvent":
+                          Complete = True
                           W = RegExNMatch(R, patToken)
                           R = Mid(R, Len(W) + 1)
                           If R = "" Then R = "()"
                           S = "event" & W & "?.Invoke" & R
-                          Complete = True
     Case "ReDim":
       Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String

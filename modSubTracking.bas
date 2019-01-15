@@ -181,7 +181,7 @@ On Error GoTo 0
   End Select
 End Sub
 
-Public Function ReadOutProperties() As String
+Public Function ReadOutProperties(Optional ByVal asModule As Boolean = False) As String
 On Error Resume Next
   Dim I As Long, R As String, P As Property
   Dim N As String, M As String
@@ -196,6 +196,7 @@ On Error Resume Next
       If .Name <> "" And Not (.Getter = "" And .Setter = "") Then
         If Not .asFunc Then
           If .asPublic Then R = R & "public "
+          If asModule Then R = R & "static "
 '          If .Getter = "" Then R = R & "writeonly "
 '          If .Setter = "" Then R = R & "readonly "
           R = R & M & .asType & " " & .Name & " {"
