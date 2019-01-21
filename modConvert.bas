@@ -1040,7 +1040,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
   Ind = 0
     
 'If IsInStr(Str, " WinCDSDataPath(") Then Stop
-If IsInStr(Str, " RunShellExecute(") Then Stop
+'If IsInStr(Str, " RunShellExecute(") Then Stop
   For Each L In S
     L = DeComment(L)
     O = ""

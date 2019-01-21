@@ -20,7 +20,7 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "String", "String()":    ConvertDataType = "string"
     Case "Long":                  ConvertDataType = "long"
     Case "Integer":               ConvertDataType = "long"
-    Case "Double", "Single":      ConvertDataType = "double"
+    Case "Double", "Single":      ConvertDataType = "decimal"
     Case "Variant":               ConvertDataType = "object"
     Case "Byte":                  ConvertDataType = "byte"
     Case "Boolean":               ConvertDataType = "bool"
