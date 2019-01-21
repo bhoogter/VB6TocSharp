@@ -68,7 +68,7 @@ Private Function ScanRefsFile(ByVal FN As String) As Long
       F = M & ":" & G & ":Function:" & F
       OutRes = OutRes & vbCrLf & F
       ScanRefsFile = ScanRefsFile + 1
-    If tLMatch(L, "Declare ") Or tLMatch(L, "Public Decalre ") Then
+    ElseIf tLMatch(L, "Declare ") Or tLMatch(L, "Public Decalre ") Then
       L = LTrim(L)
       If LMatch(L, "Public ") Then L = Mid(L, 8)
       If LMatch(L, "Declare ") Then L = Mid(L, 9)
@@ -127,7 +127,7 @@ Public Function FuncRefModule(ByVal FName As String) As String
 End Function
 
 Public Function FuncRefEntity(ByVal FName As String) As String
-  FuncRefDecl = nextBy(FuncRef(FName), ":", 3)
+  FuncRefEntity = nextBy(FuncRef(FName), ":", 3)
 End Function
 
 Public Function FuncRefDecl(ByVal FName As String) As String
