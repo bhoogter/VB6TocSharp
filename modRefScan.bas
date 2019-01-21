@@ -52,8 +52,8 @@ Private Function ScanRefsFile(ByVal FN As String) As Long
       GoTo NextLine
     End If
       
-    If tLMatch(L, "Function ") Or tLMatch(L, "Public Function") Or _
-       tLMatch(L, "Sub ") Or tLMatch(L, "Public Sub") Or _
+    If tLMatch(L, "Function ") Or tLMatch(L, "Public Function ") Or _
+       tLMatch(L, "Sub ") Or tLMatch(L, "Public Sub ") Or _
        False Then
       
       F = Trim(L)
@@ -61,13 +61,26 @@ Private Function ScanRefsFile(ByVal FN As String) As Long
       F = Trim(nextBy(F, ":"))
       
       G = F
-      If Left(G, 9) = "Function " Then G = Mid(G, 10)
-      If Left(G, 4) = "Sub " Then G = Mid(G, 5)
+      If tLMatch(G, "Function ") Then G = Mid(G, 10)
+      If tLMatch(G, "Sub ") Then G = Mid(G, 5)
       G = nextBy(G, "(")
       
-      F = M & ":" & G & ":" & F
+      F = M & ":" & G & ":Function:" & F
       OutRes = OutRes & vbCrLf & F
       ScanRefsFile = ScanRefsFile + 1
+    If tLMatch(L, "Declare ") Or tLMatch(L, "Public Decalre ") Then
+      L = LTrim(L)
+      If LMatch(L, "Public ") Then L = Mid(L, 8)
+      If LMatch(L, "Declare ") Then L = Mid(L, 9)
+      G = SplitWord(L)
+      
+    ElseIf tLMatch(L, "Const ") Or tLMatch(L, "Public Const ") Or tLMatch("Global Const ") Then
+      L = LTrim(L)
+      If LMatch(L, "Public ") Then L = Mid(L, 8)
+      If LMatch(L, "Global ") Then L = Mid(L, 8)
+      If LMatch(L, "Const ") Then L = Mid(L, 7)
+      G = SplitWord(L)
+    ElseIf tLMatch(L, "Enum ") Or tLMatch(L, "Public Enum ") Then
     End If
 NextLine:
   Next

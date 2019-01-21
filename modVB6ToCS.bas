@@ -14,7 +14,7 @@ End Function
 
 Public Function ConvertDataType(ByVal S As String) As String
   Select Case S
-    Case "Object", "Variant", "Variant()":
+    Case "Object", "Any", "Variant", "Variant()":
                                   ConvertDataType = DefaultDataType
     Case "Form", "Control":       ConvertDataType = "Form"
     Case "String", "String()":    ConvertDataType = "string"

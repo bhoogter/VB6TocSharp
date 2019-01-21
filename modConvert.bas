@@ -308,7 +308,9 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
     End If
     
     If Not isArr Then
-      Res = Res & sSpace(Ind) & ConvertDataType(pType) & " " & pName & ";" & vbCrLf
+      Res = Res & sSpace(Ind) & ConvertDataType(pType) & " " & pName
+      Res = Res & " = " & ConvertDefaultDefault(pType)
+      Res = Res & ";" & vbCrLf
     Else
       aTodo = IIf(aMin = 0, "", " // TODO - Specified Minimum Array Boundary Not Supported: " & SS)
       If Not IsNumeric(aMax) Then
@@ -372,10 +374,10 @@ Public Function ConvertAPIDef(ByVal S As String) As String
   End If
   
   S = ""
-  S = S & "[DllImport(""" & aLib & """)" & IIf(aAlias = "", "", ", DllEntryPoint(""" & aAlias & """)") & "] "
+  S = S & "[DllImport(""" & aLib & """" & IIf(aAlias = "", "", ", EntryPoint = """ & aAlias & """") & ")] "
   S = S & IIf(isPrivate, "private ", "public ")
   S = S & "static extern "
-  S = S & IIf(isSub, "void ", ConvertDataType(aReturn))
+  S = S & IIf(isSub, "void ", ConvertDataType(aReturn)) & " "
   S = S & aName
   S = S & "("
   Do
@@ -472,8 +474,12 @@ Public Function ConvertEnum(ByVal S As String)
 
     S = nlTrim(tMid(S, Len(eName) + 1))
     If tLeft(S, 1) = "=" Then
-      S = nlTrim(Mid(S, 2))
-      eName = RegExNMatch(S, "[0-9]*", 0)
+      S = nlTrim(Mid(S, 3))
+      If Left(S, 1) = "&" Then
+        eName = ConvertElement(RegExNMatch(S, "&H[0-9A-F]+"))
+      Else
+        eName = RegExNMatch(S, "[0-9]*", 0)
+      End If
       Res = Res & " = " & eName
       S = nlTrim(tMid(S, Len(eName) + 1))
     End If
@@ -484,19 +490,28 @@ Public Function ConvertEnum(ByVal S As String)
 End Function
 
 Public Function ConvertType(ByVal S As String)
-  Dim isPrivate As Boolean, eName As String, eType As String
+  Dim isPrivate As Boolean, eName As String, eArr As String, eType As String
   Dim Res As String
+  Dim N As String
   If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
   If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
   If tLeft(S, 5) = "Type " Then S = tMid(S, 6)
   eName = RegExNMatch(S, patToken, 0)
   S = nlTrim(tMid(S, Len(eName) + 1))
+'If IsInStr(eName, "OSVERSIONINFO") Then Stop
   
-  Res = IIf(isPrivate, "private ", "public ") & "struct " & eName & " {"
+  Res = IIf(isPrivate, "private ", "public ") & "class " & eName & " {"
   
-  Do While tLeft(S, 8) <> "End Enum" And S <> ""
+  Do While tLeft(S, 8) <> "End Type" And S <> ""
     eName = RegExNMatch(S, patToken, 0)
     S = nlTrim(tMid(S, Len(eName) + 1))
+    eArr = ""
+    If LMatch(S, "(") Then
+      N = nextBy(Mid(S, 2), ")")
+      S = nlTrim(Mid(S, Len(N) + 3))
+      N = ConvertValue(N)
+      eArr = "[" & N & "]"
+    End If
     
     If tLeft(S, 3) = "As " Then
       S = nlTrim(Mid(S, 4))
@@ -505,7 +520,20 @@ Public Function ConvertType(ByVal S As String)
     Else
       eType = "Variant"
     End If
-    Res = Res & vbCrLf & " public " & ConvertDataType(eType) & " " & eName & ";"
+    Res = Res & vbCrLf & " public " & ConvertDataType(eType) & IIf(eArr = "", "", "[]") & " " & eName
+    If eArr = "" Then
+      Res = Res & " = " & ConvertDefaultDefault(eType)
+    Else
+      Res = Res & " = new " & ConvertDataType(eType) & eArr
+    End If
+    Res = Res & ";"
+    If tLMatch(S, "* ") Then
+      S = Mid(LTrim(S), 3)
+      N = RegExNMatch(S, "[0-9]+", 0)
+      S = nlTrim(Mid(LTrim(S), Len(N) + 1))
+      Res = Res & " //TODO: Fixed Length Strings Not Supported: * " & N
+    End If
+
   Loop
   Res = Res & vbCrLf & "}"
   
@@ -518,16 +546,16 @@ Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean
 End Function
 
 Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As Boolean = False)
-  Dim C As String
+  Dim c As String
   Dim Pr As String
   Pr = IIf(KeepVBComments, "'", "//")
   If EOLComment = "" Then ReComment = Str: Exit Function
-  C = Pr & EOLComment
+  c = Pr & EOLComment
   EOLComment = ""
   If Not IsInStr(Str, vbCrLf) Then
-    ReComment = Str & IIf(Len(Str) = 0, "", " ") & C
+    ReComment = Str & IIf(Len(Str) = 0, "", " ") & c
   Else
-    ReComment = Replace(Str, vbCrLf, C & vbCrLf, , 1)         ' Always leave on end of first line...
+    ReComment = Replace(Str, vbCrLf, c & vbCrLf, , 1)         ' Always leave on end of first line...
   End If
   If Left(LTrim(ReComment), 2) = Pr Then ReComment = LTrim(ReComment)
 End Function
@@ -646,7 +674,7 @@ Public Function ConvertElement(ByVal S As String) As String
   If S = "" Then Exit Function
   
   If Left(S, 1) = """" And Right(S, 1) = """" And StrCnt(S, """") Mod 2 = 0 Then
-    ConvertElement = S
+    ConvertElement = """" & ConvertString(Mid(S, 2, Len(S) - 2)) & """"
     Exit Function
   End If
   
@@ -1010,6 +1038,9 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
   Str = Replace(Str, vbLf, "")
   S = Split(Str, vbCr)
   Ind = 0
+    
+'If IsInStr(Str, " WinCDSDataPath(") Then Stop
+If IsInStr(Str, " RunShellExecute(") Then Stop
   For Each L In S
     L = DeComment(L)
     O = ""
