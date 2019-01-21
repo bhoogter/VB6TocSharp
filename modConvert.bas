@@ -950,7 +950,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "dbClose") Then Stop
 'If IsInStr(S, "Nothing") Then Stop
 'If IsInStr(S, "Close ") Then Stop
-If IsInStr(S, "& functionType & fieldInfo &") Then Stop
+'If IsInStr(S, "& functionType & fieldInfo &") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
