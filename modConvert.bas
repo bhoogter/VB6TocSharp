@@ -599,7 +599,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
     End If
   End If
   Res = Res & tName
-  If isOptional Then
+  If isOptional And Not isByRef Then
     Res = Res & "= " & pDef
   End If
   
@@ -950,6 +950,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "dbClose") Then Stop
 'If IsInStr(S, "Nothing") Then Stop
 'If IsInStr(S, "Close ") Then Stop
+If IsInStr(S, "& functionType & fieldInfo &") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
@@ -1049,7 +1050,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If ScanFirst = vbFalse Then Stop
 'If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
 
-    If L Like "*Sub *" Or L Like "*Function *" Then
+    If LMatch(L, "Sub ") Or LMatch(L, "Private Sub ") Or LMatch(L, "Public Sub ") Or _
+       LMatch(L, "Function ") Or LMatch(L, "Private Function ") Or LMatch(L, "Public Function ") Then
       O = sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then

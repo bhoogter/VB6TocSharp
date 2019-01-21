@@ -19,7 +19,7 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
   
   If Everything = "" Then
     E = E & M & "using VB6 = " & VB6Compat & ";"
-    E = E & M & "using System.Runtime.InteropServices;"
+    E = E & N & "using System.Runtime.InteropServices;"
     E = E & N & "using static VBExtension;"
     E = E & N & "using static VBConstants;"
     
