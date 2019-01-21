@@ -74,7 +74,7 @@ Private Function ScanRefsFile(ByVal FN As String) As Long
       If LMatch(L, "Declare ") Then L = Mid(L, 9)
       G = SplitWord(L)
       
-    ElseIf tLMatch(L, "Const ") Or tLMatch(L, "Public Const ") Or tLMatch("Global Const ") Then
+    ElseIf tLMatch(L, "Const ") Or tLMatch(L, "Public Const ") Or tLMatch(L, "Global Const ") Then
       L = LTrim(L)
       If LMatch(L, "Public ") Then L = Mid(L, 8)
       If LMatch(L, "Global ") Then L = Mid(L, 8)
@@ -126,8 +126,12 @@ Public Function FuncRefModule(ByVal FName As String) As String
   FuncRefModule = nextBy(FuncRef(FName), ":")
 End Function
 
-Public Function FuncRefDecl(ByVal FName As String) As String
+Public Function FuncRefEntity(ByVal FName As String) As String
   FuncRefDecl = nextBy(FuncRef(FName), ":", 3)
+End Function
+
+Public Function FuncRefDecl(ByVal FName As String) As String
+  FuncRefDecl = nextBy(FuncRef(FName), ":", 4)
 End Function
 
 Public Function FuncRefDeclTyp(ByVal FName As String) As String
