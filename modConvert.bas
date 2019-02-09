@@ -920,7 +920,7 @@ Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As B
       O = ConvertDeclare(L, 0, True, asModule)
     End If
       
-    O = ReComment(O)
+    O = ReString(O)
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "" Or Right(O, 2) = vbCrLf, "", vbCrLf)
     N = N + 1
