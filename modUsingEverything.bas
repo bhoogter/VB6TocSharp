@@ -52,6 +52,20 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using static Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6.SystemColorConstants;"
     E = E & N & "using ADODB;"
     
+    E = E & N & "using System;"
+    E = E & N & "using System.Collections.Generic;"
+    E = E & N & "using System.Linq;"
+    E = E & N & "using System.Text;"
+    E = E & N & "using System.Threading.Tasks;"
+    E = E & N & "using System.Windows;"
+    E = E & N & "using System.Windows.Controls;"
+    E = E & N & "using System.Windows.Data;"
+    E = E & N & "using System.Windows.Documents;"
+    E = E & N & "using System.Windows.Input;"
+    E = E & N & "using System.Windows.Media;"
+    E = E & N & "using System.Windows.Media.Imaging;"
+    E = E & N & "using System.Windows.Shapes;"
+    
     Path = FilePath(vbpFile)
     For Each L In Split(VBPModules(vbpFile) & vbCrLf & VBPForms(vbpFile), vbCrLf)
       If L <> "" Then

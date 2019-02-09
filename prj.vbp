@@ -23,6 +23,7 @@ Module=modUsingEverything; modUsingEverything.bas
 Module=modSupportFiles; modSupportFiles.bas
 Module=modConfig; modConfig.bas
 Module=modRefScan; modRefScan.bas
+Module=modConvertUtils; modConvertUtils.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""

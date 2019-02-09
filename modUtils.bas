@@ -139,7 +139,7 @@ End Function
 Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String)
   Dim A As String, S As String, D As String, M As String, C As String, E As String, I As String
   Dim cNE As String, cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
-  Dim lA As String, lO As String, lM As String, lL As String
+  Dim lA As String, lO As String, lM As String, LL As String
   Dim xIs As String, xLk As String
   Dim P As String, K As Long
   A = nextByP(Src, " + ")
@@ -160,7 +160,7 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   lA = nextByP(Src, " And ")
   lO = nextByP(Src, " Or ")
   lM = nextByP(Src, " Mod ")
-  lL = nextByP(Src, " Like ")
+  LL = nextByP(Src, " Like ")
   
   xIs = nextByP(Src, " Is ")
   xLk = nextByP(Src, " Like ")
@@ -183,7 +183,7 @@ Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Op
   If Len(P) > Len(lA) Then P = lA: K = 5
   If Len(P) > Len(lO) Then P = lO: K = 4
   If Len(P) > Len(lM) Then P = lM: K = 5
-  If Len(P) > Len(lL) Then P = lL: K = 6
+  If Len(P) > Len(LL) Then P = LL: K = 6
   
   If Len(P) > Len(xLk) Then P = xLk: K = 6
   If Len(P) > Len(xIs) Then P = xIs: K = 4
@@ -425,4 +425,10 @@ Public Function Stack(ByRef Src As String, Optional ByVal Val As String = "##REM
     Src = """" & Replace(Val, """", """""") & """," & Src
     Stack = Val
   End If
+End Function
+
+Public Function QuoteXML(ByVal S As String) As String
+  QuoteXML = S
+  QuoteXML = Replace(S, """", "&quot;")
+  QuoteXML = Quote(QuoteXML)
 End Function

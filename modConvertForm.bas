@@ -108,12 +108,12 @@ On Error Resume Next
   If tType = "Line" Or tType = "Shape" Or tType = "Timer" Then
     Exit Function
   ElseIf tType = "Window" Then
-    S = S & M & "<Window x:Class=""" & cName & """"
+    S = S & M & "<Window x:Class=""" & AssemblyName & ".Forms." & cName & """"
     S = S & N & "    xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"""
     S = S & N & "    xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"""
     S = S & N & "    xmlns:d=""http://schemas.microsoft.com/expression/blend/2008"""
     S = S & N & "    xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"""
-    S = S & N & "    xmlns:local=""clr-namespace:WpfApp1"""
+    S = S & N & "    xmlns:local=""clr-namespace:" & AssemblyName & ".Forms"""
     S = S & N & "    mc:Ignorable=""d"""
     S = S & N & "    Title=" & Quote(cValP(Props, "caption"))
     S = S & M & "    Height=" & Quote(Px(cValP(Props, "clientheight", 0) + 435))
@@ -162,16 +162,16 @@ On Error Resume Next
   End If
   
   If IsInStr(Features, "Content") Then
-    S = S & " Content=" & Quote(cValP(Props, "caption") & cValP(Props, "text"))
+    S = S & " Content=" & QuoteXML(cValP(Props, "caption") & cValP(Props, "text"))
   End If
   
   If IsInStr(Features, "Header") Then
-    S = S & " Content=" & Quote(cValP(Props, "caption") & cValP(Props, "text"))
+    S = S & " Content=" & QuoteXML(cValP(Props, "caption") & cValP(Props, "text"))
   End If
 
   V = cValP(Props, "caption") & cValP(Props, "text")
   If IsInStr(Features, "Text") And V <> "" Then
-    S = S & " Text=" & Quote(V)
+    S = S & " Text=" & QuoteXML(V)
   End If
   
   V = cValP(Props, "ToolTipText")

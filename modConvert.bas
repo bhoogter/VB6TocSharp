@@ -1,12 +1,12 @@
 Attribute VB_Name = "modConvert"
 Option Explicit
 
-
 Const WithMark = "_WithVar_"
-Private EOLComment As String
 
 Dim WithLevel As Long, MaxWithLevel As Long
 Dim WithVars As String, WithTypes As String, WithAssign As String
+
+Dim CurrSub As String
 
 Public Function ConvertProject(ByVal vbpFile As String)
   Prg 0, 1, "Preparing..."
@@ -74,9 +74,16 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   X = ""
   X = X & UsingEverything(FName) & vbCrLf
   X = X & vbCrLf
-  X = X & "public class " & FName & " {" & vbCrLf
-  X = X & "  public static " & FName & " DefaultInstance;" & vbCrLf
+  X = X & "namespace " & AssemblyName & ".Forms" & vbCrLf
+  X = X & "{" & vbCrLf
+  X = X & "public partial class " & FName & " : Window {" & vbCrLf
+  X = X & "  private static " & FName & " _instance;" & vbCrLf
+  X = X & "  public static " & FName & " instance { set { _instance = null; } get { return _instance ?? (_instance = new " & FName & "()); }}"
+  X = X & "  public " & FName & "() { InitializeComponent(); }" & vbCrLf
+  X = X & vbCrLf
+  X = X & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
+  X = X & vbCrLf & "}"
   X = X & vbCrLf & "}"
   
   X = deWS(X)
@@ -540,26 +547,6 @@ Public Function ConvertType(ByVal S As String)
   ConvertType = Res
 End Function
 
-Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean = False) As String
-  If Not Discard Then EOLComment = nextBy(Str, "'", 2)
-  DeComment = RTrim(nextBy(Str, "'", 1))
-End Function
-
-Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As Boolean = False)
-  Dim c As String
-  Dim Pr As String
-  Pr = IIf(KeepVBComments, "'", "//")
-  If EOLComment = "" Then ReComment = Str: Exit Function
-  c = Pr & EOLComment
-  EOLComment = ""
-  If Not IsInStr(Str, vbCrLf) Then
-    ReComment = Str & IIf(Len(Str) = 0, "", " ") & c
-  Else
-    ReComment = Replace(Str, vbCrLf, c & vbCrLf, , 1)         ' Always leave on end of first line...
-  End If
-  If Left(LTrim(ReComment), 2) = Pr Then ReComment = LTrim(ReComment)
-End Function
-
 Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused As Boolean = False) As String
   Dim isOptional As Boolean
   Dim isByRef As Boolean, asOut As Boolean
@@ -607,7 +594,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   ConvertParameter = Trim(Res)
 End Function
 
-Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False) As String
+Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False, Optional ByRef asName As String) As String
   Const retToken = "#RET#"
   Dim Res As String
   Dim FName As String, fArgs As String, retType As String, T As String
@@ -625,6 +612,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   If tLeft(S, 9) = "Function " Then Res = Res & retToken & " ": S = Mid(S, 10)
   
   FName = Trim(SplitWord(Trim(S), 1, "("))
+  asName = FName
   S = Trim(tMid(S, Len(FName) + 2))
   If Left(S, 1) = "(" Then S = Trim(tMid(S, 2))
   fArgs = Trim(nextBy(S, ")"))
@@ -700,7 +688,7 @@ Public Function ConvertElement(ByVal S As String) As String
   If Complete Then ConvertElement = S: Exit Function
   
   If RegExTest(Trim(S), "^" & patToken & "$") Then
-    If IsFuncRef(Trim(S)) Then
+    If IsFuncRef(Trim(S)) And S <> CurrSub Then
       ConvertElement = Trim(S) & "()"
       Exit Function
     End If
@@ -902,8 +890,10 @@ Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As B
   Ind = 0
   N = 0
 '  Prg 0, UBound(S) - LBound(S) + 1, "Globals..."
+  InitDeString
   For Each L In S
     L = DeComment(L)
+    L = DeString(L)
     O = ""
     If Building <> "" Then
       Building = Building & vbCrLf & L
@@ -916,20 +906,21 @@ Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As B
       End If
     ElseIf L Like "Option *" Then
       O = "// " & L
-    ElseIf RegExTest(L, "(Public |Private |)Declare ") Then
+    ElseIf RegExTest(L, "^(Public |Private |)Declare ") Then
       O = ConvertAPIDef(L)
-    ElseIf RegExTest(L, "(Global |Public |Private |)Const ") Then
+    ElseIf RegExTest(L, "^(Global |Public |Private |)Const ") Then
       O = ConvertConstant(L, True)
-    ElseIf RegExTest(L, "(Public |Private |)Event ") Then
+    ElseIf RegExTest(L, "^(Public |Private |)Event ") Then
       O = ConvertEvent(L)
-    ElseIf RegExTest(L, "(Public |Private |)Enum ") Then
+    ElseIf RegExTest(L, "^(Public |Private |)Enum ") Then
       Building = L
-    ElseIf RegExTest(L, "(Public |Private |)Type ") Then
+    ElseIf RegExTest(LTrim(L), "^(Public |Private |)Type ") Then
       Building = L
     ElseIf tLeft(L, 8) = "Private " Or tLeft(L, 7) = "Public " Or tLeft(L, 4) = "Dim " Then
       O = ConvertDeclare(L, 0, True, asModule)
     End If
       
+    O = ReComment(O)
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "" Or Right(O, 2) = vbCrLf, "", vbCrLf)
     N = N + 1
@@ -1042,8 +1033,10 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
     
 'If IsInStr(Str, " WinCDSDataPath(") Then Stop
 'If IsInStr(Str, " RunShellExecute(") Then Stop
+  InitDeString
   For Each L In S
     L = DeComment(L)
+    L = DeString(L)
     O = ""
 
 'If IsInStr(L, "1/1/2001") Then Stop
@@ -1052,7 +1045,9 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 
     If LMatch(L, "Sub ") Or LMatch(L, "Private Sub ") Or LMatch(L, "Public Sub ") Or _
        LMatch(L, "Function ") Or LMatch(L, "Private Function ") Or LMatch(L, "Public Function ") Then
-      O = sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule)
+      Dim nK As Long
+      If LMatch(L, "Function ") Then CurrSub = nextBy(L, "(", 2)
+      O = sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule, CurrSub)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then
       AddProperty Str
@@ -1197,6 +1192,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
       O = sSpace(Ind) & ConvertCodeLine(L)
     End If
+    O = ReString(O)
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "", "", vbCrLf)
   Next

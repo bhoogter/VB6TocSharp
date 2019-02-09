@@ -12,6 +12,10 @@ Public Function OutputFolder(Optional ByVal F As String) As String
   OutputFolder = def_outputFolder & OutputSubFolder(F)
 End Function
 
+Public Function AssemblyName() As String
+  AssemblyName = "WinCDS"
+End Function
+
 Public Function OutputSubFolder(ByVal F As String) As String
   Select Case FileExt(F)
     Case ".bas": OutputSubFolder = "Modules\"
