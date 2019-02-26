@@ -159,6 +159,7 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "Date", "Today": Complete = True: S = "DateTime.Today"
     Case "Now":           Complete = True: S = "DateTime.Now"
     Case "Kill":          S = "File.Delete(" & R & ")"
+    Case "FreeFile":      S = "FreeFile()"
     Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
     Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"

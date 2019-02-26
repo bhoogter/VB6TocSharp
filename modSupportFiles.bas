@@ -216,6 +216,15 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static long UBound(object A) { return A != null && (A is System.Collections.IList) ? ((System.Collections.IList)A).Count - 1 : 0; }"
   S = S & N
   S = S & N & "  public static bool IsLike(string A, string B) { return Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(A, B, Microsoft.VisualBasic.CompareMethod.Binary); }"
+  S = S & N
+  S = S & N & "  public static bool VBOpenFile(dynamic A, dynamic B) { return false; }"
+  S = S & N & "  public static bool VBWriteFile(dynamic A, dynamic B) { return false; }"
+  S = S & N & "  public static bool VBCloseFile(dynamic A) { return false; }"
+  S = S & N & "  public static string VBReadFileLine(dynamic A, dynamic B) { return """"; }"
+  S = S & N & "  public static bool DoEvents() { return false; }"
+  S = S & N
+  S = S & N & "  public static bool Resume() { return false; }"
+  S = S & N & "  public static bool End() { return false; }"
   S = S & M
   S = S & N & "}"
   

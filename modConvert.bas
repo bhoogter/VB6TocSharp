@@ -661,6 +661,17 @@ Public Function ConvertElement(ByVal S As String) As String
   S = Trim(S)
   If S = "" Then Exit Function
   
+  If Left(Trim(S), 2) = "&H" Then
+    ConvertElement = "0x" & Mid(Trim(S), 3)
+    Exit Function
+  End If
+  
+  If IsNumeric(Trim(S)) Then
+    ConvertElement = Val(S)
+    If IsInStr(S, ".") Then ConvertElement = ConvertElement & "m"
+    Exit Function
+  End If
+  
   If Left(S, 1) = """" And Right(S, 1) = """" And StrCnt(S, """") Mod 2 = 0 Then
     ConvertElement = """" & ConvertString(Mid(S, 2, Len(S) - 2)) & """"
     Exit Function
@@ -818,6 +829,7 @@ Public Function ConvertValue(ByVal S As String) As String
     F = NextByOp(S, 1, Op)
     If F = "" Then Exit Do
     Select Case Trim(Op)
+      Case "\":    OpN = "/"
       Case "=":    OpN = " == "
       Case "<>":   OpN = " != "
       Case "&":    OpN = " + "
@@ -828,7 +840,13 @@ Public Function ConvertValue(ByVal S As String) As String
       Case "Or":   OpN = " || "
       Case Else:   OpN = Op
     End Select
-    O = O & ConvertElement(F) & OpN
+    
+    If Left(F, 1) = "(" And Right(F, 1) = ")" Then
+      O = O & "(" & ConvertValue(Mid(F, 2, Len(F) - 2)) & ")" & OpN
+    Else
+      O = O & ConvertElement(F) & OpN
+    End If
+    
     If Op = "" Then Exit Do
     S = Mid(S, Len(F) + Len(Op) + 1)
     If S = "" Or Op = "" Then Exit Do
