@@ -3,6 +3,7 @@ Option Explicit
 
 Private OutRes As String
 Private cFuncRef_Name As String, cFuncRef_Value As String
+Private cEnuRef_Name As String, cEnumRef_Value As String
 Private Funcs As Collection
 
 Private Function RefList(Optional ByVal KillRef As Boolean = False) As String
@@ -31,6 +32,7 @@ Private Function ScanRefsFile(ByVal FN As String) As Long
   Dim S As String, L As String, LL
   Dim F As String, G As String
   Dim Cont As Boolean, DoCont As Boolean
+  Dim CurrEnum As String
   M = FileBaseName(FN)
   S = ReadEntireFile(FN)
   ScanRefsFile = 0
@@ -81,6 +83,17 @@ Private Function ScanRefsFile(ByVal FN As String) As Long
       If LMatch(L, "Const ") Then L = Mid(L, 7)
       G = SplitWord(L)
     ElseIf tLMatch(L, "Enum ") Or tLMatch(L, "Public Enum ") Then
+      L = LTrim(L)
+      If LMatch(L, "Public ") Then L = Mid(L, 8)
+      If LMatch(L, "Enum ") Then L = Mid(L, 5)
+      CurrEnum = Trim(L)
+    ElseIf tLMatch(L, "End Enum") Then
+      CurrEnum = ""
+    ElseIf CurrEnum <> "" Then
+      G = SplitWord(L)
+      F = M & ":" & G & ":Enum:" & CurrEnum & "." & G
+      OutRes = OutRes & vbCrLf & F
+      ScanRefsFile = ScanRefsFile + 1
     End If
 NextLine:
   Next
@@ -99,27 +112,17 @@ On Error Resume Next
 End Sub
 
 Public Function FuncRef(ByVal FName As String) As String
-
-  
-'  Static S As String
-'  If S = "" Then S = ReadEntireFile(RefList)
-  
   If FName = cFuncRef_Name Then
     FuncRef = cFuncRef_Value
     Exit Function
   End If
   
-'  FuncRef = RegExNMatch(S, ".*:" & FName & ":.*")
   InitFuncs
 On Error Resume Next
   FuncRef = Funcs(FName)
   
   cFuncRef_Name = FName
   cFuncRef_Value = FuncRef
-End Function
-
-Public Function IsFuncRef(ByVal FName As String) As Boolean
-  IsFuncRef = FuncRef(FName) <> ""
 End Function
 
 Public Function FuncRefModule(ByVal FName As String) As String
@@ -133,6 +136,15 @@ End Function
 Public Function FuncRefDecl(ByVal FName As String) As String
   FuncRefDecl = nextBy(FuncRef(FName), ":", 4)
 End Function
+
+Public Function IsFuncRef(ByVal FName As String) As Boolean
+  IsFuncRef = FuncRef(FName) <> "" And FuncRefEntity(FName) = "Function"
+End Function
+
+Public Function IsEnumRef(ByVal FName As String) As Boolean
+  IsEnumRef = FuncRef(FName) <> "" And FuncRefEntity(FName) = "Enum"
+End Function
+
 
 Public Function FuncRefDeclTyp(ByVal FName As String) As String
   FuncRefDeclTyp = SplitWord(FuncRefDecl(FName), 1)
@@ -168,25 +180,27 @@ Public Function FuncRefDeclArgCnt(ByVal FName As String) As Long
   Loop While True
 End Function
 
-Public Function FuncRefArgType(ByVal FName, ByVal N As Long) As String
+Public Function FuncRefArgType(ByVal FName As String, ByVal N As Long) As String
   FuncRefArgType = FuncRefDeclArgN(FName, N)
   If FuncRefArgType = "" Then Exit Function
   FuncRefArgType = SplitWord(FuncRefArgType, 2, " As ")
 End Function
 
-Public Function FuncRefArgByRef(ByVal FName, ByVal N As Long) As Boolean
+Public Function FuncRefArgByRef(ByVal FName As String, ByVal N As Long) As Boolean
   FuncRefArgByRef = Not IsInStr(FuncRefDeclArgN(FName, N), "ByVal ")
 End Function
 
-Public Function FuncRefArgOptional(ByVal FName, ByVal N As Long) As Boolean
+Public Function FuncRefArgOptional(ByVal FName As String, ByVal N As Long) As Boolean
   FuncRefArgOptional = IsInStr(FuncRefDeclArgN(FName, N), "Optional ")
 End Function
 
-Public Function FuncRefArgDefault(ByVal FName, ByVal N As Long) As String
+Public Function FuncRefArgDefault(ByVal FName As String, ByVal N As Long) As String
   Dim aTyp As String
   If Not FuncRefArgOptional(FName, N) Then Exit Function
   FuncRefArgDefault = SplitWord(FuncRefDeclArgN(FName, N), 2, " = ", True, True)
   If FuncRefArgDefault = "" Then FuncRefArgDefault = ConvertDefaultDefault(FuncRefArgType(FName, N))
 End Function
 
-
+Public Function EnumRefRepl(ByVal EName As String) As String
+  EnumRefRepl = FuncRefDecl(EName)
+End Function

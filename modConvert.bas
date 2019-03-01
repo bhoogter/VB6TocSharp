@@ -464,31 +464,31 @@ End Function
 
 
 Public Function ConvertEnum(ByVal S As String)
-  Dim isPrivate As Boolean, eName As String
+  Dim isPrivate As Boolean, EName As String
   Dim Res As String, has As Boolean
   If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
   If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
   If tLeft(S, 5) = "Enum " Then S = tMid(S, 6)
-  eName = RegExNMatch(S, patToken, 0)
-  S = nlTrim(tMid(S, Len(eName) + 1))
+  EName = RegExNMatch(S, patToken, 0)
+  S = nlTrim(tMid(S, Len(EName) + 1))
   
-  Res = "public enum " & eName & " {"
+  Res = "public enum " & EName & " {"
   
   Do While tLeft(S, 8) <> "End Enum" And S <> ""
-    eName = RegExNMatch(S, patToken, 0)
-    Res = Res & IIf(has, ",", "") & vbCrLf & sSpace(SpIndent) & eName
+    EName = RegExNMatch(S, patToken, 0)
+    Res = Res & IIf(has, ",", "") & vbCrLf & sSpace(SpIndent) & EName
     has = True
 
-    S = nlTrim(tMid(S, Len(eName) + 1))
+    S = nlTrim(tMid(S, Len(EName) + 1))
     If tLeft(S, 1) = "=" Then
       S = nlTrim(Mid(S, 3))
       If Left(S, 1) = "&" Then
-        eName = ConvertElement(RegExNMatch(S, "&H[0-9A-F]+"))
+        EName = ConvertElement(RegExNMatch(S, "&H[0-9A-F]+"))
       Else
-        eName = RegExNMatch(S, "[0-9]*", 0)
+        EName = RegExNMatch(S, "[0-9]*", 0)
       End If
-      Res = Res & " = " & eName
-      S = nlTrim(tMid(S, Len(eName) + 1))
+      Res = Res & " = " & EName
+      S = nlTrim(tMid(S, Len(EName) + 1))
     End If
   Loop
   Res = Res & vbCrLf & "}"
@@ -497,21 +497,21 @@ Public Function ConvertEnum(ByVal S As String)
 End Function
 
 Public Function ConvertType(ByVal S As String)
-  Dim isPrivate As Boolean, eName As String, eArr As String, eType As String
+  Dim isPrivate As Boolean, EName As String, eArr As String, eType As String
   Dim Res As String
   Dim N As String
   If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
   If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
   If tLeft(S, 5) = "Type " Then S = tMid(S, 6)
-  eName = RegExNMatch(S, patToken, 0)
-  S = nlTrim(tMid(S, Len(eName) + 1))
+  EName = RegExNMatch(S, patToken, 0)
+  S = nlTrim(tMid(S, Len(EName) + 1))
 'If IsInStr(eName, "OSVERSIONINFO") Then Stop
   
-  Res = IIf(isPrivate, "private ", "public ") & "class " & eName & " {"
+  Res = IIf(isPrivate, "private ", "public ") & "class " & EName & " {"
   
   Do While tLeft(S, 8) <> "End Type" And S <> ""
-    eName = RegExNMatch(S, patToken, 0)
-    S = nlTrim(tMid(S, Len(eName) + 1))
+    EName = RegExNMatch(S, patToken, 0)
+    S = nlTrim(tMid(S, Len(EName) + 1))
     eArr = ""
     If LMatch(S, "(") Then
       N = nextBy(Mid(S, 2), ")")
@@ -527,7 +527,7 @@ Public Function ConvertType(ByVal S As String)
     Else
       eType = "Variant"
     End If
-    Res = Res & vbCrLf & " public " & ConvertDataType(eType) & IIf(eArr = "", "", "[]") & " " & eName
+    Res = Res & vbCrLf & " public " & ConvertDataType(eType) & IIf(eArr = "", "", "[]") & " " & EName
     If eArr = "" Then
       Res = Res & " = " & ConvertDefaultDefault(eType)
     Else
@@ -689,6 +689,7 @@ Public Function ConvertElement(ByVal S As String) As String
 'If IsInStr(S, "True") Then Stop
 'If IsInStr(S, ":=") Then Stop
 'If IsInStr(S, "GetRecordNotFound") Then Stop
+'If IsInStr(S, "Nonretro_14day") Then Stop
 
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
   S = RegExReplace(S, "^" & patToken & "!" & patToken & patNotToken, "$1(""$2"")$3") ' RS!Field -> RS("Field")
@@ -702,9 +703,11 @@ Public Function ConvertElement(ByVal S As String) As String
     If IsFuncRef(Trim(S)) And S <> CurrSub Then
       ConvertElement = Trim(S) & "()"
       Exit Function
+    ElseIf IsEnumRef(Trim(S)) Then
+      ConvertElement = EnumRefRepl(Trim(S))
+      Exit Function
     End If
   End If
-
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)
@@ -814,6 +817,7 @@ Public Function ConvertValue(ByVal S As String) As String
   Dim F As String, Op As String, OpN As String
   Dim O As String
   O = ""
+  S = Trim(S)
   If S = "" Then Exit Function
   
 'If IsInStr(S, "GetMaxFieldValue") Then Stop
