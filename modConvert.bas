@@ -656,6 +656,7 @@ End Function
 
 Public Function ConvertElement(ByVal S As String) As String
 'Debug.Print "ConvertElement: " & S
+If IsInStr(S, "frmSetup") Then Stop
   Dim FirstToken As String, FirstWord As String
   Dim T As String, Complete As Boolean
   S = Trim(S)
@@ -707,6 +708,11 @@ Public Function ConvertElement(ByVal S As String) As String
       ConvertElement = EnumRefRepl(Trim(S))
       Exit Function
     End If
+  End If
+  
+  If IsFormRef(Trim(S)) Then
+    ConvertElement = FormRefRepl(Trim(S))
+    Exit Function
   End If
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
@@ -1167,7 +1173,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
       L = SplitWord(L, 2, "=")
       forStr = SplitWord(L, 1, " To ")
       forEnd = SplitWord(L, 2, " To ")
-      O = O & sSpace(Ind) & "for(" & forKey & "=" & forStr & "; " & forKey & "<" & forEnd & "; " & forKey + "++) {"
+      O = O & sSpace(Ind) & "for(" & ConvertElement(forKey) & "=" & ConvertElement(forStr) & "; " & ConvertElement(forKey) & "<" & ConvertElement(forEnd) & "; " & ConvertElement(forKey) & "++) {"
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 11) = "Loop While " Then
       Ind = Ind - SpIndent

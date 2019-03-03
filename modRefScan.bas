@@ -13,14 +13,23 @@ On Error Resume Next
 End Function
 
 Public Function ScanRefs() As Long
-  Dim L
+  Dim L, T As String
 On Error Resume Next
   OutRes = ""
   ScanRefs = 0
   For Each L In Split(VBPModules(vbpFile), vbCrLf)
-    If L = "" Then GoTo SkipItem
+    If L = "" Then GoTo SkipMod
     ScanRefs = ScanRefs + ScanRefsFile(FilePath(vbpFile) & L)
-SkipItem:
+SkipMod:
+  Next
+  
+  For Each L In Split(VBPForms(vbpFile), vbCrLf)
+    L = Replace(L, ".frm", "")
+    If L = "" Then GoTo SkipForm
+    T = vbCrLf & L & ":" & L & ":Form:"
+    OutRes = OutRes & T
+    ScanRefs = ScanRefs + 1
+SkipForm:
   Next
   RefList KillRef:=True
   WriteFile RefList, OutRes
@@ -145,6 +154,12 @@ Public Function IsEnumRef(ByVal FName As String) As Boolean
   IsEnumRef = FuncRef(FName) <> "" And FuncRefEntity(FName) = "Enum"
 End Function
 
+Public Function IsFormRef(ByVal FName As String) As Boolean
+  Dim T As String
+  T = SplitWord(FName, 1, ".")
+  IsFormRef = FuncRef(T) <> "" And FuncRefEntity(T) = "Form"
+End Function
+
 
 Public Function FuncRefDeclTyp(ByVal FName As String) As String
   FuncRefDeclTyp = SplitWord(FuncRefDecl(FName), 1)
@@ -203,4 +218,11 @@ End Function
 
 Public Function EnumRefRepl(ByVal EName As String) As String
   EnumRefRepl = FuncRefDecl(EName)
+End Function
+
+Public Function FormRefRepl(ByVal FName As String) As String
+  Dim T As String, U As String
+  T = SplitWord(FName, 1, ".")
+  U = FuncRefModule(T) & ".DefaultInstance"
+  FormRefRepl = Replace(FName, T, U)
 End Function

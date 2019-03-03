@@ -186,6 +186,8 @@ Public Function VBExtensionClass() As String
   S = S & M & "public static class VBExtension {"
   S = S & N & "  public enum vbTriState {  vbFalse = 0, vbTrue = -1, vbUseDefault = -2 }"
   S = S & N
+  S = S & N & "  public static object Printer;"
+  S = S & N
   S = S & N & "  public static object IIf(bool A, object B, object C) { return !!A ? B : C; }"
   S = S & N & "  public static bool IIf(bool A, bool B, bool C) { return !!A ? B : C; }"
   S = S & N & "  public static string IIf(bool A, string B, string C) { return !!A ? B : C; }"
