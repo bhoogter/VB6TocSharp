@@ -67,10 +67,16 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using System.Windows.Shapes;"
     
     Path = FilePath(vbpFile)
-    For Each L In Split(VBPModules(vbpFile) & vbCrLf & VBPForms(vbpFile), vbCrLf)
+    For Each L In Split(VBPModules(vbpFile), vbCrLf)
       If L <> "" Then
         Name = ModuleName(ReadEntireFile(Path & L))
         E = E & N & "using static " & PackagePrefix & Name & ";"
+      End If
+    Next
+    For Each L In Split(VBPForms(vbpFile), vbCrLf)
+      If L <> "" Then
+        Name = ModuleName(ReadEntireFile(Path & L))
+        E = E & N & "using static " & AssemblyName & ".Forms." & Name & ";"
       End If
     Next
 '    For Each L In Split(VBPClasses(vbpFile), vbCrLf)  ' controls?

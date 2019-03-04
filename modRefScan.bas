@@ -223,6 +223,6 @@ End Function
 Public Function FormRefRepl(ByVal FName As String) As String
   Dim T As String, U As String
   T = SplitWord(FName, 1, ".")
-  U = FuncRefModule(T) & ".DefaultInstance"
+  U = FuncRefModule(T) & ".instance"
   FormRefRepl = Replace(FName, T, U)
 End Function
