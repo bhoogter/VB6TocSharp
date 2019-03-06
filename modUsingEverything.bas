@@ -66,6 +66,10 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using System.Windows.Media.Imaging;"
     E = E & N & "using System.Windows.Shapes;"
     
+    E = E & N
+    
+    E = E & N & "using " & AssemblyName & ".Forms;"
+    
     Path = FilePath(vbpFile)
     For Each L In Split(VBPModules(vbpFile), vbCrLf)
       If L <> "" Then

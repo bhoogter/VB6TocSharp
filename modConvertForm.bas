@@ -141,6 +141,15 @@ On Error Resume Next
     S = S & " Margin=" & Quote(Px(cValP(Props, "left")) & "," & Px(cValP(Props, "top")) & ",0,0")
     S = S & " Width=" & Quote(Px(cValP(Props, "width")))
     S = S & " Height=" & Quote(Px(cValP(Props, "height")))
+  ElseIf tType = "Image" Then
+    S = S & "<" & tType
+    
+    S = S & " x:Name=""" & cName & """"
+    S = S & " Margin=" & Quote(Px(cValP(Props, "left")) & "," & Px(cValP(Props, "top")) & ",0,0")
+    S = S & " Width=" & Quote(Px(cValP(Props, "width")))
+    S = S & " Height=" & Quote(Px(cValP(Props, "height")))
+    S = S & " VerticalAlignment=" & Quote("Top")
+    S = S & " HorizontalAlignment=" & Quote("Left")
   Else
     S = ""
     S = S & "<" & tType

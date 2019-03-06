@@ -997,7 +997,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
       ConvertCodeLine = A
     End If
     
-    ConvertCodeLine = ConvertCodeLine & " = "
+    ConvertCodeLine = ConvertValue(ConvertCodeLine) & " = "
 
     B = ConvertValue(Trim(Mid(S, T + 1)))
     ConvertCodeLine = ConvertCodeLine & B
