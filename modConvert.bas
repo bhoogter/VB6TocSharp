@@ -69,6 +69,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   
   J = CodeSectionGlobalEndLoc(Code)
   Globals = ConvertGlobals(Left(Code, J))
+  InitLocalFuncs FormControls(FName, Preamble)
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = ""
@@ -974,11 +975,11 @@ Public Function ConvertCodeLine(ByVal S As String) As String
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
   
-  If RegExTest(Trim(S), "^[a-zA-Z0-9_.()""]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.]+ \= ") Then
+  If RegExTest(Trim(S), "^[a-zA-Z0-9_.()]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.()]+ \= ") Then
     T = InStr(S, "=")
     A = Trim(Left(S, T - 1))
     If tLeft(A, 4) = "Set " Then A = Trim(Mid(A, 5))
-    SubParamAssign A
+    SubParamAssign RegExNMatch(A, patToken)
     If RegExTest(A, "^" & patToken & "\(""[^""]+""\)") Then
       P = RegExNMatch(A, "^" & patToken)
       V = SubParam(P)

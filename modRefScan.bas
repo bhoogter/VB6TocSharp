@@ -4,7 +4,7 @@ Option Explicit
 Private OutRes As String
 Private cFuncRef_Name As String, cFuncRef_Value As String
 Private cEnuRef_Name As String, cEnumRef_Value As String
-Private Funcs As Collection
+Private Funcs As Collection, LocalFuncs As Collection
 
 Private Function RefList(Optional ByVal KillRef As Boolean = False) As String
 On Error Resume Next
@@ -28,6 +28,16 @@ SkipMod:
     If L = "" Then GoTo SkipForm
     T = vbCrLf & L & ":" & L & ":Form:"
     OutRes = OutRes & T
+    
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    Dim S As String, J As Long, Preamble As String, ControlRefs As String
+    S = ReadEntireFile(vbpPath & L & ".frm")
+    J = CodeSectionLoc(S)
+    Preamble = Left(S, J - 1)
+    ControlRefs = FormControls(L, Preamble, False)
+    OutRes = OutRes & ControlRefs
+''''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
+    
     ScanRefs = ScanRefs + 1
 SkipForm:
   Next
@@ -118,6 +128,16 @@ On Error Resume Next
   For Each L In Split(S, vbCrLf)
     Funcs.Add L, SplitWord(L, 2, ":")
   Next
+  InitLocalFuncs
+End Sub
+
+Public Sub InitLocalFuncs(Optional ByVal S As String)
+On Error Resume Next
+  Dim L As Variant
+  Set LocalFuncs = New Collection
+  For Each L In Split(S, vbCrLf)
+    LocalFuncs.Add L, SplitWord(L, 2, ":")
+  Next
 End Sub
 
 Public Function FuncRef(ByVal FName As String) As String
@@ -129,6 +149,7 @@ Public Function FuncRef(ByVal FName As String) As String
   InitFuncs
 On Error Resume Next
   FuncRef = Funcs(FName)
+  If FuncRef = "" Then FuncRef = LocalFuncs(FName)
   
   cFuncRef_Name = FName
   cFuncRef_Value = FuncRef
@@ -225,4 +246,15 @@ Public Function FormRefRepl(ByVal FName As String) As String
   T = SplitWord(FName, 1, ".")
   U = FuncRefModule(T) & ".instance"
   FormRefRepl = Replace(FName, T, U)
+End Function
+
+Public Function IsControlRef(ByVal FName As String, Repl)
+  Dim T1 As String, T2 As String
+  T1 = SplitWord(FName, 1, ".")
+  T2 = T1 & "." & SplitWord(FName, 2, ".")
+  If FuncRef(T1) <> "" And FuncRefEntity(T1) = "Control" Then
+    IsControlRef = True
+End Function
+
+Public Function FormControlReplDefaultProp(ByVal Line As String) As String
 End Function

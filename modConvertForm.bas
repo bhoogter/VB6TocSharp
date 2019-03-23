@@ -24,6 +24,30 @@ NextLine:
   Frm2Xml = R
 End Function
 
+Public Function FormControls(ByVal Src As String, ByVal F As String, Optional ByVal asLocal As Boolean = True)
+  Dim Sp, L, I As Long
+  Dim R As String, T As String
+  Dim Nm As String, Ty As String
+  Sp = Split(F, vbCrLf)
+  
+  For Each L In Sp
+    L = Trim(L)
+    If L = "" Then GoTo NextLine
+    If Left(L, 6) = "Begin " Then
+      Ty = SplitWord(L, 2)
+      Nm = SplitWord(L, 3)
+      Select Case Ty
+        Case "VB.Form"
+        Case Else
+          T = Src & ":" & IIf(asLocal, "", Src & ".") & Nm & ":Control:" & Ty
+          If Right(R, Len(T)) <> T Then R = R & vbCrLf & T
+      End Select
+    End If
+NextLine:
+  Next
+  FormControls = R
+End Function
+
 
 
 Public Function ConvertFormUi(ByVal F As String) As String
