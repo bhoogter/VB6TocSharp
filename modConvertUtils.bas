@@ -57,7 +57,10 @@ Public Function DeString(ByVal S As String) As String
   Dim Token As String
   Dim A As Long, B As Long, C As Long
   Dim K As String
-If mStrings Is Nothing Then InitDeString
+  If mStrings Is Nothing Then InitDeString
+  
+'If IsInStr(S, """ArCheck.chkShowB") Then Stop
+  
   A = InStr(S, Q)
   C = A
   If A > 0 Then
@@ -80,13 +83,25 @@ MidQuote:
   DeString = S
 End Function
 
-Public Function ReString(ByVal Str As String) As String
+Public Function ReString(ByVal Str As String, Optional ByVal doConvertString As Boolean = False) As String
   Dim I As Long, T As String, V As String
   For I = 1 To nStringCnt
     T = DeStringToken(I)
     V = mStrings.Item(T)
+    If V <> "" And doConvertString Then
+      If Left(V, 1) = """" And Right(V, 1) = """" Then
+        V = """" & InternalConvertString(Mid(V, 2, Len(V) - 2)) & """"
+      End If
+    End If
     Str = Replace(Str, T, V)
   Next
   ReString = Str
+End Function
+
+
+Private Function InternalConvertString(ByVal S As String)
+  S = Replace(S, "\", "\\")
+  S = Replace(S, """""", "\""")
+  InternalConvertString = S
 End Function
 

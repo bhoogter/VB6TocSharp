@@ -277,7 +277,7 @@ WriteFile "C:\Users\benja\Desktop\sani.txt", S, True
   
   R = ReadOutProperties(asModule) & vbCrLf2 & R
   
-  R = ReString(R)
+  R = ReString(R, True)
   
   ConvertCodeSegment = R
 End Function
@@ -697,11 +697,6 @@ Public Function ConvertElement(ByVal S As String) As String
     Exit Function
   End If
   
-  If Left(S, 1) = """" And Right(S, 1) = """" And StrCnt(S, """") Mod 2 = 0 Then
-    ConvertElement = """" & ConvertString(Mid(S, 2, Len(S) - 2)) & """"
-    Exit Function
-  End If
-  
   If RegExTest(S, "#[0-9]+/[0-9]+/[0-9]+#") Then
     ConvertElement = "DateValue(""" & Mid(S, 2, Len(S) - 2) & """)"
     Exit Function
@@ -789,8 +784,6 @@ DoReplacements:
     If Right(ConvertElement, 1) = "&" Then ConvertElement = Left(ConvertElement, Len(ConvertElement) - 1)
   End If
   
-  ConvertElement = ConvertStrings(ConvertElement)
-
   If WithLevel > 0 Then
     T = Stack(WithVars, , True)
     ConvertElement = Trim(RegExReplace(ConvertElement, "([ (])(\.)" & patToken, "$1" & T & "$2$3"))
@@ -889,44 +882,6 @@ Public Function ConvertValue(ByVal S As String) As String
   ConvertValue = O
 End Function
 
-Public Function TestConvertStrings()
-  Const Q As String = """"
-  Dim S As String
-  S = "a + b + " & Q & "hello" & Q & " + " & Q & ", " & Q & Q & Q & " + k + " & Q & Q & Q & Q & " & " & Q & Q & Q & Q & Q & Q
-  TestConvertStrings = ConvertStrings(S)
-'  Debug.Print S
-'  Debug.Print TestConvertStrings
-End Function
-
-Public Function ConvertStrings(ByVal S As String)
-  Dim A As Long, B As Long
-  Dim T As String, U As String
-  A = InStr(S, """")
-  Do Until A = 0
-    B = InStr(A + 1, S, """")
-    If B = 0 Then Exit Do
-    Do While Mid(S, B + 1, 1) = """" And B <> 0
-      B = InStr(B + 2, S, """")
-    Loop
-    If B = 0 Then Exit Do
-    
-    T = Mid(S, A, B - A + 1)
-    U = """" & ConvertString(Mid(T, 2, Len(T) - 2)) & """"
-    
-    If T <> U Then
-      S = Left(S, A - 1) & U & Mid(S, B + 1)
-    End If
-    A = InStr(B - Len(T) + Len(U) + 1, S, """")
-  Loop
-  ConvertStrings = S
-End Function
-
-Public Function ConvertString(ByVal S As String)
-  S = Replace(S, "\", "\\")
-  S = Replace(S, """""", "\""")
-  ConvertString = S
-End Function
-
 Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As Boolean = False) As String
   Dim Res As String
   Dim S, L, O As String
@@ -973,7 +928,6 @@ Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As B
       O = ConvertDeclare(L, 0, True, asModule)
     End If
       
-    O = ReString(O)
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "" Or Right(O, 2) = vbCrLf, "", vbCrLf)
     N = N + 1
@@ -981,7 +935,8 @@ Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As B
 '    If N Mod 10000 = 0 Then Stop
   Next
 '  Prg
-  
+
+  Res = ReString(Res, True)
   ConvertGlobals = Res
 End Function
 

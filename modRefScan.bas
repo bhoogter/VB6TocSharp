@@ -254,6 +254,7 @@ Public Function IsControlRef(ByVal FName As String, Repl)
   T2 = T1 & "." & SplitWord(FName, 2, ".")
   If FuncRef(T1) <> "" And FuncRefEntity(T1) = "Control" Then
     IsControlRef = True
+  End If
 End Function
 
 Public Function FormControlReplDefaultProp(ByVal Line As String) As String
