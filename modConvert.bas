@@ -165,6 +165,7 @@ Public Function SanitizeCode(ByVal Str As String)
   R = "": N = vbCrLf
   Sp = Split(Str, vbCrLf)
   Building = ""
+
   For Each L In Sp
     If Right(L, 1) = "_" Then Building = Building & Trim(Left(L, Len(L) - 1)) & " ": GoTo NextLine
     If Building <> "" Then
@@ -173,6 +174,7 @@ Public Function SanitizeCode(ByVal Str As String)
     End If
     
     L = DeComment(L)
+    L = DeString(L)
 'If IsInStr(L, "CustRec <> 0") Then Stop
     
     FinishSplitIf = False
@@ -182,7 +184,7 @@ Public Function SanitizeCode(ByVal Str As String)
       R = R & N & F
       L = Mid(L, Len(F) + 2)
       If nextBy(L, " Else ", 2) <> "" Then
-        R = R & N & SanitizeCode(nextBy(L, " Else ", 1))
+        R = R & SanitizeCode(nextBy(L, " Else ", 1))
         R = R & N & "Else"
         L = nextBy(L, "Else ", 2)
       End If
@@ -200,7 +202,7 @@ Public Function SanitizeCode(ByVal Str As String)
           L = Replace(L, NamedParamTok, NamedParamSrc)
           If F = L Then Exit Do
           L = Trim(Mid(L, Len(F) + 2))
-          R = R & N & SanitizeCode(L)
+          R = R & SanitizeCode(L)
 
         Loop While False
       End If
@@ -223,6 +225,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As
   
   ClearProperties
   
+  InitDeString
   S = SanitizeCode(S)
   Do
     P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "[ ]*\("
@@ -255,6 +258,8 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As
   Loop While True
   
   R = ReadOutProperties(asModule) & vbCrLf2 & R
+  
+  R = ReString(R)
   
   ConvertCodeSegment = R
 End Function
@@ -805,7 +810,7 @@ Public Function ConvertFunctionCall(ByVal fCall As String) As String
       TV = nextByP(TS, ",", I)
       If IsFuncRef(tName) Then
         If Trim(TV) = "" Then
-          TB = TB & FuncRefArgDefault(tName, I)
+          TB = TB & ConvertElement(FuncRefArgDefault(tName, I))
         Else
           If FuncRefArgByRef(tName, I) Then TB = TB & "ref "
           TB = TB & ConvertValue(TV)
@@ -971,6 +976,8 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "Nothing") Then Stop
 'If IsInStr(S, "Close ") Then Stop
 'If IsInStr(S, "& functionType & fieldInfo &") Then Stop
+'If IsInStr(S, " & vbCrLf2 & Res)") Then Stop
+'If IsInStr(S, "Res = CompareSI(SI1, SI2)") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
@@ -1062,8 +1069,9 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
     
 'If IsInStr(Str, " WinCDSDataPath(") Then Stop
 'If IsInStr(Str, " RunShellExecute(") Then Stop
-  InitDeString
+'If IsInStr(Str, " ValidateSI(") Then Stop
   For Each L In S
+'If IsInStr(L, "MsgBox") Then Stop
     L = DeComment(L)
     L = DeString(L)
     O = ""
@@ -1221,7 +1229,6 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
       O = sSpace(Ind) & ConvertCodeLine(L)
     End If
-    O = ReString(O)
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "", "", vbCrLf)
   Next

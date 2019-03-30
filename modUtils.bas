@@ -70,10 +70,6 @@ Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """",
   DoEvents
   L = InStr(Src, Del)
   If L = 0 Then nextBy = IIf(Ind <= 1, Src, ""): Exit Function
-  Do While StrCnt(Left(Src, L - 1), """") Mod 2 <> 0
-    L = InStr(L + 1, Src, Del)
-    If L = 0 Then nextBy = IIf(Ind <= 1, Src, ""): Exit Function
-  Loop
   If Ind <= 1 Then
     nextBy = Left(Src, L - 1)
   Else
