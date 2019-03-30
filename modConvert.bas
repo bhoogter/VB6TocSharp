@@ -153,6 +153,14 @@ Public Function ConvertClass(ByVal clsFile As String)
   WriteOut F, X, clsFile
 End Function
 
+Public Function GetMultiLineSpace(ByVal Prv As String, ByVal Nxt As String) As String
+  Dim pC As String, nC As String
+  GetMultiLineSpace = " "
+  pC = Right(Prv, 1)
+  nC = Left(Nxt, 1)
+  If nC = "(" Then GetMultiLineSpace = ""
+End Function
+
 Public Function SanitizeCode(ByVal Str As String)
   Const NamedParamSrc = ":="
   Const NamedParamTok = "###NAMED-PARAMETER###"
@@ -169,9 +177,14 @@ Public Function SanitizeCode(ByVal Str As String)
 
   For Each L In Sp
 'If IsInStr(L, "Set objSourceArNo = New_CDbTypeAhead") Then Stop
-    If Right(L, 1) = "_" Then Building = Building & Trim(Left(L, Len(L) - 1)) & " ": GoTo NextLine
+    If Right(L, 1) = "_" Then
+      Dim C As String
+      C = Trim(Left(L, Len(L) - 1))
+      Building = Building & GetMultiLineSpace(Building, C) & C
+      GoTo NextLine
+    End If
     If Building <> "" Then
-      L = Building & Trim(L)
+      L = Building & GetMultiLineSpace(Building, Trim(L)) & Trim(L)
       Building = ""
     End If
     
@@ -742,7 +755,8 @@ Public Function ConvertElement(ByVal S As String) As String
   End If
   
 ManageFunctions:
-  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]+\(.*\)$") Then
+If IsInStr(ConvertElement, "New_CDbTypeAhead") Then Stop
+  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]+[ ]*\(.*\)$") Then
     ConvertElement = ConvertFunctionCall(ConvertElement)
   End If
 
