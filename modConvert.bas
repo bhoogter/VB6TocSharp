@@ -165,14 +165,17 @@ Public Function SanitizeCode(ByVal Str As String)
   R = "": N = vbCrLf
   Sp = Split(Str, vbCrLf)
   Building = ""
+  
 
   For Each L In Sp
+'If IsInStr(L, "Set objSourceArNo = New_CDbTypeAhead") Then Stop
     If Right(L, 1) = "_" Then Building = Building & Trim(Left(L, Len(L) - 1)) & " ": GoTo NextLine
     If Building <> "" Then
       L = Building & Trim(L)
       Building = ""
     End If
     
+'    If IsInStr(L, "'") Then Stop
     L = DeComment(L)
     L = DeString(L)
 'If IsInStr(L, "CustRec <> 0") Then Stop
@@ -207,7 +210,7 @@ Public Function SanitizeCode(ByVal Str As String)
         Loop While False
       End If
     Else
-      R = R & N & L
+      R = R & N & ReComment(L, True)
     End If
     
     If FinishSplitIf Then R = R & N & "End If"
@@ -226,7 +229,9 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As
   ClearProperties
   
   InitDeString
+WriteFile "C:\Users\benja\Desktop\code.txt", S, True
   S = SanitizeCode(S)
+WriteFile "C:\Users\benja\Desktop\sani.txt", S, True
   Do
     P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "[ ]*\("
     N = -1

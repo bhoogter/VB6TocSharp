@@ -11,8 +11,21 @@ Private Const DeStringToken_Base As String = DeStringToken_Base1 & DeStringToken
 
 
 Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean = False) As String
-  If Not Discard Then EOLComment = nextBy(Str, "'", 2)
-  DeComment = RTrim(nextBy(Str, "'", 1))
+  Dim A As Long
+  Dim T As String, U As String
+  Dim C As String
+  DeComment = Str
+  A = InStr(Str, "'")
+  If A = 0 Then Exit Function
+  Do While True
+    T = Left(Str, A - 1)
+    U = Replace(T, """", "")
+    If (Len(T) - Len(U)) Mod 2 = 0 Then Exit Do
+    A = InStr(A + 1, Str, "'")
+    If A = 0 Then Exit Function
+  Loop
+  If Not Discard Then EOLComment = Mid(Str, A + 1)
+  DeComment = RTrim(Left(Str, A - 1))
 End Function
 
 Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As Boolean = False)
