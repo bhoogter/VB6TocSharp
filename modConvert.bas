@@ -755,7 +755,7 @@ Public Function ConvertElement(ByVal S As String) As String
   End If
   
 ManageFunctions:
-If IsInStr(ConvertElement, "New_CDbTypeAhead") Then Stop
+'If IsInStr(ConvertElement, "New_CDbTypeAhead") Then Stop
   If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]+[ ]*\(.*\)$") Then
     ConvertElement = ConvertFunctionCall(ConvertElement)
   End If
