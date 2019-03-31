@@ -24,6 +24,7 @@ Module=modSupportFiles; modSupportFiles.bas
 Module=modConfig; modConfig.bas
 Module=modRefScan; modRefScan.bas
 Module=modConvertUtils; modConvertUtils.bas
+Module=modControlProperties; modControlProperties.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""

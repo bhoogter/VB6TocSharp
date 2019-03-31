@@ -5,6 +5,7 @@ Const WithMark = "_WithVar_"
 
 Dim WithLevel As Long, MaxWithLevel As Long
 Dim WithVars As String, WithTypes As String, WithAssign As String
+Dim FormName As String
 
 Dim CurrSub As String
 
@@ -41,10 +42,11 @@ Public Function ConvertFile(ByVal someFile As String, Optional ByVal UIOnly As B
   Select Case LCase(FileExt(someFile))
     Case ".bas": ConvertFile = ConvertModule(someFile)
     Case ".cls": ConvertFile = ConvertClass(someFile)
-    Case ".frm": ConvertFile = ConvertForm(someFile, UIOnly)
+    Case ".frm": FormName = FileBaseName(someFile): ConvertFile = ConvertForm(someFile, UIOnly)
 '      Case ".ctl": ConvertModule  someFile
     Case Else: MsgBox "UNKNOWN VB TYPE: " & someFile
   End Select
+  FormName = ""
 End Function
 
 Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean
@@ -729,10 +731,16 @@ Public Function ConvertElement(ByVal S As String) As String
     End If
   End If
   
+  If IsControlRef(Trim(S), FormName) Then
+    S = FormControlRepl(S, FormName)
+  End If
+  
   If IsFormRef(Trim(S)) Then
     ConvertElement = FormRefRepl(Trim(S))
     Exit Function
   End If
+  
+
   
   FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)

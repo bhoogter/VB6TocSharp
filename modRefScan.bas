@@ -181,6 +181,18 @@ Public Function IsFormRef(ByVal FName As String) As Boolean
   IsFormRef = FuncRef(T) <> "" And FuncRefEntity(T) = "Form"
 End Function
 
+Public Function IsControlRef(ByVal Src As String, Optional ByVal FormName As String) As Boolean
+  Dim Tok As String, Tok2 As String
+  Dim FTok As String, TTok As String
+  Tok = RegExNMatch(Src, patToken)
+  Tok2 = RegExNMatch(Src, patToken, 1)
+  TTok = Tok & "." & Tok2
+  FTok = FormName & "." & Tok
+  If FuncRef(TTok) <> "" And FuncRefEntity(TTok) = "Control" Or FuncRef(FTok) <> "" And FuncRefEntity(FTok) = "Control" Then
+    IsControlRef = True
+  End If
+End Function
+
 
 Public Function FuncRefDeclTyp(ByVal FName As String) As String
   FuncRefDeclTyp = SplitWord(FuncRefDecl(FName), 1)
@@ -248,14 +260,19 @@ Public Function FormRefRepl(ByVal FName As String) As String
   FormRefRepl = Replace(FName, T, U)
 End Function
 
-Public Function IsControlRef(ByVal FName As String, Repl)
-  Dim T1 As String, T2 As String
-  T1 = SplitWord(FName, 1, ".")
-  T2 = T1 & "." & SplitWord(FName, 2, ".")
-  If FuncRef(T1) <> "" And FuncRefEntity(T1) = "Control" Then
-    IsControlRef = True
+Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As String) As String
+  Dim Tok As String, Tok2 As String, Tok3 As String
+  Dim F As String, V As String
+  Tok = RegExNMatch(Src, patToken)
+  Tok2 = RegExNMatch(Src, patToken, 1)
+  Tok3 = RegExNMatch(Src, patToken, 2)
+  
+  If Not IsFormRef(Tok) Then
+    F = Tok
+    V = ConvertControlProperty(F, Tok2, FuncRefDecl(FormName & "." & Tok))
+  Else
+    F = Tok & "." & Tok2
+    V = ConvertControlProperty(F, Tok3, FuncRefDecl(Tok & "." & Tok2))
   End If
-End Function
-
-Public Function FormControlReplDefaultProp(ByVal Line As String) As String
+  FormControlRepl = Replace(F, V)
 End Function
