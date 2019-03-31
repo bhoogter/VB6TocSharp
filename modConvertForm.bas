@@ -1,6 +1,8 @@
 Attribute VB_Name = "modConvertForm"
 Option Explicit
 
+Private EventStubs As String
+
 Public Function Frm2Xml(ByVal F As String) As String
   Dim Sp, L, I As Long
   Dim R As String
@@ -56,6 +58,8 @@ Public Function ConvertFormUi(ByVal F As String, ByVal CodeSection As String) As
   Dim Prefix As String
   Dim Props As Collection, pK As String, pV As String
   Sp = Split(F, vbCrLf)
+  
+  EventStubs = ""
   
   For K = LBound(Sp) To UBound(Sp)
     L = Trim(Sp(K))
@@ -209,8 +213,9 @@ On Error Resume Next
   If IsInStr(Features, "ToolTip") And V <> "" Then
     S = S & " ToolTip=" & Quote(V)
   End If
-
   
+  S = S & CheckControlEvents(tType, cName, Code)
+
   If DoEmpty Then
     S = S & " />"
     TagType = ""
@@ -221,11 +226,47 @@ On Error Resume Next
   StartControl = S
 End Function
 
-Public Function CheckEvent(ByVal EventName As String, ByVal ControlName As String, ByVal CodeSection As Boolean) As String
-  Dim X As String
-  X = "Public Function " & ControlName & "_" & EventName & "("
-  If IsInStr(CodeSection, X) Then
-    CheckEvent = " " & EventName & "=""" & T & """"
+Public Function CheckControlEvents(ByVal ControlType As String, ByVal ControlName As String, Optional ByVal CodeSection As String) As String
+  Dim Res As String
+  Dim HasClick As Boolean, HasFocus As Boolean, HasChange As Boolean
+  HasClick = True
+  HasFocus = Not IsInStr("GroupBox", ControlType)
+  HasChange = IsInStr("TextBox,ListBox", ControlType)
+  
+  Res = ""
+  Res = Res & CheckEvent("MouseMove", ControlName, ControlType, CodeSection)
+  If HasFocus Then
+    Res = Res & CheckEvent("GotFocus", ControlName, ControlType, CodeSection)
+    Res = Res & CheckEvent("LostFocus", ControlName, ControlType, CodeSection)
+    Res = Res & CheckEvent("KeyDown", ControlName, ControlType, CodeSection)
+    Res = Res & CheckEvent("KeyUp", ControlName, ControlType, CodeSection)
+  End If
+  If HasClick Then
+    Res = Res & CheckEvent("Click", ControlName, ControlType, CodeSection)
+    Res = Res & CheckEvent("DblClick", ControlName, ControlType, CodeSection)
+  End If
+  If HasChange Then
+    Res = Res & CheckEvent("Change", ControlName, ControlType, CodeSection)
+  End If
+
+  CheckControlEvents = Res
+End Function
+
+Public Function CheckEvent(ByVal EventName As String, ByVal ControlName As String, ByVal ControlType As String, Optional ByVal CodeSection As String) As String
+  Dim Search As String, Target As String, N As String
+  Dim L As Long, V As String
+  N = ControlName & "_" & EventName
+  Search = " " & N & "("
+  Target = EventName
+  Select Case EventName
+    Case "DblClick": Target = "MouseDoubleClick"
+    Case "Change":
+      If ControlType = "TextBox" Then Target = "TextChanged"
+  End Select
+  L = InStr(1, CodeSection, Search, vbTextCompare)
+  If L > 0 Then
+    V = Mid(CodeSection, L + 1, Len(N))   ' Get exact capitalization from source....
+    CheckEvent = " " & Target & "=""" & V & """"
   Else
     CheckEvent = ""
   End If

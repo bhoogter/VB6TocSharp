@@ -134,6 +134,10 @@ Private Sub cmdAll_Click()
   IsWorking True
 End Sub
 
+Private Sub cmdAll_OLEDragOver(Data As DataObject, Effect As Long, Button As Integer, Shift As Integer, X As Single, Y As Single, State As Integer)
+
+End Sub
+
 Private Sub cmdClasses_Click()
   IsWorking
   ConvertFileList FilePath(txtSrc), VBPClasses(txtSrc)
@@ -174,3 +178,7 @@ On Error Resume Next
   shpPrg.Visible = Val >= 0
   lblPrg.Visible = shpPrg.Visible
 End Function
+
+Private Sub fra_DragDrop(Source As Control, X As Single, Y As Single)
+
+End Sub

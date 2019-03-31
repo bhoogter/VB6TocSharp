@@ -242,9 +242,9 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As
   ClearProperties
   
   InitDeString
-WriteFile "C:\Users\benja\Desktop\code.txt", S, True
+'WriteFile "C:\Users\benja\Desktop\code.txt", S, True
   S = SanitizeCode(S)
-WriteFile "C:\Users\benja\Desktop\sani.txt", S, True
+'WriteFile "C:\Users\benja\Desktop\sani.txt", S, True
   Do
     P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "[ ]*\("
     N = -1
