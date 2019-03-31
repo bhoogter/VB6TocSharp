@@ -48,9 +48,7 @@ NextLine:
   FormControls = R
 End Function
 
-
-
-Public Function ConvertFormUi(ByVal F As String) As String
+Public Function ConvertFormUi(ByVal F As String, ByVal CodeSection As String) As String
   Dim Stck(0 To 100)
   Dim Sp, L, J As Long, K As Long, I As Long, Tag As String
   Dim M As String
@@ -90,7 +88,7 @@ On Error GoTo 0
         End If
       Loop While True
       K = K + J - 1
-      R = R & sSpace(I * SpIndent) & StartControl(L, Props, LMatch(M, "End"), Tag) & vbCrLf
+      R = R & sSpace(I * SpIndent) & StartControl(L, Props, LMatch(M, "End"), CodeSection, Tag) & vbCrLf
       I = I + 1
       Stck(I) = Tag
     ElseIf L = "End" Then
@@ -112,7 +110,7 @@ Private Function ConvertProperty(ByVal S As String) As String
   ConvertProperty = S
 End Function
 
-Private Function StartControl(ByVal L As String, ByVal Props As Collection, ByVal DoEmpty As Boolean, ByRef TagType As String) As String
+Private Function StartControl(ByVal L As String, ByVal Props As Collection, ByVal DoEmpty As Boolean, ByVal Code As String, ByRef TagType As String) As String
   Dim cType As String, cName As String, cIndex As String
   Dim tType As String, tCont As Boolean, tDef As String, Features As String
   Dim S As String, N As String, M As String
@@ -221,6 +219,16 @@ On Error Resume Next
     TagType = tType
   End If
   StartControl = S
+End Function
+
+Public Function CheckEvent(ByVal EventName As String, ByVal ControlName As String, ByVal CodeSection As Boolean) As String
+  Dim X As String
+  X = "Public Function " & ControlName & "_" & EventName & "("
+  If IsInStr(CodeSection, X) Then
+    CheckEvent = " " & EventName & "=""" & T & """"
+  Else
+    CheckEvent = ""
+  End If
 End Function
  
 Public Function EndControl(ByVal tType As String) As String

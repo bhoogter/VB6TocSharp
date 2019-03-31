@@ -62,7 +62,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   Preamble = Left(S, J - 1)
   Code = Mid(S, J)
   
-  X = ConvertFormUi(Preamble)
+  X = ConvertFormUi(Preamble, Code)
   F = FName & ".xaml"
   WriteOut F, X, frmFile
   If UIOnly Then Exit Function
