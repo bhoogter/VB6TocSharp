@@ -5,6 +5,7 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
   Select Case vProp
     Case "Visible": ConvertControlProperty = "Visibility"
     Case "Enabled": ConvertControlProperty = "IsEnabled"
+    Case "TabStop": ConvertControlProperty = "IsTabStop"
     Case "Move": ConvertControlProperty = ""
     Case Else: ConvertControlProperty = vProp
   End Select
