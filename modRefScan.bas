@@ -188,6 +188,7 @@ Public Function IsControlRef(ByVal Src As String, Optional ByVal FormName As Str
   Tok2 = RegExNMatch(Src, patToken, 1)
   TTok = Tok & "." & Tok2
   FTok = FormName & "." & Tok
+  If IsInStr(Src, "SetFocus") Then Stop
   If FuncRef(TTok) <> "" And FuncRefEntity(TTok) = "Control" Or FuncRef(FTok) <> "" And FuncRefEntity(FTok) = "Control" Then
     IsControlRef = True
   End If
@@ -266,6 +267,8 @@ Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As 
   Tok = RegExNMatch(Src, patToken)
   Tok2 = RegExNMatch(Src, patToken, 1)
   Tok3 = RegExNMatch(Src, patToken, 2)
+  
+  If IsInStr(Src, "SetFocus") Then Stop
   
   If Not IsFormRef(Tok) Then
     F = Tok
