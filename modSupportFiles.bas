@@ -229,6 +229,34 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static bool Resume() { return false; }"
   S = S & N & "  public static bool End() { return false; }"
   S = S & M
+  S = S & N & "  public static bool HasEmptyText(this TextBox textBox) { return string.IsNullOrEmpty(textBox.Text); }"
+  S = S & N & "  public static decimal getValue(this TextBox textBox) { try { return Decimal.Parse(textBox.Text); } catch { return 0; } }"
+  S = S & N & "  public static decimal setValue(this TextBox textBox, decimal value) { textBox.Text = value.ToString(); return getValue(textBox); }"
+  S = S & N & "  public static long getValueLong(this TextBox textBox) { try { return long.Parse(textBox.Text); } catch { return 0; } }"
+  S = S & N & "  public static long setValueLong(this TextBox textBox, long value) { textBox.Text = value.ToString(); return getValueLong(textBox); }"
+  
+  S = S & N & ""
+  S = S & N & "  public static bool getValue(this CheckBox chk) { try { return ((bool)chk.IsChecked); } catch { return false; } }"
+  S = S & N & "  public static bool setValue(this CheckBox chk, bool value) { chk.IsChecked = value; return getValue(chk); }"
+  S = S & N & "//    public static long getValue(this CheckBox chk) { try { return ((bool)chk.IsChecked); } catch { return false; } }"
+  S = S & N & "    public static long setValue(this CheckBox chk, long value) { chk.IsChecked = value != 1; return getValue(chk) ? 1: 0; }"
+
+  S = S & N & ""
+  S = S & N & "    public static bool getValue(this Button btn) { try { return ((bool) btn.IsPressed); } catch { return false; } }"
+  S = S & N & "    public static bool setValue(this Button btn, bool value) { try { btn.RaiseEvent(new RoutedEventArgs(Button.ClickEvent)); return true; } catch { return false; } }"
+
+  S = S & N
+  S = S & N & "  public static bool getVisible(this Control c) { return c.Visibility == System.Windows.Visibility.Visible; }"
+  S = S & N & "  public static bool setVisible(this Control c, bool value) { c.Visibility = value ? System.Windows.Visibility.Visible : System.Windows.Visibility.Hidden; return c.getVisible(); }"
+  S = S & N & "  public static bool SetFocus(this Control c) { try { return c.Focus(); } catch { return false; } }"
+  S = S & N & "  public static bool Move(this Control c, decimal X = -10000, decimal Y = -10000, decimal W = -1000, decimal H = -10000, bool MakeVisible = false ) {"
+  S = S & N & "      if (W != -10000) c.Height = (double) W;"
+  S = S & N & "      if (H != -10000) c.Height = (double) H;"
+  S = S & N & "      c.Margin = new System.Windows.Thickness(X == -10000 ? c.Margin.Left : (double)X, Y == -10000 ? c.Margin.Top : (double)Y, c.Width, c.Height));"
+  S = S & N & "      try { return c.Focus(); } catch { return false; }"
+  S = S & N & "  }"
+  
+  S = S & N
   S = S & N & "}"
   
   VBExtensionClass = S

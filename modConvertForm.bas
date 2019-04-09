@@ -271,7 +271,7 @@ Public Function CheckEvent(ByVal EventName As String, ByVal ControlName As Strin
     CheckEvent = ""
   End If
 End Function
- 
+
 Public Function EndControl(ByVal tType As String) As String
   Select Case tType
     Case "Line", "Shape", "Timer":

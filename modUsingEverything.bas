@@ -24,6 +24,8 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using static VBConstants;"
     
     E = E & N & "using System;"
+    E = E & N & "using System.Windows;"
+    E = E & N & "using System.Windows.Controls;"
     E = E & N & "using static System.DateTime;"
     E = E & N & "using static System.Math;"
     

@@ -1021,7 +1021,21 @@ If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
 'Debug.Print ConvertCodeLine
 End Function
 
-
+Public Function IsEvent(ByVal Str As String) As Boolean
+  IsEvent = True
+  If IsInStr(Str, "_Click(") Then Exit Function
+  If IsInStr(Str, "_DblClick(") Then Exit Function
+  If IsInStr(Str, "_Change(") Then Exit Function
+  If IsInStr(Str, "_Load(") Then Exit Function
+  If IsInStr(Str, "_Unload(") Then Exit Function
+  If IsInStr(Str, "_KeyDown(") Then Exit Function
+  If IsInStr(Str, "_KeyPress(") Then Exit Function
+  If IsInStr(Str, "_KeyUp(") Then Exit Function
+  If IsInStr(Str, "_MouseMove(") Then Exit Function
+  If IsInStr(Str, "_MouseDown(") Then Exit Function
+  If IsInStr(Str, "_MouseUp(") Then Exit Function
+  IsEvent = False
+End Function
 
 Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim oStr As String
@@ -1066,7 +1080,10 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
        LMatch(L, "Function ") Or LMatch(L, "Private Function ") Or LMatch(L, "Public Function ") Then
       Dim nK As Long
       If LMatch(L, "Function ") Then CurrSub = nextBy(L, "(", 2)
-      O = sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule, CurrSub)
+      If IsEvent(L) Then
+        O = O & "private void " & CurrSub & "(object sender, RoutedEventArgs e) { }" & vbCrLf
+      End If
+      O = O & sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule, CurrSub)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then
       AddProperty Str
