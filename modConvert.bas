@@ -639,6 +639,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   
   FName = Trim(SplitWord(Trim(S), 1, "("))
   asName = FName
+  
   S = Trim(tMid(S, Len(FName) + 2))
   If Left(S, 1) = "(" Then S = Trim(tMid(S, 2))
   fArgs = Trim(nextBy(S, ")"))
@@ -673,6 +674,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
     SubParamDecl returnVariable, retType, False, False, True
   End If
   
+  If IsEvent(asName) Then Res = EventStub(asName) & Res
   ConvertPrototype = Trim(Res)
 End Function
 
@@ -1021,22 +1023,6 @@ If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
 'Debug.Print ConvertCodeLine
 End Function
 
-Public Function IsEvent(ByVal Str As String) As Boolean
-  IsEvent = True
-  If IsInStr(Str, "_Click(") Then Exit Function
-  If IsInStr(Str, "_DblClick(") Then Exit Function
-  If IsInStr(Str, "_Change(") Then Exit Function
-  If IsInStr(Str, "_Load(") Then Exit Function
-  If IsInStr(Str, "_Unload(") Then Exit Function
-  If IsInStr(Str, "_KeyDown(") Then Exit Function
-  If IsInStr(Str, "_KeyPress(") Then Exit Function
-  If IsInStr(Str, "_KeyUp(") Then Exit Function
-  If IsInStr(Str, "_MouseMove(") Then Exit Function
-  If IsInStr(Str, "_MouseDown(") Then Exit Function
-  If IsInStr(Str, "_MouseUp(") Then Exit Function
-  IsEvent = False
-End Function
-
 Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
   Dim oStr As String
   Dim Res As String
@@ -1075,14 +1061,12 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If IsInStr(L, "1/1/2001") Then Stop
 'If ScanFirst = vbFalse Then Stop
 'If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
+'If IsInStr(L, "GetCustomerBalance") Then Stop
 
     If LMatch(L, "Sub ") Or LMatch(L, "Private Sub ") Or LMatch(L, "Public Sub ") Or _
        LMatch(L, "Function ") Or LMatch(L, "Private Function ") Or LMatch(L, "Public Function ") Then
       Dim nK As Long
       If LMatch(L, "Function ") Then CurrSub = nextBy(L, "(", 2)
-      If IsEvent(L) Then
-        O = O & "private void " & CurrSub & "(object sender, RoutedEventArgs e) { }" & vbCrLf
-      End If
       O = O & sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule, CurrSub)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then

@@ -282,3 +282,26 @@ Public Function EndControl(ByVal tType As String) As String
   End Select
 End Function
 
+
+Public Function IsEvent(ByVal Str As String) As Boolean
+  IsEvent = EventStub(Str) <> ""
+End Function
+
+Public Function EventStub(ByVal FName As String) As String
+  Dim S As String, V As String, K As String
+  S = "private void " & FName & "(object sender, RoutedEventArgs e) { "
+  K = SplitWord(FName, 2, "_")
+  Select Case K
+    Case "Click", "DblClick", "Change", "Load", "GotFocus", "LostFocus"
+      V = FName & "();"
+    Case "QueryUnload"
+      V = " long doCancel; long UnloadMode; " & FName & "(ref doCancel, ref UnloadMode);"
+    Case "Validate", "Unload"
+      V = "long doCancel; " & FName & "(ref doCancel);"
+    Case "KeyDown", "KeyUp", "KeyPress"
+    Case "MouseMove", "MouseDown", "MouseUp"
+  End Select
+  S = IIf(V = "", "", S & V & " }" & vbCrLf)
+  
+  EventStub = S
+End Function
