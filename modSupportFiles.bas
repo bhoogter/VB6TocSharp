@@ -188,6 +188,8 @@ Public Function VBExtensionClass() As String
   S = S & N
   S = S & N & "  public static object Printer;"
   S = S & N
+  S = S & N & "  public static void Unload(dynamic Ob) { Ob.Close(); }"
+  S = S & N
   S = S & N & "  public static object IIf(bool A, object B, object C) { return !!A ? B : C; }"
   S = S & N & "  public static bool IIf(bool A, bool B, bool C) { return !!A ? B : C; }"
   S = S & N & "  public static string IIf(bool A, string B, string C) { return !!A ? B : C; }"
@@ -201,7 +203,7 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static bool IsNothing(object A) { return IsNull(A); }"
   S = S & N & "  public static bool IsObject(object A) { return !IsNothing(A); }"
   S = S & N
-  S = S & N & "  public static System.DateTime NullDate() { try { return System.DateTime.Parse(""1/1/2001""); } catch { return Today; } }"
+  S = S & N & "  public static System.DateTime NullDate() { try { return System.DateTime.Parse(""1/1/2001""); } catch { return DateTime.Today; } }"
   S = S & N & "  public static bool IsDate(string D) { try { System.DateTime.Parse(D); } catch { return false; } return true; }"
   S = S & N
   S = S & N & "  public static System.DateTime CDate(object A) { return IsDate(A.ToString()) ? NullDate() : System.DateTime.Parse(A.ToString()); }"
@@ -218,7 +220,8 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static long UBound(object A) { return A != null && (A is System.Collections.IList) ? ((System.Collections.IList)A).Count - 1 : 0; }"
   S = S & N
   S = S & N & "  public static bool IsLike(string A, string B) { return Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(A, B, Microsoft.VisualBasic.CompareMethod.Binary); }"
-  S = S & N & "  public static bool Switch("
+  S = S & N & "  public static dynamic Switch(params dynamic[] list) { for (long i = 0; i < list.Length; i += 2) if ((bool)list[i * 2]) return list[i * 2 + 1]; return null; }"
+  S = S & N & "  public static dynamic Choose(long Idx, params dynamic[] list) { if (Idx < 0 || Idx >= list.Length) return null; return list[Idx]; }"
   S = S & N
   S = S & N & "  public static bool VBOpenFile(dynamic A, dynamic B) { return false; }"
   S = S & N & "  public static bool VBWriteFile(dynamic A, dynamic B) { return false; }"
@@ -252,7 +255,7 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static bool Move(this Control c, decimal X = -10000, decimal Y = -10000, decimal W = -1000, decimal H = -10000, bool MakeVisible = false ) {"
   S = S & N & "      if (W != -10000) c.Height = (double) W;"
   S = S & N & "      if (H != -10000) c.Height = (double) H;"
-  S = S & N & "      c.Margin = new System.Windows.Thickness(X == -10000 ? c.Margin.Left : (double)X, Y == -10000 ? c.Margin.Top : (double)Y, c.Width, c.Height));"
+  S = S & N & "      c.Margin = new System.Windows.Thickness(X == -10000 ? c.Margin.Left : (double)X, Y == -10000 ? c.Margin.Top : (double)Y, c.Width, c.Height);"
   S = S & N & "      try { return c.Focus(); } catch { return false; }"
   S = S & N & "  }"
   

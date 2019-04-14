@@ -685,6 +685,7 @@ End Function
 Public Function ConvertElement(ByVal S As String) As String
 'Debug.Print "ConvertElement: " & S
 'If IsInStr(S, "frmSetup") Then Stop
+'If IsInStr(S, "chkShowBalance.Value") Then Stop
   Dim FirstToken As String, FirstWord As String
   Dim T As String, Complete As Boolean
   S = Trim(S)
@@ -732,7 +733,7 @@ Public Function ConvertElement(ByVal S As String) As String
       Exit Function
     End If
   End If
-  
+
   If IsControlRef(Trim(S), FormName) Then
     S = FormControlRepl(S, FormName)
   End If

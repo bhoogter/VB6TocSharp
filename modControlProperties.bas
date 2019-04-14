@@ -7,13 +7,21 @@ If IsInStr(vProp, "SetF") Then Stop
     Case "Visible": ConvertControlProperty = "Visibility"
     Case "Enabled": ConvertControlProperty = "IsEnabled"
     Case "TabStop": ConvertControlProperty = "IsTabStop"
-    Case "Caption":
+    Case "SelStart": ConvertControlProperty = "SelectionStart"
+    Case "SelLength": ConvertControlProperty = "SelectionLength"
+    Case "Caption"
       If cType = "VB.Label" Then ConvertControlProperty = "Content"
-    Case "SetFocus"
-      ConvertControlProperty = "FocusControl "
-    Case "Move": ConvertControlProperty = ""
+    Case "Value"
+      If cType = "VB.CheckBox" Then ConvertControlProperty = "Checked"
+    Case ""
+      Select Case cType
+        Case "VB.Caption": ConvertControlProperty = "Content"
+        Case "VB.TextBox": ConvertControlProperty = "Text"
+        Case "VB.ComboBox": ConvertControlProperty = "Text"
+        Case "VB.RadioButton": ConvertControlProperty = "IsChecked"
+        Case "VB.CheckBox": ConvertControlProperty = "IsChecked"
+        Case Else: ConvertControlProperty = "DefaultProperty"
+      End Select
     Case Else: ConvertControlProperty = vProp
-  End Select
-  Select Case cType
   End Select
 End Function

@@ -22,6 +22,7 @@ Public Function UsingEverything(Optional ByVal PackageName As String) As String
     E = E & N & "using System.Runtime.InteropServices;"
     E = E & N & "using static VBExtension;"
     E = E & N & "using static VBConstants;"
+    E = E & N & "using Microsoft.VisualBasic;"
     
     E = E & N & "using System;"
     E = E & N & "using System.Windows;"

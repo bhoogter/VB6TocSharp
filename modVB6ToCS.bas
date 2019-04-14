@@ -26,7 +26,7 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Boolean":               ConvertDataType = "bool"
     Case "Currency":              ConvertDataType = "decimal"
     Case "VbTriState":            ConvertDataType = "vbTriState"
-    Case "Collection":            ConvertDataType = "vbCollection"
+    Case "Collection":            ConvertDataType = "Collection"
     Case "TSPNode":               ConvertDataType = "TSPNode"
     Case "TSPNetwork":            ConvertDataType = "TSPNetwork"
     Case "FindResults":           ConvertDataType = "FindResults"
@@ -152,6 +152,7 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
   Select Case W
     Case "True":          Complete = True: S = "true"
     Case "False":         Complete = True: S = "false"
+    Case "Me":            Complete = True: S = "this"
     Case "Nothing":       Complete = True: S = "null"
     Case "vbTrue":        Complete = True: S = "vbTriState.vbTrue"
     Case "vbFalse":       Complete = True: S = "vbTriState.vbFalse"

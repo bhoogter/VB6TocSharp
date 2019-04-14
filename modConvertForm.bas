@@ -144,6 +144,7 @@ On Error Resume Next
     S = S & N & "    Title=" & Quote(cValP(Props, "caption"))
     S = S & M & "    Height=" & Quote(Px(cValP(Props, "clientheight", 0) + 435))
     S = S & M & "    Width=" & Quote(Px(cValP(Props, "clientwidth", 0) + 435))
+    S = S & CheckControlEvents("Window", "Form", Code)
     S = S & M & ">"
     S = S & N & " <Grid"
   ElseIf tType = "GroupBox" Then
@@ -228,10 +229,11 @@ End Function
 
 Public Function CheckControlEvents(ByVal ControlType As String, ByVal ControlName As String, Optional ByVal CodeSection As String) As String
   Dim Res As String
-  Dim HasClick As Boolean, HasFocus As Boolean, HasChange As Boolean
+  Dim HasClick As Boolean, HasFocus As Boolean, HasChange As Boolean, IsWindow As Boolean
   HasClick = True
   HasFocus = Not IsInStr("GroupBox", ControlType)
   HasChange = IsInStr("TextBox,ListBox", ControlType)
+  IsWindow = ControlType = "Window"
   
   Res = ""
   Res = Res & CheckEvent("MouseMove", ControlName, ControlType, CodeSection)
@@ -248,6 +250,11 @@ Public Function CheckControlEvents(ByVal ControlType As String, ByVal ControlNam
   If HasChange Then
     Res = Res & CheckEvent("Change", ControlName, ControlType, CodeSection)
   End If
+  If IsWindow Then
+    Res = Res & CheckEvent("Load", ControlName, ControlType, CodeSection)
+    Res = Res & CheckEvent("Unload", ControlName, ControlType, CodeSection)
+'    Res = Res & CheckEvent("QueryUnload", ControlName, ControlType, CodeSection)
+  End If
 
   CheckControlEvents = Res
 End Function
@@ -262,6 +269,8 @@ Public Function CheckEvent(ByVal EventName As String, ByVal ControlName As Strin
     Case "DblClick": Target = "MouseDoubleClick"
     Case "Change":
       If ControlType = "TextBox" Then Target = "TextChanged"
+    Case "Load": Target = "Loaded"
+    Case "Unload": Target = "Unloaded"
   End Select
   L = InStr(1, CodeSection, Search, vbTextCompare)
   If L > 0 Then
@@ -294,8 +303,8 @@ Public Function EventStub(ByVal FName As String) As String
   Select Case K
     Case "Click", "DblClick", "Change", "Load", "GotFocus", "LostFocus"
       V = FName & "();"
-    Case "QueryUnload"
-      V = " long doCancel; long UnloadMode; " & FName & "(ref doCancel, ref UnloadMode);"
+'    Case "QueryUnload"
+'      V = " long doCancel; long UnloadMode; " & FName & "(ref doCancel, ref UnloadMode);"
     Case "Validate", "Unload"
       V = "long doCancel; " & FName & "(ref doCancel);"
     Case "KeyDown", "KeyUp", "KeyPress"
