@@ -274,14 +274,18 @@ Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As 
   If Not IsFormRef(Tok) Then
     F = Tok
     V = ConvertControlProperty(F, Tok2, FuncRefDecl(FormName & "." & Tok))
+    If Tok2 <> "" Then
+      FormControlRepl = Replace(Src, Tok2, V)
+    Else
+      FormControlRepl = Src & "." & V
+    End If
   Else
     F = Tok & "." & Tok2
     V = ConvertControlProperty(F, Tok3, FuncRefDecl(Tok & "." & Tok2))
-  End If
-  
-  If Tok2 <> "" Then
-    FormControlRepl = Replace(Src, Tok2, V)
-  Else
-    FormControlRepl = Src & "." & V
+    If Tok3 <> "" Then
+      FormControlRepl = Replace(Src, Tok2, V)
+    Else
+      FormControlRepl = Src & "." & V
+    End If
   End If
 End Function
