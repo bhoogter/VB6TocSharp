@@ -297,20 +297,22 @@ Public Function IsEvent(ByVal Str As String) As Boolean
 End Function
 
 Public Function EventStub(ByVal FName As String) As String
-  Dim S As String, V As String, K As String
-  S = "private void " & FName & "(object sender, RoutedEventArgs e) { "
+  Dim S As String, C As String, K As String
+
+  C = SplitWord(FName, 1, "_")
   K = SplitWord(FName, 2, "_")
   Select Case K
-    Case "Click", "DblClick", "Change", "Load", "GotFocus", "LostFocus"
-      V = FName & "();"
+    Case "Click", "DblClick", "Load", "GotFocus", "LostFocus"
+      S = "private void " & FName & "(object sender, RoutedEventArgs e) { " & FName & "(); }" & vbCrLf
+    Case "Change"
+      S = "private void " & C & "_Change(object sender, System.Windows.Controls.TextChangedEventArgs e) { " & FName & "(); }" & vbCrLf
 '    Case "QueryUnload"
 '      V = " long doCancel; long UnloadMode; " & FName & "(ref doCancel, ref UnloadMode);"
     Case "Validate", "Unload"
-      V = "long doCancel; " & FName & "(ref doCancel);"
+'      V = "long doCancel; " & FName & "(ref doCancel);"
     Case "KeyDown", "KeyUp", "KeyPress"
     Case "MouseMove", "MouseDown", "MouseUp"
   End Select
-  S = IIf(V = "", "", S & V & " }" & vbCrLf)
   
   EventStub = S
 End Function

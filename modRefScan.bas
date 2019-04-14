@@ -188,7 +188,7 @@ Public Function IsControlRef(ByVal Src As String, Optional ByVal FormName As Str
   Tok2 = RegExNMatch(Src, patToken, 1)
   TTok = Tok & "." & Tok2
   FTok = FormName & "." & Tok
-  If IsInStr(Src, "SetFocus") Then Stop
+'If IsInStr(Src, "SetFocus") Then Stop
   If FuncRef(TTok) <> "" And FuncRefEntity(TTok) = "Control" Or FuncRef(FTok) <> "" And FuncRefEntity(FTok) = "Control" Then
     IsControlRef = True
   End If
@@ -206,6 +206,7 @@ Public Function FuncRefDeclRet(ByVal FName As String) As String
 End Function
 
 Public Function FuncRefDeclArgs(ByVal FName As String) As String
+On Error Resume Next
   FuncRefDeclArgs = FuncRefDecl(FName)
   FuncRefDeclArgs = Mid(FuncRefDeclArgs, InStr(FuncRefDeclArgs, "(") + 1)
   FuncRefDeclArgs = Left(FuncRefDeclArgs, InStrRev(FuncRefDeclArgs, ")") - 1)
@@ -268,7 +269,7 @@ Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As 
   Tok2 = RegExNMatch(Src, patToken, 1)
   Tok3 = RegExNMatch(Src, patToken, 2)
   
-  If IsInStr(Src, "SetFocus") Then Stop
+'If IsInStr(Src, "SetFocus") Then Stop
   
   If Not IsFormRef(Tok) Then
     F = Tok
