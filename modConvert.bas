@@ -686,6 +686,7 @@ Public Function ConvertElement(ByVal S As String) As String
 'Debug.Print "ConvertElement: " & S
 'If IsInStr(S, "frmSetup") Then Stop
 'If IsInStr(S, "chkShowBalance.Value") Then Stop
+'If IsInStr(S, "optTelephone") Then Stop
   Dim FirstToken As String, FirstWord As String
   Dim T As String, Complete As Boolean
   S = Trim(S)

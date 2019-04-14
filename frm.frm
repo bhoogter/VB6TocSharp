@@ -175,6 +175,3 @@ On Error Resume Next
   lblPrg.Visible = shpPrg.Visible
 End Function
 
-Private Sub fra_DragDrop(Source As Control, X As Single, Y As Single)
-
-End Sub

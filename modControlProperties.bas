@@ -2,7 +2,8 @@ Attribute VB_Name = "modControlProperties"
 Option Explicit
 
 Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As String, ByVal cType As String) As String
-If IsInStr(vProp, "SetF") Then Stop
+'If IsInStr(vProp, "SetF") Then Stop
+  ConvertControlProperty = vProp
   Select Case vProp
     Case "Visible": ConvertControlProperty = "Visibility"
     Case "Enabled": ConvertControlProperty = "IsEnabled"
@@ -12,7 +13,8 @@ If IsInStr(vProp, "SetF") Then Stop
     Case "Caption"
       If cType = "VB.Label" Then ConvertControlProperty = "Content"
     Case "Value"
-      If cType = "VB.CheckBox" Then ConvertControlProperty = "Checked"
+      If cType = "VB.CheckBox" Then ConvertControlProperty = "IsChecked"
+      If cType = "VB.RadioButton" Then ConvertControlProperty = "IsChecked"
     Case ""
       Select Case cType
         Case "VB.Caption": ConvertControlProperty = "Content"
@@ -22,6 +24,5 @@ If IsInStr(vProp, "SetF") Then Stop
         Case "VB.CheckBox": ConvertControlProperty = "IsChecked"
         Case Else: ConvertControlProperty = "DefaultProperty"
       End Select
-    Case Else: ConvertControlProperty = vProp
   End Select
 End Function
