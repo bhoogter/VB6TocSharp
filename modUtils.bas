@@ -24,7 +24,17 @@ Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean:
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
 
-Public Function WriteOut(ByVal F As String, ByVal S As String, Optional ByVal O As String = "") As Boolean: WriteOut = WriteFile(OutputFolder(O) & F, S, True): End Function
+Public Function WriteOut(ByVal F As String, ByVal S As String, Optional ByVal O As String = "") As Boolean
+  If Not IsConverted(F, O) Then
+    WriteOut = WriteFile(OutputFolder(O) & F, S, True)
+  Else
+    Debug.Print "Already converted: " & F
+  End If
+End Function
+
+Public Function IsConverted(ByVal F As String, Optional ByVal O As String = "") As Boolean
+  IsConverted = IsInStr(Left(ReadEntireFile(OutputFolder(O) & F), 100), "### CONVERTED")
+End Function
 
 Public Function FileExt(ByVal FN As String, Optional ByVal vLCase As Boolean = True) As String
   If FN = "" Then Exit Function

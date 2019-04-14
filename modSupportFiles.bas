@@ -196,6 +196,8 @@ Public Function VBExtensionClass() As String
   S = S & N & "  public static double IIf(bool A, double B, double C) { return !!A ? B : C; }"
   S = S & N & "  public static decimal IIf(bool A, decimal B, decimal C) { return !!A ? B : C; }"
   S = S & N & "  public static long IIf(bool A, long B, long C) { return !!A ? B : C; }"
+  S = S & N & "  public static decimal ValD(string A) { return (decimal)Val(A); }"
+  S = S & N & "  public static long ValL(string A) { return (long)Val(A); }"
   S = S & N & "  public static DateTime IIf(bool A, DateTime B, DateTime C) { return !!A ? B : C; }"
   S = S & N
   S = S & N & "  public static bool IsMissing(object A) { return false; }"

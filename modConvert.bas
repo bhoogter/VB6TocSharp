@@ -57,8 +57,11 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
     MsgBox "File not found in ConvertForm: " & frmFile
     Exit Function
   End If
+  
   S = ReadEntireFile(frmFile)
   FName = ModuleName(S)
+  F = FName & ".xaml.cs"
+  If IsConverted(F, frmFile) Then Debug.Print "Form Already Converted: " & F: Exit Function
   
   J = CodeSectionLoc(S)
   Preamble = Left(S, J - 1)
@@ -105,6 +108,10 @@ Public Function ConvertModule(ByVal basFile As String)
   End If
   S = ReadEntireFile(basFile)
   FName = ModuleName(S)
+  F = FName & ".cs"
+  If IsConverted(F, basFile) Then Debug.Print "Module Already Converted: " & F: Exit Function
+  
+  FName = ModuleName(S)
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
@@ -120,11 +127,8 @@ Public Function ConvertModule(ByVal basFile As String)
   
   X = deWS(X)
   
-  F = FName & ".cs"
   WriteOut F, X, basFile
 End Function
-
-
 
 Public Function ConvertClass(ByVal clsFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
@@ -136,6 +140,9 @@ Public Function ConvertClass(ByVal clsFile As String)
   End If
   S = ReadEntireFile(clsFile)
   FName = ModuleName(S)
+  F = FName & ".cs"
+  If IsConverted(F, clsFile) Then Debug.Print "Class Already Converted: " & F: Exit Function
+
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
