@@ -388,12 +388,7 @@ Public Function VBAConstantsClass() As String
   
   S = S & N & "    public const long vbModal = 0x1;"
   
-  S = S & N & "    public const long vbAlignNone = 0;"
-  S = S & N & "    public const long vbAlignTop = 1;"
-  S = S & N & "    public const long vbAlignBottom = 2;"
-  S = S & N & "    public const long vbAlignLeft = 3;"
-  S = S & N & "    public const long vbAlignRight = 4;"
-  
+  S = S & N & "    public enum AlignConstants {  vbAlignNone = 0, vbAlignTop = 1, vbAlignBottom = 2, vbAlignLeft = 3, vbAlignRight = 4 }"
   
   S = S & N & " }"
   

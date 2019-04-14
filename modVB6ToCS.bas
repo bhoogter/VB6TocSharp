@@ -165,6 +165,10 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"
     Case "New":           Complete = True: S = "new " & R & "()"
+    Case "vbAlignLeft":   S = "AlignConstants.vbAlignLeft"
+    Case "vbAlignRight":  S = "AlignConstants.vbAlignRight"
+    Case "vbAlignTop":    S = "AlignConstants.vbAlignTop"
+    Case "vbAlignBottom": S = "AlignConstants.vbAlignBottom"
     Case "RaiseEvent":
                           Complete = True
                           W = RegExNMatch(R, patToken)
