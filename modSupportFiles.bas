@@ -210,7 +210,7 @@ Public Function VBExtensionClass() As String
   S = S & N
   S = S & N & "  public static System.DateTime CDate(object A) { return IsDate(A.ToString()) ? NullDate() : System.DateTime.Parse(A.ToString()); }"
   S = S & N & "  public static double CDbl(object A)  { return (A is System.IConvertible) ? ((System.IConvertible)A).ToDouble(null) : 0; }"
-  S = S & N & "  public static double CLng(object A) { return (A is System.IConvertible) ? ((System.IConvertible)A).ToInt64(null) : 0; }"
+  S = S & N & "  public static long CLng(object A) { return (A is System.IConvertible) ? ((System.IConvertible)A).ToInt64(null) : 0; }"
   S = S & N & "  public static double CInt(object A) { return (A is System.IConvertible) ? ((System.IConvertible)A).ToInt32(null) : 0; }"
   S = S & N & "  public static string CStr(object A) { return A.ToString(); }"
   S = S & N & "  public static bool CBool(object A) { { return (A is System.IConvertible) ? ((System.IConvertible)A).ToBoolean(null) : false; } }"
