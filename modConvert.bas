@@ -255,7 +255,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As
   S = SanitizeCode(S)
 'WriteFile "C:\Users\benja\Desktop\sani.txt", S, True
   Do
-    P = "(Public |Private |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "[ ]*\("
+    P = "(Public |Private |)(Friend |)(Function |Sub |Property Get |Property Let |Property Set )" & patToken & "[ ]*\("
     N = -1
     Do
       N = N + 1
@@ -638,11 +638,12 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   Res = ""
   returnVariable = ""
   isSub = False
-  If tLeft(S, 7) = "Public " Then Res = Res & "public ": S = Mid(S, 8)
-  If tLeft(S, 8) = "Private " Then Res = Res & "private ": S = Mid(S, 9)
+  If LMatch(S, "Public ") Then Res = Res & "public ": S = Mid(S, 8)
+  If LMatch(S, "Private ") Then Res = Res & "private ": S = Mid(S, 9)
+  If LMatch(S, "Friend ") Then S = Mid(S, 8)
   If asModule Then Res = Res & "static "
-  If tLeft(S, 4) = "Sub " Then Res = Res & "void ": S = Mid(S, 5): isSub = True
-  If tLeft(S, 9) = "Function " Then Res = Res & retToken & " ": S = Mid(S, 10)
+  If LMatch(S, "Sub ") Then Res = Res & "void ": S = Mid(S, 5): isSub = True
+  If LMatch(S, "Function ") Then Res = Res & retToken & " ": S = Mid(S, 10)
   
   FName = Trim(SplitWord(Trim(S), 1, "("))
   asName = FName
@@ -1072,10 +1073,16 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
 'If IsInStr(L, "GetCustomerBalance") Then Stop
 
-    If LMatch(L, "Sub ") Or LMatch(L, "Private Sub ") Or LMatch(L, "Public Sub ") Or _
-       LMatch(L, "Function ") Or LMatch(L, "Private Function ") Or LMatch(L, "Public Function ") Then
+    Dim PP As String
+    PP = "^(Public |Private |)(Friend |)(Function |Sub )" & patToken & "[ ]*\("
+    If RegExNMatch(L, PP) <> "" Then
       Dim nK As Long
-      If LMatch(L, "Function ") Then CurrSub = nextBy(L, "(", 2)
+'      CurrSub = nextBy(L, "(", 1)
+'      If (LMatch(CurrSub, "Public ")) Then CurrSub = Mid(CurrSub, 8)
+'      If (LMatch(CurrSub, "Private ")) Then CurrSub = Mid(CurrSub, 9)
+'      If (LMatch(CurrSub, "Friend ")) Then CurrSub = Mid(CurrSub, 8)
+'      If (LMatch(CurrSub, "Function ")) Then CurrSub = Mid(CurrSub, 10)
+'      If (LMatch(CurrSub, "Sub ")) Then CurrSub = Mid(CurrSub, 5)
       O = O & sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule, CurrSub)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then

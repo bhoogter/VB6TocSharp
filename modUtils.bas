@@ -342,6 +342,7 @@ Public Function CodeSectionGlobalEndLoc(ByVal S As String)
     If CodeSectionGlobalEndLoc = 1 Then CodeSectionGlobalEndLoc = Len(S): Exit Function
   Loop While Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "Declare "
   If CodeSectionGlobalEndLoc >= 8 Then
+    If Mid(S, CodeSectionGlobalEndLoc - 7, 7) = "Friend " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 7
     If Mid(S, CodeSectionGlobalEndLoc - 7, 7) = "Public " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 7
     If Mid(S, CodeSectionGlobalEndLoc - 8, 8) = "Private " Then CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 8
   End If

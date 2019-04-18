@@ -140,7 +140,9 @@ Public Sub AddProperty(ByVal S As String)
   
   If LMatch(Pro, "Public ") Then Pro = Mid(Pro, 8): asPublic = True ' if one is public, both are...
   If LMatch(Pro, "Private ") Then Pro = Mid(Pro, 9)
+  If LMatch(Pro, "Friend ") Then Pro = Mid(Pro, 8)
   If LMatch(Pro, "Property ") Then Pro = Mid(Pro, 10)
+
   If LMatch(Pro, "Get ") Then Pro = Mid(Pro, 5): GSL = "get"
   If LMatch(Pro, "Let ") Then Pro = Mid(Pro, 5): GSL = "let"
   If LMatch(Pro, "Set ") Then Pro = Mid(Pro, 5): GSL = "set"
