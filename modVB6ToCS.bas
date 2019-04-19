@@ -18,8 +18,8 @@ Public Function ConvertDataType(ByVal S As String) As String
                                   ConvertDataType = DefaultDataType
     Case "Form", "Control":       ConvertDataType = "Window"
     Case "String", "String()":    ConvertDataType = "string"
-    Case "Long":                  ConvertDataType = "long"
-    Case "Integer":               ConvertDataType = "long"
+    Case "Long":                  ConvertDataType = "int"
+    Case "Integer":               ConvertDataType = "int"
     Case "Double", "Single":      ConvertDataType = "decimal"
     Case "Variant":               ConvertDataType = "object"
     Case "Byte":                  ConvertDataType = "byte"
