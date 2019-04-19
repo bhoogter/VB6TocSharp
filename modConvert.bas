@@ -1157,7 +1157,12 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
           O = O & "case " & K & ": "
         Next
       Else
-        O = O & sSpace(Ind) & "case " & ConvertValue(T) & ":"
+        Dim TT, LL
+'          O = O & sSpace(Ind) & "case " & ConvertValue(T) & ":"
+        O = O & Space(Ind)
+        For Each LL In Split(T, ",")
+          O = O & "case " & ConvertValue(T) & ": "
+        Next
       End If
       inCase = inCase + 1
       Ind = Ind + SpIndent

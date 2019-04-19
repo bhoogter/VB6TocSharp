@@ -269,6 +269,7 @@ Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As 
   Tok2 = RegExNMatch(Src, patToken, 1)
   Tok3 = RegExNMatch(Src, patToken, 2)
   
+'If IsInStr(Tok, "BillOSale") Then Stop
 'If IsInStr(Src, "SetFocus") Then Stop
   
   If Not IsFormRef(Tok) Then
@@ -283,7 +284,7 @@ Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As 
     F = Tok & "." & Tok2
     V = ConvertControlProperty(F, Tok3, FuncRefDecl(Tok & "." & Tok2))
     If Tok3 <> "" Then
-      FormControlRepl = Replace(Src, Tok2, V)
+      FormControlRepl = Replace(Src, Tok3, V)
     Else
       FormControlRepl = Src & "." & V
     End If
