@@ -21,6 +21,7 @@ Public Type Property
   Getter As String
   Setter As String
   origArgName As String
+  funcArgs As String
 End Type
 
 Private Lockout As Boolean
@@ -178,6 +179,8 @@ On Error GoTo 0
     Case "get"
                         Props(X).Getter = ConvertSub(S, , vbFalse)
                         Props(X).asType = ConvertDataType(pType)
+                        Props(X).asFunc = asFunc
+                        Props(X).funcArgs = pArgs
     Case "set", "let":  Props(X).Setter = ConvertSub(S, , vbFalse)
                         Props(X).origArgName = pArgName
   End Select
@@ -196,34 +199,41 @@ On Error Resume Next
     If I = -1 Then GoTo NoItems
     With Props(I)
       If .Name <> "" And Not (.Getter = "" And .Setter = "") Then
-        If Not .asFunc Then
-          If .asPublic Then R = R & "public "
-          If asModule Then R = R & "static "
+        If .asPublic Then R = R & "public "
+        If asModule Then R = R & "static "
 '          If .Getter = "" Then R = R & "writeonly "
 '          If .Setter = "" Then R = R & "readonly "
-          R = R & M & .asType & " " & .Name & " {"
-          If .Getter <> "" Then
-            R = R & N & "  get {"
-            R = R & N & "    " & .asType & " " & .Name & ";"
-            T = .Getter
-            T = Replace(T, "Exit Property", "return " & .Name & ";")
-            R = R & N & "    " & T
-            R = R & N & "  return " & .Name & ";"
-            R = R & N & "  }"
-          End If
-          If .Setter <> "" Then
-            R = R & N & "  set {"
-            T = .Setter
-            T = ReplaceToken(T, "value", "valueOrig")
-            T = Replace(T, .origArgName, "value")
-            T = Replace(T, "Exit Property", "return;")
-            R = R & N & "    " & T
-            R = R & N & "  }"
-          End If
-          R = R & N & "}"
-          R = R & N
-        Else
+        R = R & M & .asType & " " & .Name
+        If .asFunc Then
+          R = R & "("
+          R = R & .funcArgs
+          R = R & ")"
         End If
+        
+        R = R & " {"
+        
+        If .asFunc Then R = R & " // TODO: Arguments not allowed on properties"
+        
+        If .Getter <> "" Then
+          R = R & N & "  get {"
+          R = R & N & "    " & .asType & " " & .Name & ";"
+          T = .Getter
+          T = Replace(T, "Exit Property", "return " & .Name & ";")
+          R = R & N & "    " & T
+          R = R & N & "  return " & .Name & ";"
+          R = R & N & "  }"
+        End If
+        If .Setter <> "" Then
+          R = R & N & "  set {"
+          T = .Setter
+          T = ReplaceToken(T, "value", "valueOrig")
+          T = Replace(T, .origArgName, "value")
+          T = Replace(T, "Exit Property", "return;")
+          R = R & N & "    " & T
+          R = R & N & "  }"
+        End If
+        R = R & N & "}"
+        R = R & N
       End If
     End With
   Next
