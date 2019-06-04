@@ -341,15 +341,29 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
         End If
       End If
     End If
+    
+    Dim AsNew As Boolean
+    AsNew = False
     If SplitWord(L, 1) = "As" Then
       pType = SplitWord(L, 2)
+      If pType = "New" Then
+        pType = SplitWord(L, 3)
+        AsNew = True
+      End If
     Else
       pType = "Variant"
     End If
     
     If Not isArr Then
       Res = Res & sSpace(Ind) & ConvertDataType(pType) & " " & pName
-      Res = Res & " = " & ConvertDefaultDefault(pType)
+      Res = Res & " = "
+      If AsNew Then
+        Res = Res & "new "
+        Res = Res & ConvertDataType(pType)
+        Res = Res & "()"
+      Else
+        Res = Res & ConvertDefaultDefault(pType)
+      End If
       Res = Res & ";" & vbCrLf
     Else
       aTodo = IIf(aMin = 0, "", " // TODO - Specified Minimum Array Boundary Not Supported: " & SS)
@@ -660,6 +674,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
     Else
       retType = "Variant"
     End If
+    If Right(retType, 1) = ")" Then retType = Left(retType, Len(retType) - 1)
     Res = Replace(Res, retToken, ConvertDataType(retType))
   End If
   
@@ -1043,6 +1058,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
   Dim inCase As Long
   Dim returnVariable As String
   
+'  If IsInStr(Str, "Dim oFTP As New FTP") Then Stop
+  
   Select Case ScanFirst
     Case vbUseDefault:  oStr = Str
                         ConvertSub oStr, asModule, vbTrue
@@ -1100,6 +1117,8 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
       Else
         O = O & "return;" & vbCrLf
       End If
+    ElseIf tLMatch(L, "GoTo ") Then
+      O = O & "goto " & SplitWord(L, 2) & ";"
     ElseIf RegExTest(Trim(L), "^[a-zA-Z_][a-zA-Z_0-9]*:$") Then ' Goto Label
       O = O & L
     ElseIf tLeft(L, 3) = "Dim" Then
