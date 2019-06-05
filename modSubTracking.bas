@@ -204,15 +204,9 @@ On Error Resume Next
 '          If .Getter = "" Then R = R & "writeonly "
 '          If .Setter = "" Then R = R & "readonly "
         R = R & M & .asType & " " & .Name
-        If .asFunc Then
-          R = R & "("
-          R = R & .funcArgs
-          R = R & ")"
-        End If
-        
         R = R & " {"
         
-        If .asFunc Then R = R & " // TODO: Arguments not allowed on properties"
+        If .asFunc Then R = R & " // TODO: Arguments not allowed on properties: " & .funcArgs
         
         If .Getter <> "" Then
           R = R & N & "  get {"
