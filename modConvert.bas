@@ -768,7 +768,7 @@ Public Function ConvertElement(ByVal S As String) As String
 'If IsInStr(S, "optTagIncoming") Then Stop
     S = FormControlRepl(S, FormName)
   ElseIf LMatch(Trim(S), "Not ") And IsControlRef(Mid(Trim(S), 5), FormName) Then
-    S = "!" & FormControlRepl(Mid(Trim(S), 5), FormName)
+    S = "!(" & FormControlRepl(Mid(Trim(S), 5), FormName) & ")"
   End If
   
   If IsFormRef(Trim(S)) Then
