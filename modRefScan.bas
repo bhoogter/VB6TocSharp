@@ -118,6 +118,14 @@ NextLine:
   Next
 End Function
 
+Public Function ScanRefsFileToString(ByVal FN As String) As String
+  OutRes = ""
+  ScanRefsFile FN
+  ScanRefsFileToString = OutRes
+  OutRes = ""
+End Function
+
+
 Private Sub InitFuncs()
   Dim S As String, L
   If Dir(RefList) = "" Then ScanRefs

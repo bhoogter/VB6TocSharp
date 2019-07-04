@@ -74,7 +74,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   
   J = CodeSectionGlobalEndLoc(Code)
   Globals = ConvertGlobals(Left(Code, J))
-  InitLocalFuncs FormControls(FName, Preamble)
+  InitLocalFuncs FormControls(FName, Preamble) & ScanRefsFileToString(frmFile)
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = ""
@@ -995,6 +995,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "NewAudit.Name1") Then Stop
 'If IsInStr(S, "optDelivered") Then Stop
 'If IsInStr(S, " Is Nothing Then") Then Stop
+If IsInStr(S, "SqFt, SqYd") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
