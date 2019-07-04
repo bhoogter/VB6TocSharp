@@ -25,6 +25,7 @@ Module=modConfig; modConfig.bas
 Module=modRefScan; modRefScan.bas
 Module=modConvertUtils; modConvertUtils.bas
 Module=modControlProperties; modControlProperties.bas
+Module=modProjectSpecific; modProjectSpecific.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""

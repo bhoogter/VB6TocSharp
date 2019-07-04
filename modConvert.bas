@@ -994,6 +994,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "frmPrintPreviewDocument") Then Stop
 'If IsInStr(S, "NewAudit.Name1") Then Stop
 'If IsInStr(S, "optDelivered") Then Stop
+'If IsInStr(S, " Is Nothing Then") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
@@ -1061,7 +1062,6 @@ Public Function ConvertCodeLine(ByVal S As String) As String
   If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
   
   ConvertCodeLine = ConvertCodeLine & ";"
-  ConvertCodeLine = PostConvertCodeLine(ConvertCodeLine)
 'Debug.Print ConvertCodeLine
 End Function
 
@@ -1069,12 +1069,16 @@ Public Function PostConvertCodeLine(ByVal Str As String) As String
   Dim S As String
   S = Str
   
+'  If IsInStr(S, "optPoNo") Then Stop
+  
   If IsInStr(S, "0 &") Then S = Replace(S, "0 &", "0")
   If IsInStr(S, ".instance.instance") Then S = Replace(S, ".instance.instance", ".instance")
-  If IsInStr(S, ".IsChecked)") Then S = Replace(S, ".IsChecked)", ".IsChecked) == true", 1)
+  If IsInStr(S, ".IsChecked)") Then S = Replace(S, ".IsChecked)", ".IsChecked == true)", 1)
   If IsInStr(S, ".IsChecked &") Then S = Replace(S, ".IsChecked", ".IsChecked == true", 1)
   If IsInStr(S, ".IsChecked |") Then S = Replace(S, ".IsChecked", ".IsChecked == true", 1)
   If IsInStr(S, ".IsChecked,") Then S = Replace(S, ".IsChecked", ".IsChecked == true", 1)
+  If IsInStr(S, ".IsChecked == 1,") Then S = Replace(S, ".IsChecked == 1", ".IsChecked == true", 1)
+  If IsInStr(S, ".IsChecked == 0,") Then S = Replace(S, ".IsChecked == 1", ".IsChecked == false", 1)
   
   If IsInStr(S, ".Visibility = true") Then S = Replace(S, ".Visibility = true", ".setVisible(true)")
   If IsInStr(S, ".Visibility = false") Then S = Replace(S, ".Visibility = false", ".setVisible(false)")
@@ -1082,7 +1086,7 @@ Public Function PostConvertCodeLine(ByVal Str As String) As String
   If IsInStr(S, ".Print(") Then
     If IsInStr(S, ";);") Then
       S = Replace(S, ";);", ");")
-      S = Replace(S, "Print(", "PrintNNL")
+      S = Replace(S, "Print(", "PrintNNL(")
     End If
     S = Replace(S, "; ", ", ")
   End If
@@ -1303,6 +1307,10 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
       O = sSpace(Ind) & ConvertCodeLine(L)
     End If
+    
+    O = modConvert.PostConvertCodeLine(O)
+    O = modProjectSpecific.ProjectSpecificPostCodeLineConvert(O)
+    
     O = ReComment(O)
     Res = Res & ReComment(O) & IIf(O = "", "", vbCrLf)
   Next

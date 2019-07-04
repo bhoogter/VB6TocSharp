@@ -15,8 +15,12 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
       If cType = "VB.Label" Then ConvertControlProperty = "Content"
     Case "Value"
       If cType = "VB.CheckBox" Then ConvertControlProperty = "IsChecked"
-      If cType = "VB.RadioButton" Then ConvertControlProperty = "IsChecked"
+      If cType = "VB.OptionButton" Then ConvertControlProperty = "IsChecked"
       If cType = "MSComCtl2.DTPicker" Then ConvertControlProperty = "DisplayDate"
+    Case "Text"
+      If cType = "VB.ListBox" Then ConvertControlProperty = "SelectedText.toString()"
+    Case "ListCount"
+      If cType = "VB.ListBox" Then ConvertControlProperty = "Items.Count"
     Case ""
       If IsInStr(cType, "mage") Then Stop
       Select Case cType
