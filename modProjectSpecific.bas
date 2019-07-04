@@ -25,12 +25,15 @@ Public Function ProjectSpecificPostCodeLineConvert(ByVal Str As String) As Strin
   If IsInStr(S, "POMode(") Then S = Replace(S, "ref ", "")
   If IsInStr(S, "OrderMode(") Then S = Replace(S, "ref ", "")
   If IsInStr(S, "InvenMode(") Then S = Replace(S, "ref ", "")
+  If IsInStr(S, "SetButtonImage(") Then S = Replace(S, "ref ", ""): S = Replace(S, ".DefaultProperty", "")
   
   ' Common Mistake Functions...
   If IsInStr(S, "StoreSettings.") Then S = Replace(S, "StoreSettings.", "StoreSettings().")
   
   ' etc
   If IsInStr(S, ".hwnd") Then S = Replace(S, ".hwnd", ".hWnd()")
+  If IsInStr(S, "SetCustomFrame") Then S = ""
+  If IsInStr(S, "RemoveCustomFrame") Then S = ""
   
   ProjectSpecificPostCodeLineConvert = S
 End Function

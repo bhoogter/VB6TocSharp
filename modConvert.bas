@@ -753,6 +753,7 @@ Public Function ConvertElement(ByVal S As String) As String
   If Complete Then ConvertElement = S: Exit Function
   
   If RegExTest(Trim(S), "^" & patToken & "$") Then
+'    If S = "SqFt" Then Stop
     If IsFuncRef(Trim(S)) And S <> CurrSub Then
       ConvertElement = Trim(S) & "()"
       Exit Function
@@ -995,7 +996,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "NewAudit.Name1") Then Stop
 'If IsInStr(S, "optDelivered") Then Stop
 'If IsInStr(S, " Is Nothing Then") Then Stop
-If IsInStr(S, "SqFt, SqYd") Then Stop
+'If IsInStr(S, "SqFt, SqYd") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)

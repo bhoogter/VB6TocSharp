@@ -12,6 +12,15 @@ On Error Resume Next
   If KillRef Then Kill RefList
 End Function
 
+Public Function FuncsCount(Optional ByVal vLocal As Boolean = False) As Long
+On Error Resume Next
+  If vLocal Then
+    FuncsCount = LocalFuncs.Count
+  Else
+    FuncsCount = Funcs.Count
+  End If
+End Function
+
 Public Function ScanRefs() As Long
   Dim L, T As String
 On Error Resume Next
