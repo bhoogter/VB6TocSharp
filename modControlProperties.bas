@@ -23,7 +23,8 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
         Case "VB.TextBox": ConvertControlProperty = "Text"
         Case "VB.ComboBox": ConvertControlProperty = "Text"
         Case "VB.OptionButton": ConvertControlProperty = "IsChecked"
-        Case "VB.CheckBox": ConvertControlProperty = "IsChecked"
+        Case "VB.CheckBox":
+        ConvertControlProperty = "IsChecked"
         Case Else: ConvertControlProperty = "DefaultProperty"
       End Select
   End Select
