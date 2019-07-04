@@ -18,14 +18,17 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
       If cType = "VB.RadioButton" Then ConvertControlProperty = "IsChecked"
       If cType = "MSComCtl2.DTPicker" Then ConvertControlProperty = "DisplayDate"
     Case ""
+      If IsInStr(cType, "mage") Then Stop
       Select Case cType
-        Case "VB.Caption": ConvertControlProperty = "Content"
-        Case "VB.TextBox": ConvertControlProperty = "Text"
-        Case "VB.ComboBox": ConvertControlProperty = "Text"
+        Case "VB.Caption":      ConvertControlProperty = "Content"
+        Case "VB.TextBox":      ConvertControlProperty = "Text"
+        Case "VB.ComboBox":     ConvertControlProperty = "Text"
+        Case "VB.PictureBox":   ConvertControlProperty = "Source"
+        Case "VB.ComboBox":     ConvertControlProperty = "Text"
         Case "VB.OptionButton": ConvertControlProperty = "IsChecked"
-        Case "VB.CheckBox":
-        ConvertControlProperty = "IsChecked"
-        Case Else: ConvertControlProperty = "DefaultProperty"
+        Case "VB.CheckBox":     ConvertControlProperty = "IsChecked"
+        Case "VB.Frame":        ConvertControlProperty = "Content"
+        Case Else:              ConvertControlProperty = "DefaultProperty"
       End Select
   End Select
 End Function

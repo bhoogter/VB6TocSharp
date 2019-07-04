@@ -307,7 +307,7 @@ Public Function EventStub(ByVal FName As String) As String
     Case "Change"
       S = "private void " & C & "_Change(object sender, System.Windows.Controls.TextChangedEventArgs e) { " & FName & "(); }" & vbCrLf
     Case "QueryUnload"
-    S = "private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { int c = 0, u = 0 ;  " & FName & "(ref c, ref u); e.Cancel = c != 0;  }" & vbCrLf
+    S = "private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { int c = 0, u = 0 ;  " & FName & "(out c, ref u); e.Cancel = c != 0;  }" & vbCrLf
 '      V = " long doCancel; long UnloadMode; " & FName & "(ref doCancel, ref UnloadMode);"
     Case "Validate", "Unload"
 '      V = "long doCancel; " & FName & "(ref doCancel);"

@@ -726,10 +726,14 @@ Public Function ConvertElement(ByVal S As String) As String
     Exit Function
   End If
   
-  If RegExTest(S, "#[0-9]+/[0-9]+/[0-9]+#") Then
-    ConvertElement = "DateValue(""" & Mid(S, 2, Len(S) - 2) & """)"
-    Exit Function
-  End If
+  Dim vMax As Long
+  Do While RegExTest(S, "#[0-9]+/[0-9]+/[0-9]+#")
+    Dim dStr As String
+    dStr = RegExNMatch(S, "#[0-9]+/[0-9]+/[0-9]+#", 0)
+    S = Replace(S, dStr, "DateValue(""" & Mid(dStr, 2, Len(dStr) - 2) & """)")
+    vMax = vMax + 1
+    If vMax > 10 Then Exit Do
+  Loop
  
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
@@ -987,6 +991,9 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "& functionType & fieldInfo &") Then Stop
 'If IsInStr(S, " & vbCrLf2 & Res)") Then Stop
 'If IsInStr(S, "Res = CompareSI(SI1, SI2)") Then Stop
+'If IsInStr(S, "frmPrintPreviewDocument") Then Stop
+'If IsInStr(S, "NewAudit.Name1") Then Stop
+'If IsInStr(S, "optDelivered") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
@@ -1014,6 +1021,12 @@ Public Function ConvertCodeLine(ByVal S As String) As String
       ConvertCodeLine = A
     End If
     
+    Dim tAWord As String
+    tAWord = SplitWord(A, 1, ".")
+    If IsFormRef(tAWord) Then
+      A = Replace(A, tAWord, tAWord & ".instance", , 1)
+    End If
+    
     ConvertCodeLine = ConvertValue(ConvertCodeLine) & " = "
 
     B = ConvertValue(Trim(Mid(S, T + 1)))
@@ -1024,6 +1037,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     Rest = SplitWord(Trim(S), 2, , , True)
     If Rest = "" Then
       ConvertCodeLine = S & IIf(Right(S, 1) <> ")", "()", "")
+      ConvertCodeLine = ConvertElement(ConvertCodeLine)
     ElseIf FirstWord = "RaiseEvent" Then
       ConvertCodeLine = ConvertValue(S)
     ElseIf StrQCnt(FirstWord, "(") = 0 Then
@@ -1044,9 +1058,41 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     If WithLevel > 0 And Left(Trim(ConvertCodeLine), 1) = "." Then ConvertCodeLine = Stack(WithVars, , True) & Trim(ConvertCodeLine)
   End If
   
-If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
+  If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
+  
   ConvertCodeLine = ConvertCodeLine & ";"
+  ConvertCodeLine = PostConvertCodeLine(ConvertCodeLine)
 'Debug.Print ConvertCodeLine
+End Function
+
+Public Function PostConvertCodeLine(ByVal Str As String) As String
+  Dim S As String
+  S = Str
+  
+  If IsInStr(S, "0 &") Then S = Replace(S, "0 &", "0")
+  If IsInStr(S, ".instance.instance") Then S = Replace(S, ".instance.instance", ".instance")
+  If IsInStr(S, ".IsChecked)") Then S = Replace(S, ".IsChecked)", ".IsChecked) == true", 1)
+  If IsInStr(S, ".IsChecked &") Then S = Replace(S, ".IsChecked", ".IsChecked == true", 1)
+  If IsInStr(S, ".IsChecked |") Then S = Replace(S, ".IsChecked", ".IsChecked == true", 1)
+  If IsInStr(S, ".IsChecked,") Then S = Replace(S, ".IsChecked", ".IsChecked == true", 1)
+  
+  If IsInStr(S, ".Visibility = true") Then S = Replace(S, ".Visibility = true", ".setVisible(true)")
+  If IsInStr(S, ".Visibility = false") Then S = Replace(S, ".Visibility = false", ".setVisible(false)")
+  
+  If IsInStr(S, ".Print(") Then
+    If IsInStr(S, ";);") Then
+      S = Replace(S, ";);", ");")
+      S = Replace(S, "Print(", "PrintNNL")
+    End If
+    S = Replace(S, "; ", ", ")
+  End If
+  If IsInStr(S, ".Line((") Then
+    S = Replace(S, ") - (", ", ")
+    S = Replace(S, "Line((", "Line(")
+    S = Replace(S, "));", ");")
+  End If
+  
+  PostConvertCodeLine = S
 End Function
 
 Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
@@ -1084,6 +1130,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
   For Each L In S
 'If IsInStr(L, "OrdVoid") Then Stop
 'If IsInStr(L, "MsgBox") Then Stop
+'If IsInStr(L, "And Not IsDoddsLtd Then") Then Stop
     L = DeComment(L)
     L = DeString(L)
     O = ""
@@ -1130,7 +1177,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
     ElseIf tLeft(L, 5) = "Const" Then
       O = sSpace(Ind) & ConvertConstant(L, False)
     ElseIf tLeft(L, 3) = "If " Then  ' Code sanitization prevents all single-line ifs.
-'If IsInStr(L, "Development") Then Stop
+'If IsInStr(L, "optDelivered") Then Stop
       T = Mid(Trim(L), 4, Len(Trim(L)) - 8)
       O = sSpace(Ind) & "if (" & ConvertValue(T) & ") {"
       Ind = Ind + SpIndent
