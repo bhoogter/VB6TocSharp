@@ -108,8 +108,8 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
 
     ' MS Windows Common Controls-2 6.0
 '    Case "MSComCtl2.Animation":
-    Case "MSComCtl2.UpDown":          Name = "Label"
-    Case "MSComCtl2.DTPicker":        Name = "Label" '"DateTimePicker"
+    Case "MSComCtl2.UpDown":          Name = "UpDown"
+    Case "MSComCtl2.DTPicker":        Name = "DatePicker"
     Case "MSComCtl2.MonthView":       Name = "DatePicker"
     Case "MSComCtl2.FlatScrollBar":   Name = "ScrollBar"
     

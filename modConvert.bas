@@ -1037,6 +1037,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
         ConvertCodeLine = ConvertCodeLine & IIf(N = 1, "", ", ") & ConvertValue(B)
       Loop While True
       ConvertCodeLine = ConvertCodeLine & ")"
+      ConvertCodeLine = ConvertElement(ConvertCodeLine)
     Else
       ConvertCodeLine = ConvertValue(S)
     End If
@@ -1059,6 +1060,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
   Dim returnVariable As String
   
 '  If IsInStr(Str, "Dim oFTP As New FTP") Then Stop
+'  If IsInStr(Str, "cHolding") Then Stop
   
   Select Case ScanFirst
     Case vbUseDefault:  oStr = Str
@@ -1080,6 +1082,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If IsInStr(Str, " RunShellExecute(") Then Stop
 'If IsInStr(Str, " ValidateSI(") Then Stop
   For Each L In S
+'If IsInStr(L, "OrdVoid") Then Stop
 'If IsInStr(L, "MsgBox") Then Stop
     L = DeComment(L)
     L = DeString(L)
@@ -1089,6 +1092,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If ScanFirst = vbFalse Then Stop
 'If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
 'If IsInStr(L, "GetCustomerBalance") Then Stop
+
 
     Dim PP As String
     PP = "^(Public |Private |)(Friend |)(Function |Sub )" & patToken & "[ ]*\("

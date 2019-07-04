@@ -5,6 +5,7 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
 'If IsInStr(vProp, "SetF") Then Stop
   ConvertControlProperty = vProp
   Select Case vProp
+    Case "ListIndex": ConvertControlProperty = "SelectedIndex"
     Case "Visible": ConvertControlProperty = "Visibility"
     Case "Enabled": ConvertControlProperty = "IsEnabled"
     Case "TabStop": ConvertControlProperty = "IsTabStop"
@@ -15,12 +16,13 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
     Case "Value"
       If cType = "VB.CheckBox" Then ConvertControlProperty = "IsChecked"
       If cType = "VB.RadioButton" Then ConvertControlProperty = "IsChecked"
+      If cType = "MSComCtl2.DTPicker" Then ConvertControlProperty = "DisplayDate"
     Case ""
       Select Case cType
         Case "VB.Caption": ConvertControlProperty = "Content"
         Case "VB.TextBox": ConvertControlProperty = "Text"
         Case "VB.ComboBox": ConvertControlProperty = "Text"
-        Case "VB.RadioButton": ConvertControlProperty = "IsChecked"
+        Case "VB.OptionButton": ConvertControlProperty = "IsChecked"
         Case "VB.CheckBox": ConvertControlProperty = "IsChecked"
         Case Else: ConvertControlProperty = "DefaultProperty"
       End Select
