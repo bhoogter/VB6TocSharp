@@ -13,5 +13,5 @@ modSupportFiles = 130, 130, 1068, 459,
 modConfig = 130, 130, 1068, 460, 
 modRefScan = 156, 156, 922, 484, 
 modConvertUtils = 78, 78, 870, 385, C
-modControlProperties = 130, 130, 896, 463, 
+modControlProperties = 130, 130, 896, 463, C
 modProjectSpecific = 130, 130, 896, 466, 

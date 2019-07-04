@@ -763,8 +763,12 @@ Public Function ConvertElement(ByVal S As String) As String
     End If
   End If
 
+'If IsInStr(S, "Not optTagIncoming") Then Stop
   If IsControlRef(Trim(S), FormName) Then
+'If IsInStr(S, "optTagIncoming") Then Stop
     S = FormControlRepl(S, FormName)
+  ElseIf LMatch(Trim(S), "Not ") And IsControlRef(Mid(Trim(S), 5), FormName) Then
+    S = "!" & FormControlRepl(Mid(Trim(S), 5), FormName)
   End If
   
   If IsFormRef(Trim(S)) Then
@@ -909,6 +913,7 @@ Public Function ConvertValue(ByVal S As String) As String
       Case Else:   OpN = Op
     End Select
     
+    
     If Left(F, 1) = "(" And Right(F, 1) = ")" Then
       O = O & "(" & ConvertValue(Mid(F, 2, Len(F) - 2)) & ")" & OpN
     Else
@@ -997,6 +1002,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "optDelivered") Then Stop
 'If IsInStr(S, " Is Nothing Then") Then Stop
 'If IsInStr(S, "SqFt, SqYd") Then Stop
+'If IsInStr(S, "optTagIncoming") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
@@ -1113,10 +1119,12 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
   
 '  If IsInStr(Str, "Dim oFTP As New FTP") Then Stop
 '  If IsInStr(Str, "cHolding") Then Stop
+
   
   Select Case ScanFirst
     Case vbUseDefault:  oStr = Str
                         ConvertSub oStr, asModule, vbTrue
+'                          If IsInStr(Str, "StoreStockToolTipText") Then Stop
                         ConvertSub = ConvertSub(oStr, asModule, vbFalse)
                         Exit Function
     Case vbTrue:        SubBegin

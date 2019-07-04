@@ -22,6 +22,7 @@ Public Type Property
   Setter As String
   origArgName As String
   funcArgs As String
+  origProto As String
 End Type
 
 Private Lockout As Boolean
@@ -129,11 +130,12 @@ End Function
 
 Public Sub AddProperty(ByVal S As String)
   Dim X As Long, PP As Property
-  Dim Pro As String, asPublic As Boolean
+  Dim Pro As String, origProto As String, asPublic As Boolean
   Dim asFunc As Boolean
   Dim GSL As String, pName As String, pArgs As String, pArgName As String, pType As String
   
   Pro = SplitWord(S, 1, vbCr)
+  origProto = Pro
   
   S = nlTrim(Replace(S, Pro, ""))
   If Right(S, 12) = "End Property" Then S = nlTrim(Left(S, Len(S) - 12))
@@ -151,10 +153,16 @@ Public Sub AddProperty(ByVal S As String)
   Pro = Mid(Pro, Len(pName) + 1)
   If LMatch(Pro, "(") Then Pro = Mid(Pro, 2)
   pArgs = nextBy(Pro, ")")
-  If GSL = "get" And pArgs <> "" Or GSL <> "get" And InStr(pArgs, ",") > 0 Then asFunc = True
+  If (GSL = "get" And pArgs <> "") Or (GSL <> "get" And InStr(pArgs, ",") > 0) Then
+    asFunc = True
+  End If
   If GSL = "set" Or GSL = "let" Then
-    pArgName = SplitWord(pArgs, 1)
-    If pArgName = "ByVal" Or pArgName = "ByRef" Then pArgName = SplitWord(pArgs, 2)
+    Dim fArg As String
+    fArg = Trim(SplitWord(pArgs, -1, ","))
+    If LMatch(fArg, "ByVal ") Then fArg = Mid(fArg, 7)
+    If LMatch(fArg, "ByRef ") Then fArg = Mid(fArg, 7)
+    pArgName = SplitWord(fArg, 1)
+    If SplitWord(fArg, 2, " ") = "As" Then pType = SplitWord(fArg, 3, " ") Else pType = "Variant"
   End If
   Pro = Mid(Pro, Len(pArgs) + 1)
   If LMatch(Pro, ")") Then Pro = Trim(Mid(Pro, 2))
@@ -174,6 +182,7 @@ On Error GoTo 0
   End If
   
   Props(X).Name = pName
+  Props(X).origProto = origProto
   If asPublic Then Props(X).asPublic = True  ' if one is public, both are...
   Select Case GSL
     Case "get"
@@ -183,6 +192,9 @@ On Error GoTo 0
                         Props(X).funcArgs = pArgs
     Case "set", "let":  Props(X).Setter = ConvertSub(S, , vbFalse)
                         Props(X).origArgName = pArgName
+                        If pType <> "" Then Props(X).asType = ConvertDataType(pType)
+                        If asFunc Then Props(X).asFunc = True
+                        If pArgs <> "" Then Props(X).funcArgs = pArgs
   End Select
 End Sub
 
@@ -203,16 +215,18 @@ On Error Resume Next
         If asModule Then R = R & "static "
 '          If .Getter = "" Then R = R & "writeonly "
 '          If .Setter = "" Then R = R & "readonly "
+        If .asFunc Then
+          R = R & " // TODO: Arguments not allowed on properties: " & .funcArgs & vbCrLf
+          R = R & " //       " + .origProto & vbCrLf
+        End If
         R = R & M & .asType & " " & .Name
         R = R & " {"
-        
-        If .asFunc Then R = R & " // TODO: Arguments not allowed on properties: " & .funcArgs
         
         If .Getter <> "" Then
           R = R & N & "  get {"
           R = R & N & "    " & .asType & " " & .Name & ";"
           T = .Getter
-          T = Replace(T, "Exit Property", "return " & .Name & ";")
+          T = Replace(T, "Exit(Property)", "return " & .Name & ";")
           R = R & N & "    " & T
           R = R & N & "  return " & .Name & ";"
           R = R & N & "  }"
