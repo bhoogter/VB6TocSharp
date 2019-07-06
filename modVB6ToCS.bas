@@ -114,8 +114,8 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
     Case "MSComCtl2.FlatScrollBar":   Name = "ScrollBar"
     
     Case "MSComDlg.CommonDialog":     Name = "Label"
-    Case "MSFlexGridLib.MSFlexGrid":  Name = "Grid"
-    Case "MSDBGrid.DBGrid":           Name = "Grid"
+    Case "MSFlexGridLib.MSFlexGrid":  Name = "DataGrid"
+    Case "MSDBGrid.DBGrid":           Name = "DataGrid"
     Case "TabDlg.SSTab":              Name = "TabControl"
     Case "RichTextLib.RichTextBox":   Name = "TextBlock"
     Case "InetCtlsObjects.Inet":      Name = "INet"

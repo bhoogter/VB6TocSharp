@@ -171,6 +171,8 @@ Public Sub AddProperty(ByVal S As String)
     pType = Pro
   End If
   
+  If pType = "" Then pType = "Variant"
+  
 
   X = PropIndex(pName)
   If X = -1 Then

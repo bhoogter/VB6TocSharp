@@ -185,6 +185,7 @@ Public Function SanitizeCode(ByVal Str As String)
   
 
   For Each L In Sp
+'If IsInStr(L, "POEDIFolder") Then Stop
 'If IsInStr(L, "Set objSourceArNo = New_CDbTypeAhead") Then Stop
     If Right(L, 1) = "_" Then
       Dim C As String
@@ -800,8 +801,15 @@ ManageFunctions:
   End If
 
 DoReplacements:
+  If IsInStr(ConvertElement, ":=") Then
+    Dim Ts As String
+    Ts = SplitWord(ConvertElement, 1, ":=")
+    Ts = Ts & ": "
+    Ts = Ts & ConvertElement(SplitWord(ConvertElement, 2, ":=", True, True))
+    ConvertElement = Ts
+  End If
+
   ConvertElement = Replace(ConvertElement, " & ", " + ")
-  ConvertElement = Replace(ConvertElement, ":=", ": ")
   ConvertElement = Replace(ConvertElement, " = ", " == ")
   ConvertElement = Replace(ConvertElement, "<>", "!=")
   ConvertElement = Replace(ConvertElement, " Not ", " !")
@@ -836,7 +844,7 @@ DoReplacements:
 End Function
 
 Public Function ConvertFunctionCall(ByVal fCall As String) As String
-  Dim I As Long, N As Long, TB As String, TS As String, tName As String
+  Dim I As Long, N As Long, TB As String, Ts As String, tName As String
   Dim TV As String
   Dim vP As Variable
 'Debug.Print "ConvertFunctionCall: " & fCall
@@ -845,25 +853,25 @@ Public Function ConvertFunctionCall(ByVal fCall As String) As String
   tName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*")
   TB = TB & tName
 
-  TS = Mid(fCall, Len(tName) + 2)
-  TS = Left(TS, Len(TS) - 1)
+  Ts = Mid(fCall, Len(tName) + 2)
+  Ts = Left(Ts, Len(Ts) - 1)
   
   vP = SubParam(tName)
   If ConvertDataType(vP.asType) = "Recordset" Then
     TB = TB & ".Fields["
-    TB = TB & ConvertValue(TS)
+    TB = TB & ConvertValue(Ts)
     TB = TB & "].Value"
   ElseIf vP.asArray <> "" Then
     TB = TB & "["
-    TB = TB & ConvertValue(TS)
+    TB = TB & ConvertValue(Ts)
     TB = TB & "]"
 '    TB = Replace(TB, ", ", "][")
   Else
-    N = nextByPCt(TS, ",")
+    N = nextByPCt(Ts, ",")
     TB = TB & "("
     For I = 1 To N
       If I <> 1 Then TB = TB & ", "
-      TV = nextByP(TS, ",", I)
+      TV = nextByP(Ts, ",", I)
       If IsFuncRef(tName) Then
         If Trim(TV) = "" Then
           TB = TB & ConvertElement(FuncRefArgDefault(tName, I))
@@ -1003,6 +1011,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, " Is Nothing Then") Then Stop
 'If IsInStr(S, "SqFt, SqYd") Then Stop
 'If IsInStr(S, "optTagIncoming") Then Stop
+'If IsInStr(S, "Kill modAshleyItemAlign") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
@@ -1060,7 +1069,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
         ConvertCodeLine = ConvertCodeLine & IIf(N = 1, "", ", ") & ConvertValue(B)
       Loop While True
       ConvertCodeLine = ConvertCodeLine & ")"
-      ConvertCodeLine = ConvertElement(ConvertCodeLine)
+'      ConvertCodeLine = ConvertElement(ConvertCodeLine)
     Else
       ConvertCodeLine = ConvertValue(S)
     End If
@@ -1168,6 +1177,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
       O = O & sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule, CurrSub)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then
+'      If IsInStr(L, "edi888_Admin888_Src") Then Stop
       AddProperty Str
       Exit Function    ' repacked later...  not added here.
     ElseIf tLMatch(L, "End Sub") Or tLMatch(L, "End Function") Then

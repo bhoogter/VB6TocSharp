@@ -22,12 +22,12 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
     Case "ListCount"
       If cType = "VB.ListBox" Then ConvertControlProperty = "Items.Count"
     Case ""
-      If IsInStr(cType, "mage") Then Stop
       Select Case cType
         Case "VB.Caption":      ConvertControlProperty = "Content"
         Case "VB.TextBox":      ConvertControlProperty = "Text"
         Case "VB.ComboBox":     ConvertControlProperty = "Text"
         Case "VB.PictureBox":   ConvertControlProperty = "Source"
+        Case "VB.Image":        ConvertControlProperty = "Source"
         Case "VB.ComboBox":     ConvertControlProperty = "Text"
         Case "VB.OptionButton": ConvertControlProperty = "IsChecked"
         Case "VB.CheckBox":     ConvertControlProperty = "IsChecked"
