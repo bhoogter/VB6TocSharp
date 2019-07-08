@@ -33,6 +33,8 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Pushpin":               ConvertDataType = "Pushpin"
     Case "Map":                   ConvertDataType = "Map"
     
+    Case "Node":                  ConvertDataType = "TreeViewItem"
+    
     Case "Recordset", "ADODB.Recordset":
                                   ConvertDataType = "Recordset"
     Case "Connection", "ADODB.Connection":
@@ -54,6 +56,7 @@ Public Function ConvertDataType(ByVal S As String) As String
                                   ConvertDataType = S
     Case "MSCommLib.MSComm"
                                   ConvertDataType = S
+            
     Case Else
       If IsInStr(VBPClasses(ClassNames:=True), S) Then
         ConvertDataType = S
@@ -108,13 +111,13 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
 
     ' MS Windows Common Controls-2 6.0
 '    Case "MSComCtl2.Animation":
-    Case "MSComCtl2.UpDown":          Name = "UpDown"
+    Case "MSComCtl2.UpDown":          Name = "usercontrols:UpDown"
     Case "MSComCtl2.DTPicker":        Name = "DatePicker"
     Case "MSComCtl2.MonthView":       Name = "DatePicker"
     Case "MSComCtl2.FlatScrollBar":   Name = "ScrollBar"
     
     Case "MSComDlg.CommonDialog":     Name = "Label"
-    Case "MSFlexGridLib.MSFlexGrid":  Name = "DataGrid"
+    Case "MSFlexGridLib.MSFlexGrid":  Name = "usercontrols:FlexGrid"
     Case "MSDBGrid.DBGrid":           Name = "DataGrid"
     Case "TabDlg.SSTab":              Name = "TabControl"
     Case "RichTextLib.RichTextBox":   Name = "TextBlock"

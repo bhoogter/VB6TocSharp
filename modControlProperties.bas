@@ -21,6 +21,9 @@ Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As Strin
       If cType = "VB.ListBox" Then ConvertControlProperty = "SelectedText.toString()"
     Case "ListCount"
       If cType = "VB.ListBox" Then ConvertControlProperty = "Items.Count"
+    Case "Default": ConvertControlProperty = "IsDefault"
+    Case "Cancel": ConvertControlProperty = "IsCancel"
+      
     Case ""
       Select Case cType
         Case "VB.Caption":      ConvertControlProperty = "Content"
