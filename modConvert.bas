@@ -1113,6 +1113,13 @@ Public Function PostConvertCodeLine(ByVal Str As String) As String
     S = Replace(S, "));", ");")
   End If
   
+  S = Replace(S, "vbRetryCancel +", "vbRetryCancel |")
+  S = Replace(S, "vbOkOnly +", "vbOkOnly |")
+  S = Replace(S, "vbOkCancel +", "vbOkCancel |")
+  S = Replace(S, "vbExclamation +", "vbExclamation |")
+  S = Replace(S, "vbYesNo +", "vbYesNo |")
+  S = Replace(S, "vbQuestion +", "vbQuestion |")
+  
   PostConvertCodeLine = S
 End Function
 

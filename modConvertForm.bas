@@ -140,6 +140,7 @@ On Error Resume Next
     S = S & N & "    xmlns:d=""http://schemas.microsoft.com/expression/blend/2008"""
     S = S & N & "    xmlns:mc=""http://schemas.openxmlformats.org/markup-compatibility/2006"""
     S = S & N & "    xmlns:local=""clr-namespace:" & AssemblyName & ".Forms"""
+    S = S & N & "    xmlns:usercontrols=""clr-namespace:" & AssemblyName & ".UserControls"""
     S = S & N & "    mc:Ignorable=""d"""
     S = S & N & "    Title=" & Quote(cValP(Props, "caption"))
     S = S & M & "    Height=" & Quote(Px(cValP(Props, "clientheight", 0) + 435))
