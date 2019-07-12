@@ -1081,7 +1081,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     If WithLevel > 0 And Left(Trim(ConvertCodeLine), 1) = "." Then ConvertCodeLine = Stack(WithVars, , True) & Trim(ConvertCodeLine)
   End If
   
-  If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
+'  If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
   
   ConvertCodeLine = ConvertCodeLine & ";"
 'Debug.Print ConvertCodeLine
