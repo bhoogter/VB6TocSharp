@@ -796,8 +796,12 @@ Public Function ConvertElement(ByVal S As String) As String
   
 ManageFunctions:
 'If IsInStr(ConvertElement, "New_CDbTypeAhead") Then Stop
-  If RegExTest(ConvertElement, "^[a-zA-Z0-9_.]+[ ]*\(.*\)$") Then
-    ConvertElement = ConvertFunctionCall(ConvertElement)
+  If RegExTest(ConvertElement, "(\!)?[a-zA-Z0-9_.]+[ ]*\(.*\)$") Then
+    If (Left(ConvertElement, 1) = "!") Then
+        ConvertElement = "!" & ConvertFunctionCall(Mid(ConvertElement, 2))
+    Else
+      ConvertElement = ConvertFunctionCall(ConvertElement)
+    End If
   End If
 
 DoReplacements:
@@ -1012,6 +1016,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "SqFt, SqYd") Then Stop
 'If IsInStr(S, "optTagIncoming") Then Stop
 'If IsInStr(S, "Kill modAshleyItemAlign") Then Stop
+'If IsInStr(S, "PRFolder") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   S = ConvertVb6Syntax(S)
@@ -1119,6 +1124,8 @@ Public Function PostConvertCodeLine(ByVal Str As String) As String
   S = Replace(S, "vbExclamation +", "vbExclamation |")
   S = Replace(S, "vbYesNo +", "vbYesNo |")
   S = Replace(S, "vbQuestion +", "vbQuestion |")
+  S = Replace(S, "vbOKCancel +", "vbOKCancel |")
+  S = Replace(S, "+ vbExclamation", "| vbExclamation")
   
   PostConvertCodeLine = S
 End Function
@@ -1209,6 +1216,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
       O = sSpace(Ind) & ConvertConstant(L, False)
     ElseIf tLeft(L, 3) = "If " Then  ' Code sanitization prevents all single-line ifs.
 'If IsInStr(L, "optDelivered") Then Stop
+'If IsInStr(L, "PRFolder") Then Stop
       T = Mid(Trim(L), 4, Len(Trim(L)) - 8)
       O = sSpace(Ind) & "if (" & ConvertValue(T) & ") {"
       Ind = Ind + SpIndent

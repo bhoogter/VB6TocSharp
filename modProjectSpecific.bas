@@ -25,6 +25,7 @@ Public Function ProjectSpecificPostCodeLineConvert(ByVal Str As String) As Strin
   If IsInStr(S, "POMode(") Then S = Replace(S, "ref ", "")
   If IsInStr(S, "OrderMode(") Then S = Replace(S, "ref ", "")
   If IsInStr(S, "InvenMode(") Then S = Replace(S, "ref ", "")
+  If IsInStr(S, "ReportsMode(") Then S = Replace(S, "ref ", "")
   If IsInStr(S, "SetButtonImage(") Then S = Replace(S, "ref ", ""): S = Replace(S, ".DefaultProperty", "")
   If IsInStr(S, "EnableFrame") Then S = Replace(S, "ref ", "")
   S = Replace(S, " && BackupType.", " & BackupType.")
@@ -36,8 +37,12 @@ Public Function ProjectSpecificPostCodeLineConvert(ByVal Str As String) As Strin
   If IsInStr(S, ".hwnd") Then S = Replace(S, ".hwnd", ".hWnd()")
   If IsInStr(S, "SetCustomFrame") Then S = ""
   If IsInStr(S, "RemoveCustomFrame") Then S = ""
+  S = Replace(S, "VbMsgBoxResult", "MsgBoxResult")
   
   Const TokenBreak As String = "[ ,)]"
+  S = RegExReplace(S, "InventFolder(" & TokenBreak & ")", "InventFolder()$1")
+  S = RegExReplace(S, "PXFolder(" & TokenBreak & ")", "InventFolder()$1")
+  S = RegExReplace(S, "FXFolder(" & TokenBreak & ")", "InventFolder()$1")
   S = RegExReplace(S, "InventFolder(" & TokenBreak & ")", "InventFolder()$1")
   S = RegExReplace(S, "IsDevelopment(" & TokenBreak & ")", "IsDevelopment()$1")
   
