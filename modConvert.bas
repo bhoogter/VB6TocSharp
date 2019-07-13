@@ -909,6 +909,11 @@ Public Function ConvertValue(ByVal S As String) As String
 
   SubParamUsedList TokenList(S)
   
+  If RegExTest(S, "^-[a-zA-Z0-9_]") Then
+    ConvertValue = "-" & ConvertValue(Mid(S, 2))
+    Exit Function
+  End If
+  
   Do While True
     F = NextByOp(S, 1, Op)
     If F = "" Then Exit Do
@@ -1019,7 +1024,12 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "PRFolder") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
-  S = ConvertVb6Syntax(S)
+  Dim Complete As Boolean
+  S = ConvertVb6Specific(S, Complete)
+  If Complete Then
+    ConvertCodeLine = S
+    Exit Function
+  End If
   
   If RegExTest(Trim(S), "^[a-zA-Z0-9_.()]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.()]+ \= ") Then
     T = InStr(S, "=")
@@ -1081,7 +1091,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     If WithLevel > 0 And Left(Trim(ConvertCodeLine), 1) = "." Then ConvertCodeLine = Stack(WithVars, , True) & Trim(ConvertCodeLine)
   End If
   
-'  If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
+  If IsInStr(ConvertCodeLine, ",,,,,,,") Then Stop
   
   ConvertCodeLine = ConvertCodeLine & ";"
 'Debug.Print ConvertCodeLine
@@ -1340,6 +1350,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
       O = sSpace(Ind) & "// TODO (not supported): " & L
     Else
 'If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
+'If IsInStr(L, "RaiseEvent") Then Stop
       O = sSpace(Ind) & ConvertCodeLine(L)
     End If
     

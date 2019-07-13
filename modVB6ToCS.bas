@@ -160,14 +160,14 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "vbTrue":        Complete = True: S = "vbTriState.vbTrue"
     Case "vbFalse":       Complete = True: S = "vbTriState.vbFalse"
     Case "vbUseDefault":  Complete = True: S = "vbTriState.vbUseDefault"
-    Case "Date", "Today": Complete = True: S = "DateTime.Today"
-    Case "Now":           Complete = True: S = "DateTime.Now"
-    Case "Kill":          S = "File.Delete(" & R & ")"
-    Case "FreeFile":      S = "FreeFile()"
-    Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
-    Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
-    Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"
-    Case "New":           Complete = True: S = "new " & R & "()"
+    Case "Date", "Today": Complete = True: S = "DateTime.Today;"
+    Case "Now":           Complete = True: S = "DateTime.Now;"
+    Case "Kill":          S = "File.Delete(" & R & ");"
+    Case "FreeFile":      S = "FreeFile();"
+    Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ");"
+    Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ");"
+    Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ");"
+    Case "New":           Complete = True: S = "new " & R & "();"
     Case "vbAlignLeft":   S = "AlignConstants.vbAlignLeft"
     Case "vbAlignRight":  S = "AlignConstants.vbAlignRight"
     Case "vbAlignTop":    S = "AlignConstants.vbAlignTop"
@@ -177,7 +177,7 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
                           W = RegExNMatch(R, patToken)
                           R = Mid(R, Len(W) + 1)
                           If R = "" Then R = "()"
-                          S = "event" & W & "?.Invoke" & R
+                          S = "event" & W & "?.Invoke" & R & ";"
     Case "ReDim":
       Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String
