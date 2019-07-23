@@ -1,7 +1,7 @@
 frm = 26, 26, 990, 342, C, 0, 0, 964, 316, C
 modUtils = 26, 26, 990, 342, 
 modConvert = 52, 52, 1016, 368, Z
-modProjectFiles = 52, 52, 1016, 368, 
+modProjectFiles = 52, 52, 1016, 368, C
 modTextFiles = 104, 104, 1068, 420, C
 modRegEx = 78, 78, 1042, 394, C
 frmTest = 104, 104, 1068, 420, C
@@ -14,4 +14,4 @@ modConfig = 130, 130, 1068, 460, C
 modRefScan = 156, 156, 922, 484, C
 modConvertUtils = 78, 78, 870, 385, C
 modControlProperties = 130, 130, 896, 463, C
-modProjectSpecific = 130, 130, 896, 466, 
+modProjectSpecific = 130, 130, 896, 466, C
