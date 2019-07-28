@@ -1,6 +1,6 @@
 frm = 26, 26, 990, 342, C, 0, 0, 964, 316, C
 modUtils = 26, 26, 990, 342, 
-modConvert = 52, 52, 1016, 368, Z
+modConvert = 52, 52, 1016, 368, 
 modProjectFiles = 52, 52, 1016, 368, C
 modTextFiles = 104, 104, 1068, 420, C
 modRegEx = 78, 78, 1042, 394, C
