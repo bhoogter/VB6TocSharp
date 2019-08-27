@@ -405,6 +405,7 @@ Public Function ConvertAPIDef(ByVal S As String) As String
     S = Trim(tMid(S, 5))
     aLib = SplitWord(S, 1)
     S = Trim(tMid(S, Len(aLib) + 1))
+    aLib = ReString(aLib)
     If Left(aLib, 1) = """" Then aLib = Mid(aLib, 2)
     If Right(aLib, 1) = """" Then aLib = Left(aLib, Len(aLib) - 1)
     If LCase(Right(aLib, 4)) <> ".dll" Then aLib = aLib & ".dll"
@@ -414,9 +415,10 @@ Public Function ConvertAPIDef(ByVal S As String) As String
     S = Trim(tMid(S, 7))
     aAlias = SplitWord(S, 1)
     S = Trim(tMid(S, Len(aAlias) + 1))
+    aAlias = ReString(aAlias)
     If Left(aAlias, 1) = """" Then aAlias = Mid(aAlias, 2)
     If Right(aAlias, 1) = """" Then aAlias = Left(aAlias, Len(aAlias) - 1)
-    End If
+  End If
   If tLeft(S, 1) = "(" Then S = tMid(S, 2)
   aArgs = nextBy(S, ")")
   S = Trim(tMid(S, Len(aArgs) + 2))
@@ -439,7 +441,7 @@ Public Function ConvertAPIDef(ByVal S As String) As String
     If aArgs = "" Then Exit Do
     tArg = Trim(nextBy(aArgs, ","))
     aArgs = tMid(aArgs, Len(tArg) + 2)
-    S = S & IIf(has, ", ", "") & ConvertParameter(tArg)
+    S = S & IIf(has, ", ", "") & ConvertParameter(tArg, True)
     has = True
   Loop While True
   S = S & ");"
