@@ -1,4 +1,4 @@
-# VB6 -> C#
+# VB6 To C#
 
 A VB6 based VB6 -> C# 2017 converter.
 
