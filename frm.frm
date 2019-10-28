@@ -15,6 +15,14 @@ Begin VB.Form frm
       TabIndex        =   0
       Top             =   120
       Width           =   4935
+      Begin VB.CommandButton cmdConfig 
+         Caption         =   "Conf&ig"
+         Height          =   285
+         Left            =   3960
+         TabIndex        =   10
+         Top             =   240
+         Width           =   855
+      End
       Begin VB.TextBox txtStats 
          Appearance      =   0  'Flat
          BackColor       =   &H8000000F&
@@ -22,7 +30,7 @@ Begin VB.Form frm
          Left            =   2040
          MultiLine       =   -1  'True
          ScrollBars      =   2  'Vertical
-         TabIndex        =   9
+         TabIndex        =   8
          Top             =   1320
          Width           =   2655
       End
@@ -30,7 +38,7 @@ Begin VB.Form frm
          Caption         =   "Classes"
          Height          =   495
          Left            =   240
-         TabIndex        =   8
+         TabIndex        =   7
          Top             =   1920
          Width           =   1455
       End
@@ -38,7 +46,7 @@ Begin VB.Form frm
          Caption         =   "Modules"
          Height          =   495
          Left            =   240
-         TabIndex        =   7
+         TabIndex        =   6
          Top             =   2520
          Width           =   1455
       End
@@ -46,7 +54,7 @@ Begin VB.Form frm
          Caption         =   "ALL"
          Height          =   495
          Left            =   240
-         TabIndex        =   6
+         TabIndex        =   5
          Top             =   3480
          Width           =   1455
       End
@@ -54,29 +62,23 @@ Begin VB.Form frm
          Caption         =   "Forms"
          Height          =   495
          Left            =   240
-         TabIndex        =   5
+         TabIndex        =   4
          Top             =   1320
          Width           =   1455
       End
       Begin VB.CommandButton cmdExit 
+         Cancel          =   -1  'True
          Caption         =   "E&xit"
          Height          =   495
          Left            =   3240
-         TabIndex        =   4
+         TabIndex        =   3
          Top             =   3480
          Width           =   1455
-      End
-      Begin VB.CommandButton cmdBrowse 
-         Caption         =   "Browse"
-         Height          =   255
-         Left            =   3840
-         TabIndex        =   3
-         Top             =   240
-         Width           =   855
       End
       Begin VB.TextBox txtSrc 
          Height          =   285
          Left            =   1200
+         Locked          =   -1  'True
          TabIndex        =   1
          Text            =   "C:\WinCDS\WinCDS\WinCDS.vbp"
          Top             =   240
@@ -87,7 +89,7 @@ Begin VB.Form frm
          BackStyle       =   0  'Transparent
          Height          =   255
          Left            =   2040
-         TabIndex        =   10
+         TabIndex        =   9
          Top             =   3120
          Width           =   2415
       End
@@ -140,6 +142,10 @@ Private Sub cmdClasses_Click()
   IsWorking True
 End Sub
 
+Private Sub cmdConfig_Click()
+  frmConfig.Show 1
+End Sub
+
 Private Sub cmdExit_Click()
   Unload Me
 End Sub
@@ -158,7 +164,6 @@ End Sub
 
 Private Sub IsWorking(Optional ByVal Done As Boolean)
   cmdAll.Enabled = Done
-  cmdBrowse.Enabled = Done
   cmdClasses.Enabled = Done
   cmdExit.Enabled = Done
   cmdForms.Enabled = Done
@@ -175,3 +180,7 @@ On Error Resume Next
   lblPrg.Visible = shpPrg.Visible
 End Function
 
+Private Sub Form_Load()
+  modConfig.LoadSettings
+  txtSrc = vbpFile
+End Sub

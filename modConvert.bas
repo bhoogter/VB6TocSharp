@@ -85,6 +85,8 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   X = X & "public partial class " & FName & " : Window {" & vbCrLf
   X = X & "  private static " & FName & " _instance;" & vbCrLf
   X = X & "  public static " & FName & " instance { set { _instance = null; } get { return _instance ?? (_instance = new " & FName & "()); }}"
+  X = X & "  public static void Load() { if (instance == null) { dynamic A = " + FName + ".instance; } }"
+  X = X & "  public static void Unload() { if (instance != null) instance.Close(); instance = null; }"
   X = X & "  public " & FName & "() { InitializeComponent(); }" & vbCrLf
   X = X & vbCrLf
   X = X & vbCrLf
