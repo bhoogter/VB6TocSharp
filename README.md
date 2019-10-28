@@ -12,3 +12,15 @@ A VB6 based VB6 -> C# 2017 converter.
     - Keyword capitalization can be guaranteed.
 - Non-assuming - It makes the assumption that the code compiled while in VB, so it doesn't assume that reference it can't resolve aren't going to be found.
 - C# 2017 - This is a late-comer.  There has never been a freeware solution for VB6 -> C#, and now that VB.NET is more or less discontinued, why not?
+
+## Down-sides
+
+- This will not produce code that will compile in its generated form.  The last mile is simply the most expensive, and it seemed more expedient to make something get most of the way, and finish the course manually.
+- This isn't the most customizable solution.  Unless, of course, you want to dive into a little source code on the converter.  But, that's why its available.
+
+## Pluses
+
+- It's free.
+- You have the source.
+- It's a lot better than doing it all by hand.
+- It will give you a good insight into what's going on, without having to ALL of the manual effort to do a simple conversion.
