@@ -28,6 +28,7 @@ Module=modControlProperties; modControlProperties.bas
 Module=modProjectSpecific; modProjectSpecific.bas
 Form=frmConfig.frm
 Module=modINI; modINI.bas
+Module=modLinter; modLinter.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""

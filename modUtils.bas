@@ -9,8 +9,12 @@ Public Const vbCrLf2 As String = vbCrLf & vbCrLf
 Public Const vbCrLf3 As String = vbCrLf & vbCrLf & vbCrLf
 Public Const vbCrLf4 As String = vbCrLf & vbCrLf & vbCrLf & vbCrLf
 
+Public Const STR_CHR_UCASE As String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+Public Const STR_CHR_LCASE As String = "abcdefghijklmnopqrstuvwxyz"
+Public Const STR_CHR_DIGIT As String = "1234567890"
 
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
+Public Function IsNotInStr(ByVal S As String, ByVal Fnd As String) As Boolean: IsNotInStr = Not IsInStr(S, Fnd): End Function
 Public Function FileExists(ByVal FN As String) As Boolean: FileExists = Dir(FN) <> "": End Function
 Public Function FileName(ByVal FN As String) As String: FileName = Mid(FN, InStrRev(FN, "\") + 1): End Function
 Public Function FileBaseName(ByVal FN As String) As String: FileBaseName = Left(FileName(FN), InStrRev(FileName(FN), ".") - 1): End Function
@@ -23,6 +27,17 @@ Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: 
 Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: tLMatch = Left(LTrim(Src), Len(tMatch)) = tMatch: End Function
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
+Public Function AlignString(ByVal S As String, ByVal N As Long): AlignString = Left(S & Space(N), N): End Function
+Public Function Capitalize(ByVal S As String) As String: Capitalize = UCase(Left(S, 1)) & Mid(S, 2): End Function
+
+Public Function DevelopmentFolder() As String: DevelopmentFolder = App.Path & "\": End Function
+
+Public Function IsIn(ByVal S As String, ParamArray K()) As Boolean
+  Dim L As Variant
+  For Each L In K
+    If S = L Then IsIn = True: Exit Function
+  Next
+End Function
 
 Public Function WriteOut(ByVal F As String, ByVal S As String, Optional ByVal O As String = "") As Boolean
   If Not IsConverted(F, O) Then
@@ -439,3 +454,50 @@ Public Function QuoteXML(ByVal S As String) As String
   QuoteXML = Replace(S, """", "&quot;")
   QuoteXML = Quote(QuoteXML)
 End Function
+
+
+Public Function ReduceString(ByVal Src As String, Optional ByVal Allowed As String, Optional ByVal Subst As String = "-", Optional ByVal MaxLen As Long = 0, Optional ByVal bLCase As Boolean = True) As String
+'::::ReduceString
+':::SUMMARY
+': Reduces a string by removing non-allowed characters, optionally replacing them with a substitute.
+':::DESCRIPTION
+': Non-allowed characters are removed, and, if supplied, replaced with a substitute.
+': Substitutes are trimmed from either end, and all duplicated substitutes are remvoed.
+':
+': After this process, the string can be given LCase (default) or truncated (not default), if desired.
+':
+': This is effectively a slug maker, although it is somewhat adaptable to any cleaning routine.
+':::PARAMETERS
+': - Src - Source string to be reduced
+': - [Allowed] - The list of allowable characters.  Defaults to [A-Za-z0-9]*
+': - [Subst] - If specified, the character to replace non-allowed characters with (default == "-")
+': - [MaxLen] - If passed, truncates longer strings to this length.  Default = 0
+': - [bLCase] - Convert string to lower case after operation.  Default = True
+':::EXAMPLE
+': - ReduceString("   Something To be 'slugified'!!!****") == "something-to-be-slugified"
+':::RETURN
+':  String - The slug generated from the source.
+':::AUTHOR
+': Benjamin - 2018.04.28
+':::SEE ALSO
+':  ArrangeString, StringNumerals, slug, CleanANI
+  Dim I As Long, N As Long, C As String
+  If Allowed = "" Then Allowed = STR_CHR_UCASE & STR_CHR_LCASE & STR_CHR_DIGIT
+  ReduceString = ""
+  N = Len(Src)
+  For I = 1 To N
+    C = Mid(Src, I, 1)
+    ReduceString = ReduceString & IIf(IsInStr(Allowed, C), C, Subst)
+  Next
+  
+  If Subst <> "" Then
+    Do While IsInStr(ReduceString, Subst & Subst): ReduceString = Replace(ReduceString, Subst & Subst, Subst): Loop
+    Do While Left(ReduceString, Len(Subst)) = Subst: ReduceString = Mid(ReduceString, Len(Subst) + 1): Loop
+    Do While Right(ReduceString, Len(Subst)) = Subst: ReduceString = Left(ReduceString, Len(ReduceString) - Len(Subst)): Loop
+  End If
+  
+  If MaxLen > 0 Then ReduceString = Left(ReduceString, MaxLen)
+  If bLCase Then ReduceString = LCase(ReduceString)
+End Function
+
+

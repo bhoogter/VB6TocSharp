@@ -75,7 +75,7 @@ On Error Resume Next
   If ReadIniValue = "" Then ReadIniValue = vDefault
 End Function
 
-Public Function WriteIniValue(ByVal INIPath As String, ByVal PutKey As String, ByVal PutVariable As String, ByVal PutValue As String, Optional ByVal DeleteOnEmpty As Boolean = False)
+Public Function WriteIniValue(ByVal INIPath As String, ByVal PutKey As String, ByVal PutVariable As String, ByVal PutValue As String, Optional ByVal DeleteOnEmpty As Boolean = False) As String
 On Error Resume Next
   INIWrite PutKey, PutVariable, PutValue, INIPath
   WriteIniValue = INIRead(PutKey, PutVariable, INIPath)

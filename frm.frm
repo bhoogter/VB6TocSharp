@@ -15,6 +15,14 @@ Begin VB.Form frm
       TabIndex        =   0
       Top             =   120
       Width           =   4935
+      Begin VB.CommandButton cmdLint 
+         Caption         =   "L&int"
+         Height          =   285
+         Left            =   3960
+         TabIndex        =   11
+         Top             =   600
+         Width           =   855
+      End
       Begin VB.CommandButton cmdConfig 
          Caption         =   "Conf&ig"
          Height          =   285
@@ -179,6 +187,10 @@ On Error Resume Next
   shpPrg.Visible = Val >= 0
   lblPrg.Visible = shpPrg.Visible
 End Function
+
+Private Sub cmdLint_Click()
+  LintFolder
+End Sub
 
 Private Sub Form_Load()
   modConfig.LoadSettings

@@ -79,7 +79,7 @@ On Error Resume Next
   Kill FileName
 End Function
 
-Public Function ReadFile(ByVal FileName As String, Optional ByVal Startline As Long = 1, Optional ByVal NumLines As Long = 0) ', Optional ByRef WasEOF As Boolean = False)
+Public Function ReadFile(ByVal FileName As String, Optional ByVal Startline As Long = 1, Optional ByVal NumLines As Long = 0) As String ', Optional ByRef WasEOF As Boolean = False)
 '::::ReadFile
 ':::SUMMARY
 ':Random Access Read a given file based on line number.
@@ -187,7 +187,7 @@ Public Function CountLines(ByVal Source As String, Optional ByVal IgnoreBlank As
 ':  Long - The number of lines.
 ':::SEE ALSO
 ':  WriteFile, ReadFile, VBFileCountLines, CountFileLines, LineByNumber
-  Dim L
+  Dim L As Variant
   Source = Replace(Source, vbLf, "")
   For Each L In Split(Source, vbCr)
     If Trim(L) = "" And IgnoreBlank Then
@@ -280,7 +280,7 @@ Public Function VBFileCountLines(ByVal FileName As String, Optional ByRef Totl A
   
 On Error Resume Next
   If Not FileExists(FileName) Then
-      Exit Function
+    Exit Function
   End If
   S = ReadEntireFile(FileName)
   Totl = CountLines(S, False, "")
@@ -302,9 +302,9 @@ Public Sub VBFileCountLines_Stat(ByVal FileName As String)
 ':- FileName - The name of the file to read.
 ':::SEE ALSO
 ':  ReadEntireFile, WriteFile, CountLines, VBFileCountLines
-  Dim T As Long, c As Long, B As Long, M As Long
-  If VBFileCountLines(FileName, T, c, B, M) Then
-    MsgBox "File Line Stat: " & vbCrLf & " Totl: " & T & vbCrLf & "Code: " & c & vbCrLf & "Blnk: " & B & vbCrLf & "Cmnt: " & M, vbMsgBoxRtlReading
+  Dim T As Long, C As Long, B As Long, M As Long
+  If VBFileCountLines(FileName, T, C, B, M) Then
+    MsgBox "File Line Stat: " & vbCrLf & " Totl: " & T & vbCrLf & "Code: " & C & vbCrLf & "Blnk: " & B & vbCrLf & "Cmnt: " & M, vbMsgBoxRtlReading
   Else
     MsgBox "File Not Found: " & FileName
   End If
