@@ -20,7 +20,15 @@ A VB6 based VB6 -> C# 2017 converter.
 
 ## Pluses
 
+- Do the whole thing or just one file at a time.
 - It's free.
 - You have the source.
 - It's a lot better than doing it all by hand.
 - It will give you a good insight into what's going on, without having to ALL of the manual effort to do a simple conversion.
+- Not a fast conversion, but a strightforward one.  Inspect functions such as `ConvertSub` or `ConvertPrototype`.
+- Allows inspection of how something is being converted.  Don't like the output?  Change it.
+
+## Extras
+
+- An albeit slow, but useful VB6 code linter.  Root out as much tech debt before even beginning the process.
+- VB6 form to YAML
