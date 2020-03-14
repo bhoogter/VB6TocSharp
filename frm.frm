@@ -19,14 +19,14 @@ Begin VB.Form frm
          Caption         =   "     Single File   ----->"
          Height          =   495
          Left            =   240
-         TabIndex        =   13
+         TabIndex        =   6
          Top             =   1080
          Width           =   1455
       End
       Begin VB.TextBox txtFile 
          Height          =   285
          Left            =   2040
-         TabIndex        =   12
+         TabIndex        =   5
          Top             =   1200
          Width           =   2415
       End
@@ -34,7 +34,7 @@ Begin VB.Form frm
          Caption         =   "L&int"
          Height          =   285
          Left            =   3960
-         TabIndex        =   11
+         TabIndex        =   4
          Top             =   600
          Width           =   855
       End
@@ -42,7 +42,7 @@ Begin VB.Form frm
          Caption         =   "Conf&ig"
          Height          =   285
          Left            =   3960
-         TabIndex        =   10
+         TabIndex        =   3
          Top             =   240
          Width           =   855
       End
@@ -53,7 +53,7 @@ Begin VB.Form frm
          Left            =   2040
          MultiLine       =   -1  'True
          ScrollBars      =   2  'Vertical
-         TabIndex        =   8
+         TabIndex        =   12
          Top             =   1560
          Width           =   2655
       End
@@ -61,7 +61,7 @@ Begin VB.Form frm
          Caption         =   "Classes"
          Height          =   495
          Left            =   240
-         TabIndex        =   7
+         TabIndex        =   8
          Top             =   2280
          Width           =   1455
       End
@@ -69,7 +69,7 @@ Begin VB.Form frm
          Caption         =   "Modules"
          Height          =   495
          Left            =   240
-         TabIndex        =   6
+         TabIndex        =   9
          Top             =   2880
          Width           =   1455
       End
@@ -77,7 +77,7 @@ Begin VB.Form frm
          Caption         =   "ALL"
          Height          =   495
          Left            =   240
-         TabIndex        =   5
+         TabIndex        =   10
          Top             =   3720
          Width           =   1455
       End
@@ -85,7 +85,7 @@ Begin VB.Form frm
          Caption         =   "Forms"
          Height          =   495
          Left            =   240
-         TabIndex        =   4
+         TabIndex        =   7
          Top             =   1680
          Width           =   1455
       End
@@ -94,7 +94,7 @@ Begin VB.Form frm
          Caption         =   "E&xit"
          Height          =   495
          Left            =   3240
-         TabIndex        =   3
+         TabIndex        =   11
          Top             =   3720
          Width           =   1455
       End
@@ -102,7 +102,7 @@ Begin VB.Form frm
          Height          =   285
          Left            =   1200
          Locked          =   -1  'True
-         TabIndex        =   1
+         TabIndex        =   2
          Text            =   "C:\WinCDS\WinCDS\WinCDS.vbp"
          Top             =   240
          Width           =   2655
@@ -112,7 +112,7 @@ Begin VB.Form frm
          BackStyle       =   0  'Transparent
          Height          =   255
          Left            =   2040
-         TabIndex        =   9
+         TabIndex        =   13
          Top             =   3360
          Width           =   2415
       End
@@ -138,7 +138,7 @@ Begin VB.Form frm
          Caption         =   "Project File:"
          Height          =   255
          Left            =   240
-         TabIndex        =   2
+         TabIndex        =   1
          Top             =   240
          Width           =   855
       End

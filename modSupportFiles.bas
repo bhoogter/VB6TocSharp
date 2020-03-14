@@ -110,6 +110,7 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "    </Compile>"
   
   For Each L In Split(VBPForms(vbpFile), vbCrLf)
+  If L = "" Then GoTo SkipForm
   S = S & N & "    <Page Include=""" & OutputSubFolder(L) & ChgExt(L, ".xaml") & """>"
   S = S & N & "      <SubType>Designer</SubType>"
   S = S & N & "      <Generator>MSBuild:Compile</Generator>"
@@ -118,13 +119,16 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "      <DependentUpon>" & ChgExt(L, ".xaml") & "</DependentUpon>"
   S = S & N & "      <SubType>Code</SubType>"
   S = S & N & "    </Compile>"
+SkipForm:
   Next
 
   
   S = S & N & "    <Compile Include=""VBExtension.cs"" />"
   S = S & N & "    <Compile Include=""VBConstants.cs"" />"
   For Each L In Split(VBPClasses(vbpFile) & vbCrLf & VBPModules(vbpFile), vbCrLf)
+If L = "" Then GoTo SkipClass
   S = S & N & "    <Compile Include=""" & OutputSubFolder(L) & ChgExt(L, ".cs") & """ />"
+SkipClass:
   Next
   
   S = S & N & "  </ItemGroup>"
@@ -585,7 +589,7 @@ Public Function VBExtensionClass() As String
   S = S & N & "    public static BitmapImage PackageImage(string s)"
   S = S & N & "    {"
   S = S & N & "        string d = ""/Resources/Images/none.bmp"";"
-  S = S & N & "        if (Strings.Left(s, 1) != " / ") s = ""/Resources/Images/"" + s;"
+  S = S & N & "        if (Strings.Left(s, 1) != ""/"") s = ""/Resources/Images/"" + s;"
   S = S & N & "        s = ""pack://application:,,,"" + s;"
   S = S & N & "        try { return new BitmapImage(new Uri(@s)); }"
   S = S & N & "        catch (Exception e) { return new BitmapImage(new Uri(d, UriKind.Relative)); }"
