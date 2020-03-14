@@ -27,12 +27,12 @@ Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: 
 Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: tLMatch = Left(LTrim(Src), Len(tMatch)) = tMatch: End Function
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
 Public Function Quote(ByVal S As String) As String:  Quote = """" & S & """": End Function
-Public Function AlignString(ByVal S As String, ByVal N As Long): AlignString = Left(S & Space(N), N): End Function
+Public Function AlignString(ByVal S As String, ByVal N As Long) As String: AlignString = Left(S & Space(N), N): End Function
 Public Function Capitalize(ByVal S As String) As String: Capitalize = UCase(Left(S, 1)) & Mid(S, 2): End Function
 
 Public Function DevelopmentFolder() As String: DevelopmentFolder = App.Path & "\": End Function
 
-Public Function IsIn(ByVal S As String, ParamArray K()) As Boolean
+Public Function IsIn(ByVal S As String, ParamArray K() As Variant) As Boolean
   Dim L As Variant
   For Each L In K
     If S = L Then IsIn = True: Exit Function
@@ -78,19 +78,19 @@ Public Function deWS(ByVal S As String) As String
   deWS = S
 End Function
 
-Public Function nlTrim(ByVal Str As String)
+Public Function nlTrim(ByVal Str As String) As String
   Do While InStr(" " & vbTab & vbCr & vbLf, Left(Str, 1)) <> 0 And Str <> "": Str = Mid(Str, 2): Loop
   Do While InStr(" " & vbTab & vbCr & vbLf, Right(Str, 1)) <> 0 And Str <> "": Str = Mid(Str, 1, Len(Str) - 1): Loop
   nlTrim = Str
 End Function
 
 
-Public Function sSpace(ByVal N As Long)
+Public Function sSpace(ByVal N As Long) As String
 On Error Resume Next
   sSpace = Space(N)
 End Function
 
-Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1, Optional ByVal ProcessVBComments As Boolean = False)
+Public Function nextBy(ByVal Src As String, Optional ByVal Del As String = """", Optional ByVal Ind As Long = 1, Optional ByVal ProcessVBComments As Boolean = False) As String
   Dim L As Long
   DoEvents
   L = InStr(Src, Del)
@@ -157,7 +157,7 @@ Public Function nextByP(ByVal Src As String, Optional ByVal Del As String = """"
   End If
 End Function
 
-Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String)
+Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String) As String
   Dim A As String, S As String, D As String, M As String, C As String, E As String, I As String
   Dim cNE As String, cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
   Dim lA As String, lO As String, lM As String, LL As String
@@ -373,18 +373,18 @@ Public Function isOperator(ByVal S As String) As Boolean
   End Select
 End Function
 
-Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap = "#")
+Public Sub Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap = "#")
   frm.Prg Val, Max, Cap
-End Function
+End Sub
 
-Public Function cVal(coll As Collection, Key As String, Optional ByVal Def As String = "") As String
+Public Function cVal(ByRef Coll As Collection, Key As String, Optional ByVal Def As String = "") As String
   On Error Resume Next
   cVal = Def
-  cVal = coll.Item(LCase(Key))
+  cVal = Coll.Item(LCase(Key))
 End Function
 
-Public Function cValP(coll As Collection, Key As String, Optional ByVal Def As String = "") As String
-  cValP = P(deQuote(cVal(coll, Key, Def)))
+Public Function cValP(Coll As Collection, Key As String, Optional ByVal Def As String = "") As String
+  cValP = P(deQuote(cVal(Coll, Key, Def)))
 End Function
 
 Public Function P(ByVal Str As String) As String
@@ -499,5 +499,4 @@ Public Function ReduceString(ByVal Src As String, Optional ByVal Allowed As Stri
   If MaxLen > 0 Then ReduceString = Left(ReduceString, MaxLen)
   If bLCase Then ReduceString = LCase(ReduceString)
 End Function
-
 

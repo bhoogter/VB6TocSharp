@@ -13,6 +13,8 @@ Private mVBPFile As String
 Private mOutputFolder As String
 Private mAssemblyName As String
 
+Private Loaded As Boolean
+
 Public Const INISection_Settings   As String = "Settings"
 Public Const INIKey_VBPFile As String = "VBPFile"
 Public Const INIKey_OutputFolder As String = "OutputFolder"
@@ -23,22 +25,27 @@ Public Function INIFile() As String
 End Function
 
 Public Sub LoadSettings()
+  If Loaded Then Exit Sub
+  Loaded = True
   mVBPFile = modINI.INIRead(INISection_Settings, INIKey_VBPFile, INIFile)
   mOutputFolder = modINI.INIRead(INISection_Settings, INIKey_OutputFolder, INIFile)
   mAssemblyName = modINI.INIRead(INISection_Settings, INIKey_AssemblyName, INIFile)
 End Sub
 
 Public Function OutputFolder(Optional ByVal F As String) As String
+  LoadSettings
   If mOutputFolder = "" Then mOutputFolder = def_outputFolder
   OutputFolder = mOutputFolder & OutputSubFolder(F)
 End Function
 
 Public Function AssemblyName() As String
+  LoadSettings
   If mAssemblyName = "" Then mAssemblyName = def_AssemblyName
   AssemblyName = mAssemblyName
 End Function
 
 Public Function OutputSubFolder(ByVal F As String) As String
+  LoadSettings
   Select Case FileExt(F)
     Case ".bas": OutputSubFolder = "Modules\"
     Case ".cls": OutputSubFolder = "Classes\"
@@ -48,6 +55,7 @@ Public Function OutputSubFolder(ByVal F As String) As String
 End Function
 
 Public Property Get vbpFile() As String
+  LoadSettings
   If mVBPFile = "" Then mVBPFile = def_vbpFile
   vbpFile = mVBPFile
 End Property

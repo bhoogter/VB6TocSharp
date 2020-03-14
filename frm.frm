@@ -1,20 +1,36 @@
 VERSION 5.00
 Begin VB.Form frm 
    Caption         =   "VB6 -> .NET"
-   ClientHeight    =   4380
+   ClientHeight    =   4560
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   5190
    LinkTopic       =   "Form1"
-   ScaleHeight     =   4380
+   ScaleHeight     =   4560
    ScaleWidth      =   5190
    StartUpPosition =   3  'Windows Default
    Begin VB.Frame fra 
-      Height          =   4095
+      Height          =   4335
       Left            =   120
       TabIndex        =   0
       Top             =   120
       Width           =   4935
+      Begin VB.CommandButton cmdFile 
+         Caption         =   "     Single File   ----->"
+         Height          =   495
+         Left            =   240
+         TabIndex        =   13
+         Top             =   1080
+         Width           =   1455
+      End
+      Begin VB.TextBox txtFile 
+         Height          =   285
+         Left            =   2040
+         Locked          =   -1  'True
+         TabIndex        =   12
+         Top             =   1200
+         Width           =   2415
+      End
       Begin VB.CommandButton cmdLint 
          Caption         =   "L&int"
          Height          =   285
@@ -39,7 +55,7 @@ Begin VB.Form frm
          MultiLine       =   -1  'True
          ScrollBars      =   2  'Vertical
          TabIndex        =   8
-         Top             =   1320
+         Top             =   1560
          Width           =   2655
       End
       Begin VB.CommandButton cmdClasses 
@@ -47,7 +63,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   7
-         Top             =   1920
+         Top             =   2280
          Width           =   1455
       End
       Begin VB.CommandButton cmdModules 
@@ -55,7 +71,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   6
-         Top             =   2520
+         Top             =   2880
          Width           =   1455
       End
       Begin VB.CommandButton cmdAll 
@@ -63,7 +79,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   5
-         Top             =   3480
+         Top             =   3720
          Width           =   1455
       End
       Begin VB.CommandButton cmdForms 
@@ -71,7 +87,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   4
-         Top             =   1320
+         Top             =   1680
          Width           =   1455
       End
       Begin VB.CommandButton cmdExit 
@@ -80,7 +96,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   3240
          TabIndex        =   3
-         Top             =   3480
+         Top             =   3720
          Width           =   1455
       End
       Begin VB.TextBox txtSrc 
@@ -98,14 +114,14 @@ Begin VB.Form frm
          Height          =   255
          Left            =   2040
          TabIndex        =   9
-         Top             =   3120
+         Top             =   3360
          Width           =   2415
       End
       Begin VB.Shape shpPrgBack 
          BackColor       =   &H00FFC0C0&
          Height          =   255
          Left            =   2040
-         Top             =   3120
+         Top             =   3360
          Width           =   2415
       End
       Begin VB.Shape shpPrg 
@@ -114,7 +130,7 @@ Begin VB.Form frm
          BorderStyle     =   0  'Transparent
          Height          =   255
          Left            =   2040
-         Top             =   3120
+         Top             =   3360
          Visible         =   0   'False
          Width           =   1335
       End
@@ -152,10 +168,15 @@ End Sub
 
 Private Sub cmdConfig_Click()
   frmConfig.Show 1
+  modConfig.LoadSettings
 End Sub
 
 Private Sub cmdExit_Click()
   Unload Me
+End Sub
+
+Private Sub cmdFile_Click()
+  ConvertFile txtFile
 End Sub
 
 Private Sub cmdForms_Click()
