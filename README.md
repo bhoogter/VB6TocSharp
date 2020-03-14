@@ -32,3 +32,7 @@ A VB6 based VB6 -> C# 2017 converter.
 
 - An albeit slow, but useful VB6 code linter.  Root out as much tech debt before even beginning the process.
 - VB6 form to YAML
+
+## Contact
+
+- If you do have any questions, concerns, or simply would like some quick pointers, feel free to open an Issue.  I can't guarantee much, but I do try!
