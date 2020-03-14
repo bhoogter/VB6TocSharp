@@ -35,7 +35,10 @@ End Sub
 Public Function OutputFolder(Optional ByVal F As String) As String
   LoadSettings
   If mOutputFolder = "" Then mOutputFolder = def_outputFolder
-  OutputFolder = mOutputFolder & OutputSubFolder(F)
+  OutputFolder = mOutputFolder
+  If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
+  OutputFolder = OutputFolder & OutputSubFolder(F)
+  If Dir(OutputFolder, vbDirectory) = "" Then MkDir OutputFolder
 End Function
 
 Public Function AssemblyName() As String

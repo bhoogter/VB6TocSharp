@@ -26,7 +26,6 @@ Begin VB.Form frm
       Begin VB.TextBox txtFile 
          Height          =   285
          Left            =   2040
-         Locked          =   -1  'True
          TabIndex        =   12
          Top             =   1200
          Width           =   2415
@@ -176,7 +175,10 @@ Private Sub cmdExit_Click()
 End Sub
 
 Private Sub cmdFile_Click()
+  IsWorking
   ConvertFile txtFile
+  IsWorking True
+  MsgBox "Converted " & txtFile & "."
 End Sub
 
 Private Sub cmdForms_Click()
@@ -192,12 +194,17 @@ Private Sub cmdModules_Click()
 End Sub
 
 Private Sub IsWorking(Optional ByVal Done As Boolean)
+  txtFile.Enabled = Done
+  cmdConfig.Enabled = Done
+  cmdLint.Enabled = Done
+  cmdFile.Enabled = Done
   cmdAll.Enabled = Done
   cmdClasses.Enabled = Done
   cmdExit.Enabled = Done
   cmdForms.Enabled = Done
   cmdModules.Enabled = Done
   txtSrc.Enabled = Done
+  MousePointer = IIf(Done, vbDefault, vbHourglass)
 End Sub
 
 Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#")
