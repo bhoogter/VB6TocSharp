@@ -2,6 +2,10 @@
 
 A VB6 based VB6 -> C# 2017 converter.
 
+## Usage
+
+Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more information on usage.
+
 ## Design Considerations
 
 - Simple - Not designed to do a 100% conversion.  Just maybe an 80% - 90% of the grunt work.
