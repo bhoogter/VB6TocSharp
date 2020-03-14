@@ -14,6 +14,7 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 - Opportunistic - This code heavily relies on relative uniformity of the VB6 IDE:
     - Spacing is relatively consistent because the IDE enforces it.
     - Keyword capitalization can be guaranteed.
+    - We take advantage of the Microsoft Power Packs, and do NOT need to convert most of the core VB6 statements.  Further, you can continue to USE statements like `DateDiff`, `Left`, `Trim` as you would in VB.  Or, if you prefer, begin to migrate away from them AFTER conversion.  We simply pull in Microsoft's library for maximum compatibility, and hence, do not have a large string replace library, nor do we rely as heavily as some converters do on our own DLLs or libraries (we generate a few for ease of syntax, but the end result is pure C# code).
 - Non-assuming - It makes the assumption that the code compiled while in VB, so it doesn't assume that reference it can't resolve aren't going to be found.
 - C# 2017 - This is a late-comer.  There has never been a freeware solution for VB6 -> C#, and now that VB.NET is more or less discontinued, why not?
 
