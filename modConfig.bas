@@ -5,9 +5,9 @@ Public Const SpIndent As Long = 2
 Public Const DefaultDataType As String = "dynamic"
 
 Public Const PackagePrefix As String = ""
-Private Const def_vbpFile As String = "C:\wincds\wincds\wincds.vbp"
-Private Const def_outputFolder As String = "C:\WinCDS.NET\out\WinCDS.NET\"
-Private Const def_AssemblyName As String = "WinCDS"
+Private Const def_vbpFile As String = "C:\WinCDS.NET\cnv\prj.vbp"
+Private Const def_outputFolder As String = "C:\WinCDS.NET\cnv\converted\"
+Private Const def_AssemblyName As String = "VB2CS"
 
 Private mVBPFile As String
 Private mOutputFolder As String
