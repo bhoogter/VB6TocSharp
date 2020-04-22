@@ -4,6 +4,10 @@ A VB6 based VB6 -> C# 2017 converter.
 
 ## Usage
 
+Free to use.  Free to fork.  Free to contribute.  Free to sell.  Free to sell under your own name...  Free to do just about anything except say I can't (See [LICENSE](https://github.com/bhoogter/VB6TocSharp/blob/master/LICENSE.txt)).
+
+## Instructions
+
 Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more information on usage.
 
 ## Design Considerations
