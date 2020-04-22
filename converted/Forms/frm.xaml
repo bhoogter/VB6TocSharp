@@ -1,0 +1,29 @@
+<Window x:Class="VB2CS.Forms.frm"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:VB2CS.Forms"
+    xmlns:usercontrols="clr-namespace:VB2CS.UserControls"
+    mc:Ignorable="d"
+    Title="VB6 -&gt; .NET"    Height="357"    Width="402" Loaded="Form_Load">
+ <Grid>
+  <GroupBox x:Name="fra" Margin="9,9,0,0" Width="352" Height="310" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Header=""> <Grid Margin="0,-15,0,0">
+    <Button x:Name="cmdFile" Margin="17,77,0,0" Padding="2,2,2,2" Width="104" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="     Single File   -----&gt;" Click="cmdFile_Click" />
+    <TextBox x:Name="txtFile" Margin="146,86,0,0" Padding="2,2,2,2" Width="172" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" />
+    <Button x:Name="cmdLint" Margin="283,43,0,0" Padding="2,2,2,2" Width="61" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="L&amp;int" Click="cmdLint_Click" />
+    <Button x:Name="cmdConfig" Margin="283,17,0,0" Padding="2,2,2,2" Width="61" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Conf&amp;ig" Click="cmdConfig_Click" />
+    <TextBox x:Name="txtStats" Margin="146,111,0,0" Padding="2,2,2,2" Width="190" Height="121" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" />
+    <Button x:Name="cmdClasses" Margin="17,163,0,0" Padding="2,2,2,2" Width="104" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Classes" Click="cmdClasses_Click" />
+    <Button x:Name="cmdModules" Margin="17,206,0,0" Padding="2,2,2,2" Width="104" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Modules" Click="cmdModules_Click" />
+    <Button x:Name="cmdAll" Margin="17,266,0,0" Padding="2,2,2,2" Width="104" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="ALL" Click="cmdAll_Click" />
+    <Button x:Name="cmdForms" Margin="17,120,0,0" Padding="2,2,2,2" Width="104" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Forms" Click="cmdForms_Click" />
+    <Button x:Name="cmdExit" Margin="231,266,0,0" Padding="2,2,2,2" Width="104" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="E&amp;xit" Click="cmdExit_Click" />
+    <TextBox x:Name="txtSrc" Margin="86,17,0,0" Padding="2,2,2,2" Width="190" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Text="C:\WinCDS\WinCDS\WinCDS.vbp" />
+    <Label x:Name="lblPrg" Margin="146,240,0,0" Padding="2,2,2,2" Width="172" Height="18" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="" />
+    
+    
+    <Label x:Name="lblSrc" Margin="17,17,0,0" Padding="2,2,2,2" Width="61" Height="18" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Project File:" />
+  </Grid> </GroupBox>
+ </Grid>
+</Window>
