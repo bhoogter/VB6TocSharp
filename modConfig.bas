@@ -24,8 +24,8 @@ Public Function INIFile() As String
   INIFile = App.Path & "\VB6toCS.INI"
 End Function
 
-Public Sub LoadSettings()
-  If Loaded Then Exit Sub
+Public Sub LoadSettings(Optional ByVal Force As Boolean)
+  If Loaded And Not Force Then Exit Sub
   Loaded = True
   mVBPFile = modINI.INIRead(INISection_Settings, INIKey_VBPFile, INIFile)
   mOutputFolder = modINI.INIRead(INISection_Settings, INIKey_OutputFolder, INIFile)

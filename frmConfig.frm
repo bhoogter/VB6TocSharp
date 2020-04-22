@@ -105,7 +105,7 @@ Private Sub cmdOK_Click()
   modINI.INIWrite INISection_Settings, INIKey_VBPFile, txtVBPFile, INIFile
   modINI.INIWrite INISection_Settings, INIKey_OutputFolder, txtOutput, INIFile
   modINI.INIWrite INISection_Settings, INIKey_AssemblyName, txtAssemblyName, INIFile
-  modConfig.LoadSettings
+  modConfig.LoadSettings True
   Unload Me
 End Sub
 
@@ -126,5 +126,9 @@ Private Sub txtAssemblyName_Validate(Cancel As Boolean)
     MsgBox "Please enter something for an assembly name."
   End If
 End Sub
+
+Private Sub txtVBPFile_GotFocus(): txtVBPFile.SelStart = 0: txtVBPFile.SelLength = Len(txtVBPFile): End Sub
+Private Sub txtOutput_GotFocus(): txtOutput.SelStart = 0: txtOutput.SelLength = Len(txtOutput): End Sub
+Private Sub txtAssemblyName_GotFocus(): txtAssemblyName.SelStart = 0: txtAssemblyName.SelLength = Len(txtAssemblyName): End Sub
 
 
