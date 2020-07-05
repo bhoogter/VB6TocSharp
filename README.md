@@ -6,6 +6,11 @@ A VB6 based VB6 -> C# 2017 converter.
 
 Free to use.  Free to fork.  Free to contribute.  Free to ask about.  Free to sell.  Free to sell under your own name...  Free to do just about anything except say I can't (See [LICENSE](https://github.com/bhoogter/VB6TocSharp/blob/master/LICENSE.txt)).
 
+## Requirements
+
+- [Visual Basic Power Packs 2005 (v3.0)](https://www.microsoft.com/en-us/download/details.aspx?id=25169)
+    - What better way to ensure all the built-in VB6 functions do what they're supposed to (other than `Format`).  So, when see the final output, your code can still use the basic functions such as `DateDiff`, `Left`, `Mid`, etc, but without having a 3rd party support library.  Don't like using a VB6 reference?  Get it converted, get it running and tested, and then iterate off it, one function at a time.  In the mean time, no need to worry about a vendor implementation not being equivalent to VB6.  Except for `Format`.  Even Microsoft can't get that one right.
+
 ## Instructions
 
 Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more information on usage.
