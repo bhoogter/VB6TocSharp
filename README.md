@@ -8,7 +8,11 @@ Free to use.  Free to fork.  Free to contribute.  Free to ask about.  Free to se
 
 ## Quick Start
 
-Open the file `prj.vbp`, start the program.  Enter some config values, and convert a single file.
+Open the file `prj.vbp`, start the program.  Enter some config values, and convert a project.
+
+This should generate the project structure, including the list of files needed, and output the couple of support type libraries used by the conversion process.
+
+After the initial conversion, you should be able to do single-file conversion without much difficulty.
 
 ## Requirements
 
@@ -25,6 +29,7 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 ## Design Considerations
 
 - Simple - Not designed to do a 100% conversion.  Just maybe an 80% - 90% of the grunt work.
+- Universal imports - Imports EVERY code module, just like VB6 did automatically.  Make Visual Studio do the work of deciding which ones are used simply by optimizing imports after conversion.
 - VB6 Based - Because, why not?  You have to have a working VB6 compiler if you're converting FROM vb6 anyway.
 - Custom - This was created for a personal project, and hence, is specifically tailored for our use case.  But, there isn't any reason why someone couldn't invesitgate the logic and tweak it for any of their own issues.
 - Opportunistic - This code heavily relies on relative uniformity of the VB6 IDE:
