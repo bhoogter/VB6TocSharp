@@ -29,7 +29,6 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 ## Design Considerations
 
 - Simple - Not designed to do a 100% conversion.  Just maybe an 80% - 90% of the grunt work.
-- Universal imports - Imports EVERY code module, just like VB6 did automatically.  Make Visual Studio do the work of deciding which ones are used simply by optimizing imports after conversion.
 - VB6 Based - Because, why not?  You have to have a working VB6 compiler if you're converting FROM vb6 anyway.
 - Custom - This was created for a personal project, and hence, is specifically tailored for our use case.  But, there isn't any reason why someone couldn't invesitgate the logic and tweak it for any of their own issues.
 - Opportunistic - This code heavily relies on relative uniformity of the VB6 IDE:
@@ -37,6 +36,7 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
     - Keyword capitalization can be guaranteed.
     - We take advantage of the Microsoft Power Packs, and do NOT need to convert most of the core VB6 statements.  Further, you can continue to USE statements like `DateDiff`, `Left`, `Trim` as you would in VB.  Or, if you prefer, begin to migrate away from them AFTER conversion.  We simply pull in Microsoft's library for maximum compatibility, and hence, do not have a large string replace library, nor do we rely as heavily as some converters do on our own DLLs or libraries (we generate a few for ease of syntax, but the end result is pure C# code).
 - Non-assuming - It makes the assumption that the code compiled while in VB, so it doesn't assume that reference it can't resolve aren't going to be found.
+- Universal imports - Imports EVERY code module, just like VB6 did automatically.  Make Visual Studio do the work of deciding which ones are used simply by optimizing imports after conversion.
 - C# 2017 - This is a late-comer.  There has never been a freeware solution for VB6 -> C#, and now that VB.NET is more or less discontinued, why not?
 
 ## Down-sides
