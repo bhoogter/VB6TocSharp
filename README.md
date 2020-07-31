@@ -50,7 +50,7 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 ## Extras
 
 - An albeit slow, but useful VB6 code linter.  Root out as much tech debt before even beginning the process.
-- VB6 form to YAML
+- VB6 form to XAML
 
 ## Contact
 
