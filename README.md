@@ -14,6 +14,10 @@ This should generate the project structure, including the list of files needed, 
 
 After the initial conversion, you should be able to do single-file conversion without much difficulty.
 
+## How Do I ...?
+
+There are a lot of questions when it comes to conversion.  If you just want to know the way this converter deals with specific patterns, please see the [How Do I ...?](https://github.com/bhoogter/VB6TocSharp/wiki/How-Do-I-...%3F) page in our wiki.
+
 ## Requirements
 
 - Visual Studio supporting some relatively modern version of C#.  Or alternate.
