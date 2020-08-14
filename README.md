@@ -18,6 +18,8 @@ After the initial conversion, you should be able to do single-file conversion wi
 
 There are a lot of questions when it comes to conversion.  If you just want to know the way this converter deals with specific patterns, please see the [How Do I ...?](https://github.com/bhoogter/VB6TocSharp/wiki/How-Do-I-...%3F) page in our wiki.
 
+Whether you use this converter or not, we give our solution to commonly encountered conversion puzzles.  Our solutions are quick, to the point, and don't generally use a lot of programming or context overhead.  While they may rely on our extension module, all of it is native C# code, and, generally, fairly similar to what you did int VB6.
+
 ## Requirements
 
 - Visual Studio supporting some relatively modern version of C#.  Or alternate.
