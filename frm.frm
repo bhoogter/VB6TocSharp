@@ -15,6 +15,22 @@ Begin VB.Form frm
       TabIndex        =   0
       Top             =   120
       Width           =   4935
+      Begin VB.CommandButton cmdSupport 
+         Caption         =   "SUPPORT"
+         Height          =   285
+         Left            =   2520
+         TabIndex        =   15
+         Top             =   720
+         Width           =   1215
+      End
+      Begin VB.CommandButton cmdScan 
+         Caption         =   "SCAN"
+         Height          =   285
+         Left            =   1200
+         TabIndex        =   14
+         Top             =   720
+         Width           =   1215
+      End
       Begin VB.CommandButton cmdFile 
          Caption         =   "     Single File   ----->"
          Height          =   495
@@ -204,6 +220,8 @@ Private Sub IsWorking(Optional ByVal Done As Boolean)
   cmdForms.Enabled = Done
   cmdModules.Enabled = Done
   txtSrc.Enabled = Done
+  cmdScan.Enabled = Done
+  cmdSupport.Enabled = Done
   MousePointer = IIf(Done, vbDefault, vbHourglass)
 End Sub
 
@@ -218,6 +236,17 @@ End Function
 
 Private Sub cmdLint_Click()
   LintFolder
+End Sub
+
+Private Sub cmdScan_Click()
+  working False
+  ScanRefs
+  working True
+End Sub
+
+Private Sub cmdSupport_Click()
+  If MsgBox("Generate Project files?", vbYesNo) = vbYes Then CreateProjectFile vbpFile
+  If MsgBox("Generate Support files?", vbYesNo) = vbYes Then CreateProjectSupportFiles
 End Sub
 
 Private Sub Form_Load()
