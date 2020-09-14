@@ -54,6 +54,9 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 
 - This will not produce code that will compile in its generated form.  The last mile is simply the most expensive, and it seemed more expedient to make something get most of the way, and finish the course manually.
 - This isn't the most customizable solution.  Unless, of course, you want to dive into a little source code on the converter.  But, that's why its available.
+- The resultant code is a mess, stylistically.  That's what a modern IDE is for.  All the bad formatting can be cleaned up with ^K^D.  Unused imports with ^K^E.  And, there's a lot of extra {'s and }'s you will probably want to delete.
+- The converter currently is REALLY bad at loop bounds.  Sorry, it's one of the pitfalls of a VB6->C# conversion, and there isn't much logic into how it converts.  It's tedius, but do a project-wide search for all for loops and manually inspect the bounds.
+- There is an extra method for every event.  One for the correct signature, one for the original signature.  In most cases, the redundancy is unnecessary, but it provided the easiest conversion.  These can be reduced to a single method in most cases (but not all, which is why I don't).
 
 ## Pluses
 
