@@ -52,7 +52,7 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 
 ## Known Issues
 
-- Currently, the converter will often balk at a file that contains the word 'Property' anywhere in it (other than a property declaration).  While this is a pain and likely will be fixed, it was encountered towards the end of the projects usefulness, and where it hindered progress, the variable that contained the word '...Property' was simply renamed temporarily to something like '...Prppty', and then changed back in the converted file.
+- Currently, the converter will often balk at a file that contains the word 'Property' anywhere in it (other than a property declaration).  While this is a pain and likely will be fixed, it was encountered towards the end of the projects usefulness (and hence not urgent on the repair list), and where it hindered progress, the variable that contained the word '...Property' was simply renamed temporarily to something like '...Prppty', and then changed back in the converted file.
 
 ## Down-sides
 
