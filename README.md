@@ -15,9 +15,9 @@ Free to use.  Free to fork.  Free to contribute.  Free to ask about.  Free to se
     - Alternatively, the files `VBExtension.cs` and `VBConstants.cs` could be copied directly out of the project root and included somewhere else.
 1. Then, enter a filename and click `Single File` to try to convert the file you enter beside it.
 
-This should generate the project structure, including the list of files needed, and output the couple of support type libraries used by the conversion process.
+If you want to convert the entire project, simply click `ALL`, and it will do the scan, support generation, and entire project conversion off the bat.  
 
-After the initial conversion, you should be able to do single-file conversion without much difficulty.
+NOTE:  It might not be fast, but it's faster than doing it manually!
 
 ## How Do I ...?
 
