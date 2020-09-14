@@ -239,9 +239,9 @@ Private Sub cmdLint_Click()
 End Sub
 
 Private Sub cmdScan_Click()
-  working False
+  IsWorking False
   ScanRefs
-  working True
+  IsWorking True
 End Sub
 
 Private Sub cmdSupport_Click()
