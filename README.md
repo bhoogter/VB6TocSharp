@@ -8,7 +8,12 @@ Free to use.  Free to fork.  Free to contribute.  Free to ask about.  Free to se
 
 ## Quick Start
 
-Open the file `prj.vbp`, start the program.  Enter some config values, and convert a project.
+1. Open the file `prj.vbp`, start the program.
+1. Enter some config values into the `Config` form via the button.
+1. Now that you have selected your project, click the `SCAN` button.  This helps the converted know the difference between Methods without parenthesis and variables/constants.  It also builds a full list of imports (which can be cleaned up in the VS 2019 IDE via ^K^E).
+1. If you want, click `SUPPORT` to generate the basic project support structure.
+    - Alternatively, the files `VBExtension.cs` and `VBConstants.cs` could be copied directly out of the project root and included somewhere else.
+1. Then, enter a filename and click `Single File` to try to convert the file you enter beside it.
 
 This should generate the project structure, including the list of files needed, and output the couple of support type libraries used by the conversion process.
 
