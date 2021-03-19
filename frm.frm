@@ -276,6 +276,8 @@ Private Sub cmdSupport_Click()
 End Sub
 
 Private Sub Form_Load()
+  modConfig.Hush = True
   modConfig.LoadSettings
+  modConfig.Hush = False
   txtSrc = vbpFile
 End Sub
