@@ -92,9 +92,11 @@ Attribute VB_Exposed = False
 Option Explicit
 
 Private Sub Form_Load()
+  modConfig.Hush = True
   txtVBPFile = modConfig.vbpFile
   txtOutput = modConfig.OutputFolder
   txtAssemblyName = modConfig.AssemblyName
+  modConfig.Hush = True
 End Sub
 
 Private Sub cmdCancel_Click()

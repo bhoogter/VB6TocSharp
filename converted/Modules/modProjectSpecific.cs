@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 

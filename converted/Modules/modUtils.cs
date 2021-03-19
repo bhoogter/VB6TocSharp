@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
@@ -95,8 +98,14 @@ public static bool IsNotInStr(string S, string Fnd) {
 
 public static bool FileExists(string FN) {
   bool FileExists = false;
-  FileExists = Dir(FN) != "";
+  FileExists = FN != "" && Dir(FN) != "";
   return FileExists;
+}
+
+public static bool DirExists(string FN) {
+  bool DirExists = false;
+  DirExists = FN != "" && Dir(FN, vbDirectory) != "";
+  return DirExists;
 }
 
 public static string FileName(string FN) {
@@ -181,6 +190,22 @@ public static string DevelopmentFolder() {
   string DevelopmentFolder = "";
   DevelopmentFolder = App.Path + "\\";
   return DevelopmentFolder;
+}
+
+public static bool IsIDE() {
+  bool IsIDE = false;
+//IsIDE = False
+//Exit Function
+
+// works on a very simple princicple... debug statements don't get compiled...
+  // TODO (not supported):   On Error GoTo IDEInUse
+  Debug.Print(1/0); //division by zero error
+  IsIDE = false;
+  return IsIDE;
+
+IDEInUse:
+  IsIDE = true;
+  return IsIDE;
 }
 
 public static Variant) As Boolean IsIn(string S, dynamic ParamArray_UNUSED) {
@@ -630,8 +655,8 @@ public static void ArrAdd(ref dynamic Arr(_UNUSED) {
 return;
 
   }
-  List<> Arr_6213_tmp = new List<>();
-for (int redim_iter_165=0;i<0;redim_iter_165++) {Arr.Add(redim_iter_165<Arr.Count ? Arr(redim_iter_165) : null);}
+  List<> Arr_15_tmp = new List<>();
+for (int redim_iter_3967=0;i<0;redim_iter_3967++) {Arr.Add(redim_iter_3967<Arr.Count ? Arr(redim_iter_3967) : null);}
   Arr(UBound(Arr)) = Item;
 }
 

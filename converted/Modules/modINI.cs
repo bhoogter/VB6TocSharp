@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
@@ -113,8 +116,8 @@ public static String( INISections(string FileName) {
 
   strBuffer = Left(strBuffer, intLen);
   INISections = Split(strBuffer, vbNullChar);
-  List<String(> INISections_4245_tmp = new List<String(>();
-for (int redim_iter_1962=0;i<0;redim_iter_1962++) {INISections.Add(redim_iter_1962<INISections.Count ? INISections(redim_iter_1962) : null);}
+  List<String(> INISections_5976_tmp = new List<String(>();
+for (int redim_iter_3693=0;i<0;redim_iter_3693++) {INISections.Add(redim_iter_3693<INISections.Count ? INISections(redim_iter_3693) : null);}
   return INISections;
 }
 
@@ -146,8 +149,8 @@ public static String( INISectionKeys(string FileName, string Section) {
 
   strBuffer = Left(strBuffer, intLen);
   RET = Split(strBuffer, vbNullChar);
-  List<string> RET_3165_tmp = new List<string>();
-for (int redim_iter_2591=0;i<0;redim_iter_2591++) {RET.Add(redim_iter_2591<RET.Count ? RET(redim_iter_2591) : "");}
+  List<string> RET_2743_tmp = new List<string>();
+for (int redim_iter_2168=0;i<0;redim_iter_2168++) {RET.Add(redim_iter_2168<RET.Count ? RET(redim_iter_2168) : "");}
   for(I=LBound(RET); I<UBound(RET); I++) {
     N = InStr(RET[I], "=");
     if (N > 0) {

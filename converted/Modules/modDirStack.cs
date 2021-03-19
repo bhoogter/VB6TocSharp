@@ -71,116 +71,119 @@ using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
 
-static class modRegEx {
+static class modDirStack {
 // Option Explicit
-private static dynamic mRegEx = null;
+private static Collection DirStack = new Collection();
 
 
-static dynamic RegEx {
-  get {
-    dynamic RegEx;
-    if (mRegEx == null) {
-  mRegEx = CreateObject("vbscript.regexp");
-  mRegEx.Global = true;
-}
-RegEx = mRegEx;
+public static string PushDir(string NewDir, bool doSet= true) {
+  string PushDir = "";
+//::::PushDir
+//:::SUMMARY
+//:Basic Directory Stack - Push cur dir to stack and CD to parameter.
+//:::DESCRIPTION
+//:1. Push Current Dir to stack
+//:2. CD to new folder.
+//:::PAREMETERS
+//: - sNewDir - String - Directory to CD into.
+//: - [doSet] = True - Boolean - Pass FALSE if you don't want to change current directory.
+//:::RETURNS
+//:Returns current directory.
+//:::SEE ALSO
+//: PopDir, PeekDir
+  int N = 0;
 
-  return RegEx;
+
+  // TODO (not supported): On Error Resume Next
+  if (DirStack == null) {
+    DirStack = new Collection();;
+    DirStack.Add(0, "n");
   }
-}
 
+  N = Val(DirStack.Item("n")) + 1;
+  DirStack.Remove("n");
+  DirStack.Add(N, "n");
+  DirStack.Add(CurDir, "_" + N);
 
-public static bool RegExTest(string Src, string Find) {
-  bool RegExTest = false;
-  // TODO (not supported): On Error Resume Next
-  RegEx.Pattern = Find;
-  RegExTest = RegEx.Test(Src);
-  return RegExTest;
-}
-
-public static int RegExCount(string Src, string Find) {
-  int RegExCount = 0;
-  // TODO (not supported): On Error Resume Next
-  RegEx.Pattern = Find;
-  RegEx.Global = true;
-  RegExCount = RegEx.Execute(Src).Count;
-  return RegExCount;
-}
-
-public static int RegExNPos(string Src, string Find, int N= 0) {
-  int RegExNPos = 0;
-  // TODO (not supported): On Error Resume Next
-  dynamic RegM = null;
-  string tempStr = "";
-  string tempStr2 = "";
-
-  RegEx.Pattern = Find;
-  RegEx.Global = true;
-  RegExNPos = RegEx.Execute(Src).Item(N).FirstIndex + 1;
-  return RegExNPos;
-}
-
-public static string RegExNMatch(string Src, string Find, int N= 0) {
-  string RegExNMatch = "";
-  // TODO (not supported): On Error Resume Next
-  dynamic RegM = null;
-  string tempStr = "";
-  string tempStr2 = "";
-
-  RegEx.Pattern = Find;
-  RegEx.Global = true;
-  RegExNMatch = RegEx.Execute(Src).Item(N).Value;
-  return RegExNMatch;
-}
-
-public static string RegExReplace(string Src, string Find, string Repl) {
-  string RegExReplace = "";
-  // TODO (not supported): On Error Resume Next
-  dynamic RegM = null;
-  string tempStr = "";
-  string tempStr2 = "";
-
-  RegEx.Pattern = Find;
-  RegEx.Global = true;
-  RegExReplace = RegEx.Replace(Src, Repl);
-  return RegExReplace;
-}
-
-public static dynamic RegExSplit(string szStr, string szPattern) {
-  dynamic RegExSplit = null;
-  // TODO (not supported): On Error Resume Next
-  dynamic oAl = null;
-  dynamic oRe = null;
-  dynamic oMatches = null;
-
-  oRe = RegEx;
-  oRe.Pattern = "^(.*)(" + szPattern + ")(.*)$";
-  oRe.IgnoreCase = true;
-  oRe.Global = true;
-  oAl = CreateObject("System.Collections.ArrayList");
-
-  do {
-    oMatches = oRe.Execute(szStr);
-    if (oMatches.Count > 0) {
-      oAl.Add(oMatches(0).SubMatches(2));
-      szStr = oMatches(0).SubMatches(0);
-    } else {
-      oAl.Add(szStr);
-      break;
-    }
+  if (doSet) {
+    ChDir(NewDir);
   }
-  oAl.Reverse();
-  RegExSplit = oAl.ToArray;
-  return RegExSplit;
+
+  PushDir = CurDir;
+  return PushDir;
 }
 
-public static int RegExSplitCount(string szStr, string szPattern) {
-  int RegExSplitCount = 0;
-  // TODO (not supported): On Error Resume Next
-  List<dynamic> T = new List<dynamic> {}; // TODO - Specified Minimum Array Boundary Not Supported:   Dim T()
+public static string PopDir(bool doSet= true) {
+  string PopDir = "";
+//::::PopDir
+//:::SUMMARY
+//:Remove to dir from stack.  Error Safe.  Generally to change current directory.
+//:::DESCRIPTION
+//:1. Pop Dir from stack.
+//:2. CD to dir.
+//:::PAREMETERS
+//: - [doSet] = True - Boolean - Pass FALSE if you don't want to change current directory.
+//:::RETURNS
+//:Returns directory popped.
+//:::SEE ALSO
+//: PopDir, PeekDir
+  int N = 0;
+  string V = "";
 
-  T = RegExSplit(szStr, szPattern);
-  RegExSplitCount = UBound(T) - LBound(T) + 1;
-  return RegExSplitCount;
+
+  // TODO (not supported): On Error Resume Next
+  if (DirStack == null) {
+    return PopDir;
+
+  }
+
+  N = Val(DirStack.Item("n"));
+  PopDir = DirStack.Item("_" + N);
+
+  if (N > 1) {
+    N = N - 1;
+    DirStack.Remove("n");
+    DirStack.Add(N, "n");
+  } else {
+    DirStack = null;
+  }
+
+  if (doSet) {
+    ChDir(PopDir);
+  }
+  return PopDir;
+}
+
+public static string PeekDir(bool doSet= true) {
+  string PeekDir = "";
+//::::PeekDir
+//:::SUMMARY
+//:Return directory on top of stack without removing it.  Generally to change current directory.
+//:::DESCRIPTION
+//:1. Push Current Dir to stack
+//:2. CD to new folder.
+//:::PAREMETERS
+//: - [doSet] = True - Boolean - Pass FALSE if you don't want to change current directory.
+//:::RETURNS
+//:Returns top stack item (without removing it from stack).
+//:::SEE ALSO
+//: PopDir, PeekDir
+  int N = 0;
+  string V = "";
+
+
+  // TODO (not supported): On Error Resume Next
+  if (DirStack == null) {
+    return PeekDir;
+
+  }
+
+  N = Val(DirStack.Item("n"));
+  PeekDir = DirStack.Item("_" + N);
+
+  if (doSet) {
+    ChDir(PeekDir);
+  }
+  return PeekDir;
 }
 }

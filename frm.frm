@@ -170,12 +170,14 @@ Option Explicit
 Public pMax As Long
 
 Private Sub cmdAll_Click()
+  If Not ConfigValid Then Exit Sub
   IsWorking
   ConvertProject txtSrc
   IsWorking True
 End Sub
 
 Private Sub cmdClasses_Click()
+  If Not ConfigValid Then Exit Sub
   IsWorking
   ConvertFileList FilePath(txtSrc), VBPClasses(txtSrc)
   IsWorking True
@@ -191,6 +193,7 @@ Private Sub cmdExit_Click()
 End Sub
 
 Private Sub cmdFile_Click()
+  If Not ConfigValid Then Exit Sub
   IsWorking
   ConvertFile txtFile
   IsWorking True
@@ -198,16 +201,36 @@ Private Sub cmdFile_Click()
 End Sub
 
 Private Sub cmdForms_Click()
+  If Not ConfigValid Then Exit Sub
   IsWorking
   ConvertFileList FilePath(txtSrc), VBPForms(txtSrc)
   IsWorking True
 End Sub
 
 Private Sub cmdModules_Click()
+  If Not ConfigValid Then Exit Sub
   IsWorking
   ConvertFileList FilePath(txtSrc), VBPModules(txtSrc)
   IsWorking True
 End Sub
+
+Private Function ConfigValid() As Boolean
+  modConfig.LoadSettings
+
+  If Dir(modConfig.vbpFile) = "" Then
+    MsgBox "Project file not found.  Perhaps do config first?", vbExclamation, "File Not Found"
+    Exit Function
+  End If
+  If Dir(modConfig.OutputFolder, vbDirectory) = "" Then
+    MsgBox "Ouptut Folder not found.  Perhaps do config first?", vbExclamation, "Directory Not Found"
+    Exit Function
+  End If
+  If modConfig.AssemblyName = "" Then
+    MsgBox "Assembly name not set.  Perhaps do config first?", vbExclamation, "Setting Not Found"
+    Exit Function
+  End If
+  ConfigValid = True
+End Function
 
 Private Sub IsWorking(Optional ByVal Done As Boolean)
   txtFile.Enabled = Done
@@ -235,16 +258,19 @@ On Error Resume Next
 End Function
 
 Private Sub cmdLint_Click()
+  If Not ConfigValid Then Exit Sub
   LintFolder
 End Sub
 
 Private Sub cmdScan_Click()
+  If Not ConfigValid Then Exit Sub
   IsWorking False
   ScanRefs
   IsWorking True
 End Sub
 
 Private Sub cmdSupport_Click()
+  If Not ConfigValid Then Exit Sub
   If MsgBox("Generate Project files?", vbYesNo) = vbYes Then CreateProjectFile vbpFile
   If MsgBox("Generate Support files?", vbYesNo) = vbYes Then CreateProjectSupportFiles
 End Sub

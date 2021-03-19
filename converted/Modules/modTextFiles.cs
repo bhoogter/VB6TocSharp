@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
@@ -108,6 +111,24 @@ FSO = mFSO;
   }
 }
 
+
+public static bool DeleteFileIfExists(string sFIle, bool bNoAttributeClearing= false) {
+  bool DeleteFileIfExists = false;
+  // TODO (not supported): On Error Resume Next
+  if (!FileExists(sFIle)) {
+    return DeleteFileIfExists;
+
+  }
+  if (!bNoAttributeClearing) {
+    SetAttr(sFIle, 0);
+  }
+  if (FileExists(sFIle)) {
+    File.Delete(sFIle);();
+  }
+//  DeleteFileIfExists = FileExists(sFile)
+  DeleteFileIfExists = true;
+  return DeleteFileIfExists;
+}
 
 public static string ReadEntireFile(string FileName) {
   string ReadEntireFile = "";
@@ -188,7 +209,7 @@ public static string ReadFile(string FileName, int Startline= 1, int NumLines= 0
   Static(CacheFileDate(As(String)));
   Static(CacheFileLoad() As String);
 
-  if (!FileExists(FileName())) {
+  if (FileName() == "" || !FileExists(FileName())) {
 //    WasEOF = True
     return ReadFile;
 
@@ -286,9 +307,9 @@ public static int CountLines(string Source, bool IgnoreBlank= true, string Ignor
 
   Source = Replace(Source, vbLf, "");
   foreach(var L in Split(Source, vbCr)) {
-    if (Trim(L) == "" && IgnoreBlank) {
+    if (Trim(L) == ""& IgnoreBlank) {
 // Don't count...
-    } else if (IgnorePrefix != ""& Left(LTrim(L), Len(IgnorePrefix)) == IgnorePrefix) {
+    } else if (IgnorePrefix != "" && Left(LTrim(L), Len(IgnorePrefix)) == IgnorePrefix) {
 // Don't count...
     } else {
       CountLines = CountLines + 1;

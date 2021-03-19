@@ -15,7 +15,8 @@ Public Const STR_CHR_DIGIT As String = "1234567890"
 
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
 Public Function IsNotInStr(ByVal S As String, ByVal Fnd As String) As Boolean: IsNotInStr = Not IsInStr(S, Fnd): End Function
-Public Function FileExists(ByVal FN As String) As Boolean: FileExists = Dir(FN) <> "": End Function
+Public Function FileExists(ByVal FN As String) As Boolean: FileExists = FN <> "" And Dir(FN) <> "": End Function
+Public Function DirExists(ByVal FN As String) As Boolean: DirExists = FN <> "" And Dir(FN, vbDirectory) <> "": End Function
 Public Function FileName(ByVal FN As String) As String: FileName = Mid(FN, InStrRev(FN, "\") + 1): End Function
 Public Function FileBaseName(ByVal FN As String) As String: FileBaseName = Left(FileName(FN), InStrRev(FileName(FN), ".") - 1): End Function
 Public Function FilePath(ByVal FN As String) As String: FilePath = Left(FN, InStrRev(FN, "\")): End Function
@@ -31,6 +32,19 @@ Public Function AlignString(ByVal S As String, ByVal N As Long) As String: Align
 Public Function Capitalize(ByVal S As String) As String: Capitalize = UCase(Left(S, 1)) & Mid(S, 2): End Function
 
 Public Function DevelopmentFolder() As String: DevelopmentFolder = App.Path & "\": End Function
+
+Public Function IsIDE() As Boolean
+  'IsIDE = False
+  'Exit Function
+  
+' works on a very simple princicple... debug statements don't get compiled...
+  On Error GoTo IDEInUse
+  Debug.Print 1 \ 0 'division by zero error
+  IsIDE = False
+  Exit Function
+IDEInUse:
+  IsIDE = True
+End Function
 
 Public Function IsIn(ByVal S As String, ParamArray K() As Variant) As Boolean
   Dim L As Variant

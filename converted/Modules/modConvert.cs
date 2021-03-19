@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
@@ -198,8 +201,8 @@ public static bool ConvertForm(string frmFile, bool UIOnly= false) {
   X = X + "public partial class " + fName + " : Window {" + vbCrLf;
   X = X + "  private static " + fName + " _instance;" + vbCrLf;
   X = X + "  public static " + fName + " instance { set { _instance = null; } get { return _instance ?? (_instance = new " + fName + "()); }}";
-  X = X + "  public static void Load() { if (instance == null) { dynamic A = " + fName + ".instance; } }";
-  X = X + "  public static void Unload() { if (instance != null) instance.Close(); instance = null; }";
+  X = X + "  public static void Load() { if (_instance == null) { dynamic A = " + fName + ".instance; } }";
+  X = X + "  public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }";
   X = X + "  public " + fName + "() { InitializeComponent(); }" + vbCrLf;
   X = X + vbCrLf;
   X = X + vbCrLf;
