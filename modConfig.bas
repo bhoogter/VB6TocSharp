@@ -45,7 +45,7 @@ On Error GoTo CantMakeOutputFolder
   End If
   Exit Function
 CantMakeOutputFolder:
-  MsgBox "Failed creating folder.  Perhaps create it yourself?" & vbCrLf & OutputFolder
+  If Not Hush Then MsgBox "Failed creating folder.  Perhaps create it yourself?" & vbCrLf & OutputFolder
 End Function
 
 Public Function AssemblyName() As String

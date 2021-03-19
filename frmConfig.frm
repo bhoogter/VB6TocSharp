@@ -96,7 +96,7 @@ Private Sub Form_Load()
   txtVBPFile = modConfig.vbpFile
   txtOutput = modConfig.OutputFolder
   txtAssemblyName = modConfig.AssemblyName
-  modConfig.Hush = True
+  modConfig.Hush = False
 End Sub
 
 Private Sub cmdCancel_Click()
