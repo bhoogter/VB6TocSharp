@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
@@ -72,7 +75,7 @@ namespace VB2CS.Forms
 {
 public partial class frmConfig : Window {
   private static frmConfig _instance;
-  public static frmConfig instance { set { _instance = null; } get { return _instance ?? (_instance = new frmConfig()); }}  public static void Load() { if (instance == null) { dynamic A = frmConfig.instance; } }  public static void Unload() { if (instance != null) instance.Close(); instance = null; }  public frmConfig() { InitializeComponent(); }
+  public static frmConfig instance { set { _instance = null; } get { return _instance ?? (_instance = new frmConfig()); }}  public static void Load() { if (_instance == null) { dynamic A = frmConfig.instance; } }  public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }  public frmConfig() { InitializeComponent(); }
 
 
 // Option Explicit //Right Justify
@@ -80,9 +83,11 @@ public partial class frmConfig : Window {
 
 private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }
 private void Form_Load() {
+  modConfig.Hush = true;
   txtVBPFile.Text = modConfig.vbpFile;
   txtOutput.Text = modConfig.OutputFolder;
   txtAssemblyName.Text = modConfig.AssemblyName;
+  modConfig.Hush = true;
 }
 
 private void cmdCancel_Click(object sender, RoutedEventArgs e) { cmdCancel_Click(); }

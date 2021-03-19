@@ -9,6 +9,8 @@
     Title="VB6 -&gt; .NET"    Height="357"    Width="402" Loaded="Form_Load">
  <Grid>
   <GroupBox x:Name="fra" Margin="9,9,0,0" Width="352" Height="310" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Header=""> <Grid Margin="0,-15,0,0">
+    <Button x:Name="cmdSupport" Margin="180,51,0,0" Padding="2,2,2,2" Width="87" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="SUPPORT" Click="cmdSupport_Click" />
+    <Button x:Name="cmdScan" Margin="86,51,0,0" Padding="2,2,2,2" Width="87" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="SCAN" Click="cmdScan_Click" />
     <Button x:Name="cmdFile" Margin="17,77,0,0" Padding="2,2,2,2" Width="104" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="     Single File   -----&gt;" Click="cmdFile_Click" />
     <TextBox x:Name="txtFile" Margin="146,86,0,0" Padding="2,2,2,2" Width="172" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" />
     <Button x:Name="cmdLint" Margin="283,43,0,0" Padding="2,2,2,2" Width="61" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="L&amp;int" Click="cmdLint_Click" />

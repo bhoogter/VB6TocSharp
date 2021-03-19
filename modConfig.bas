@@ -14,6 +14,7 @@ Private mOutputFolder As String
 Private mAssemblyName As String
 
 Private Loaded As Boolean
+Public Hush As Boolean
 
 Public Const INISection_Settings   As String = "Settings"
 Public Const INIKey_VBPFile As String = "VBPFile"
@@ -38,7 +39,13 @@ Public Function OutputFolder(Optional ByVal F As String) As String
   OutputFolder = mOutputFolder
   If Right(OutputFolder, 1) <> "\" Then OutputFolder = OutputFolder & "\"
   OutputFolder = OutputFolder & OutputSubFolder(F)
-  If Dir(OutputFolder, vbDirectory) = "" Then MkDir OutputFolder
+  If Dir(OutputFolder, vbDirectory) = "" Then
+On Error GoTo CantMakeOutputFolder
+    MkDir OutputFolder
+  End If
+  Exit Function
+CantMakeOutputFolder:
+  MsgBox "Failed creating folder.  Perhaps create it yourself?" & vbCrLf & OutputFolder
 End Function
 
 Public Function AssemblyName() As String

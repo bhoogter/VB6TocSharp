@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
@@ -80,6 +83,7 @@ private static string mVBPFile = "";
 private static string mOutputFolder = "";
 private static string mAssemblyName = "";
 private static bool Loaded = false;
+public static bool Hush = false;
 public const string INISection_Settings = "Settings";
 public const string INIKey_VBPFile = "VBPFile";
 public const string INIKey_OutputFolder = "OutputFolder";
@@ -137,8 +141,13 @@ public static string OutputFolder(string F= "") {
   }
   OutputFolder = OutputFolder + OutputSubFolder(F);
   if (Dir(OutputFolder, vbDirectory) == "") {
+    // TODO (not supported): On Error GoTo CantMakeOutputFolder
     MkDir(OutputFolder);
   }
+  return OutputFolder;
+
+CantMakeOutputFolder:
+  MsgBox("Failed creating folder.  Perhaps create it yourself?" + vbCrLf + OutputFolder);
   return OutputFolder;
 }
 

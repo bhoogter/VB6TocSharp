@@ -64,6 +64,9 @@ using static modControlProperties;
 using static modProjectSpecific;
 using static modINI;
 using static modLinter;
+using static modGit;
+using static modDirStack;
+using static modShell;
 using static VB2CS.Forms.frm;
 using static VB2CS.Forms.frmConfig;
 
@@ -72,7 +75,7 @@ namespace VB2CS.Forms
 {
 public partial class frm : Window {
   private static frm _instance;
-  public static frm instance { set { _instance = null; } get { return _instance ?? (_instance = new frm()); }}  public static void Load() { if (instance == null) { dynamic A = frm.instance; } }  public static void Unload() { if (instance != null) instance.Close(); instance = null; }  public frm() { InitializeComponent(); }
+  public static frm instance { set { _instance = null; } get { return _instance ?? (_instance = new frm()); }}  public static void Load() { if (_instance == null) { dynamic A = frm.instance; } }  public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }  public frm() { InitializeComponent(); }
 
 
 // Option Explicit //Right Justify
@@ -81,6 +84,10 @@ public int pMax = 0;
 
 private void cmdAll_Click(object sender, RoutedEventArgs e) { cmdAll_Click(); }
 private void cmdAll_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
   IsWorking();
   ConvertProject(txtSrc.Text);
   IsWorking(true);
@@ -88,6 +95,10 @@ private void cmdAll_Click() {
 
 private void cmdClasses_Click(object sender, RoutedEventArgs e) { cmdClasses_Click(); }
 private void cmdClasses_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
   IsWorking();
   ConvertFileList(FilePath(txtSrc.Text), VBPClasses(txtSrc.Text));
   IsWorking(true);
@@ -106,6 +117,10 @@ private void cmdExit_Click() {
 
 private void cmdFile_Click(object sender, RoutedEventArgs e) { cmdFile_Click(); }
 private void cmdFile_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
   IsWorking();
   ConvertFile(txtFile.Text);
   IsWorking(true);
@@ -114,6 +129,10 @@ private void cmdFile_Click() {
 
 private void cmdForms_Click(object sender, RoutedEventArgs e) { cmdForms_Click(); }
 private void cmdForms_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
   IsWorking();
   ConvertFileList(FilePath(txtSrc.Text), VBPForms(txtSrc.Text));
   IsWorking(true);
@@ -121,9 +140,36 @@ private void cmdForms_Click() {
 
 private void cmdModules_Click(object sender, RoutedEventArgs e) { cmdModules_Click(); }
 private void cmdModules_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
   IsWorking();
   ConvertFileList(FilePath(txtSrc.Text), VBPModules(txtSrc.Text));
   IsWorking(true);
+}
+
+private bool ConfigValid() {
+  bool ConfigValid = false;
+  modConfig.LoadSettings();
+
+  if (Dir(modConfig.vbpFile) == "") {
+    MsgBox("Project file not found.  Perhaps do config first?", vbExclamation, "File Not Found");
+    return ConfigValid;
+
+  }
+  if (Dir(modConfig.OutputFolder, vbDirectory) == "") {
+    MsgBox("Ouptut Folder not found.  Perhaps do config first?", vbExclamation, "Directory Not Found");
+    return ConfigValid;
+
+  }
+  if (modConfig.AssemblyName == "") {
+    MsgBox("Assembly name not set.  Perhaps do config first?", vbExclamation, "Setting Not Found");
+    return ConfigValid;
+
+  }
+  ConfigValid = true;
+  return ConfigValid;
 }
 
 private void IsWorking(bool Done= false) {
@@ -137,6 +183,8 @@ private void IsWorking(bool Done= false) {
   cmdForms.IsEnabled = Done;
   cmdModules.IsEnabled = Done;
   txtSrc.IsEnabled = Done;
+  cmdScan.IsEnabled = Done;
+  cmdSupport.IsEnabled = Done;
   MousePointer = IIf(Done, vbDefault, vbHourglass);
 }
 
@@ -155,7 +203,36 @@ public dynamic Prg(int Val= -1, int Max= -1, string Cap= "#") {
 
 private void cmdLint_Click(object sender, RoutedEventArgs e) { cmdLint_Click(); }
 private void cmdLint_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
   LintFolder();
+}
+
+private void cmdScan_Click(object sender, RoutedEventArgs e) { cmdScan_Click(); }
+private void cmdScan_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
+  IsWorking(false);
+  ScanRefs();
+  IsWorking(true);
+}
+
+private void cmdSupport_Click(object sender, RoutedEventArgs e) { cmdSupport_Click(); }
+private void cmdSupport_Click() {
+  if (!ConfigValid) {
+return;
+
+  }
+  if (MsgBox("Generate Project files?", vbYesNo) == vbYes) {
+    CreateProjectFile(vbpFile);
+  }
+  if (MsgBox("Generate Support files?", vbYesNo) == vbYes) {
+    CreateProjectSupportFiles();
+  }
 }
 
 private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }

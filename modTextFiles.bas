@@ -30,6 +30,17 @@ Private Property Get FSO() As Object
   Set FSO = mFSO
 End Property
 
+Public Function DeleteFileIfExists(ByVal sFIle As String, Optional ByVal bNoAttributeClearing As Boolean = False) As Boolean
+On Error Resume Next
+  If Not FileExists(sFIle) Then Exit Function
+  If Not bNoAttributeClearing Then SetAttr sFIle, 0
+  If FileExists(sFIle) Then Kill sFIle
+'  DeleteFileIfExists = FileExists(sFile)
+  DeleteFileIfExists = True
+End Function
+
+
+
 Public Function ReadEntireFile(ByVal FileName As String) As String
 '::::ReadEntireFile
 ':::SUMMARY
@@ -101,7 +112,7 @@ Public Function ReadFile(ByVal FileName As String, Optional ByVal Startline As L
   Static CacheFileDate As String
   Static CacheFileLoad() As String
   
-  If Not FileExists(FileName) Then
+  If FileName = "" Or Not FileExists(FileName) Then
 '    WasEOF = True
     Exit Function
   End If
