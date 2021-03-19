@@ -44,9 +44,10 @@ Public Function ConvertFile(ByVal someFile As String, Optional ByVal UIOnly As B
     Case ".cls": ConvertFile = ConvertClass(someFile)
     Case ".frm": FormName = FileBaseName(someFile): ConvertFile = ConvertForm(someFile, UIOnly)
 '      Case ".ctl": ConvertModule  someFile
-    Case Else: MsgBox "UNKNOWN VB TYPE: " & someFile
+    Case Else: MsgBox "UNKNOWN VB TYPE: " & someFile: Exit Function
   End Select
   FormName = ""
+  ConvertFile = True
 End Function
 
 Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean

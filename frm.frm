@@ -193,11 +193,16 @@ Private Sub cmdExit_Click()
 End Sub
 
 Private Sub cmdFile_Click()
+  Dim Success As Boolean
+  If txtFile = "" Then
+    MsgBox "Enter a file in the box.", vbExclamation, "No File Entered"
+    Exit Sub
+  End If
   If Not ConfigValid Then Exit Sub
   IsWorking
-  ConvertFile txtFile
+  Success = ConvertFile(txtFile)
   IsWorking True
-  MsgBox "Converted " & txtFile & "."
+  If Success Then MsgBox "Converted " & txtFile & "."
 End Sub
 
 Private Sub cmdForms_Click()
