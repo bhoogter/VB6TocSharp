@@ -392,13 +392,13 @@ Public Sub Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1,
   frm.Prg Val, Max, Cap
 End Sub
 
-Public Function cVal(ByRef Coll As Collection, Key As String, Optional ByVal Def As String = "") As String
+Public Function cVal(ByRef Coll As Collection, ByVal Key As String, Optional ByVal Def As String = "") As String
   On Error Resume Next
   cVal = Def
   cVal = Coll.Item(LCase(Key))
 End Function
 
-Public Function cValP(Coll As Collection, Key As String, Optional ByVal Def As String = "") As String
+Public Function cValP(Coll As Collection, ByVal Key As String, Optional ByVal Def As String = "") As String
   cValP = P(deQuote(cVal(Coll, Key, Def)))
 End Function
 

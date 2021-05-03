@@ -208,8 +208,8 @@ IDEInUse:;
   return IsIDE;
 }
 
-public static Variant) As Boolean IsIn(string S, dynamic ParamArray_UNUSED) {
-  Variant) As Boolean IsIn = null;
+public static bool IsIn(string S, params dynamic [] K_UNUSED) {
+  bool IsIn = false;
   dynamic L = null;
 
   foreach(var iterL in K) {
@@ -650,7 +650,7 @@ public static dynamic ArrSlice(ref dynamic sourceArray, int fromIndex, int toInd
   return ArrSlice;
 }
 
-public static void ArrAdd(ref dynamic Arr(_UNUSED) {
+public static void ArrAdd(ref dynamic [] Arr, ref dynamic Item) {
   int X = 0;
 
   Err().Clear();
@@ -661,9 +661,9 @@ public static void ArrAdd(ref dynamic Arr(_UNUSED) {
 return;
 
   }
-  List<> Arr_9057_tmp = new List<>();
-for (int redim_iter_3009=0;i<0;redim_iter_3009++) {Arr.Add(redim_iter_3009<Arr.Count ? Arr(redim_iter_3009) : null);}
-  Arr(UBound(Arr)) = Item;
+  List<dynamic> Arr_4291_tmp = new List<dynamic>();
+for (int redim_iter_8243=0;i<0;redim_iter_8243++) {Arr.Add(redim_iter_8243<Arr.Count ? Arr(redim_iter_8243) : null);}
+  Arr[UBound(Arr)] = Item;
 }
 
 public static dynamic SubArr(dynamic sourceArray, int fromIndex, int copyLength) {
@@ -762,7 +762,7 @@ public static void Prg(int Val= -1, int Max= -1, dynamic Cap= "#") {
   frm.Prg(Val, Max, Cap);
 }
 
-public static string cVal(ref Collection Coll, ref string Key, string Def= "") {
+public static string cVal(ref Collection Coll, string Key, string Def= "") {
   string cVal = "";
   // TODO (not supported):   On Error Resume Next
   cVal = Def;
@@ -770,9 +770,9 @@ public static string cVal(ref Collection Coll, ref string Key, string Def= "") {
   return cVal;
 }
 
-public static string cValP(ref Collection Coll, ref string Key, string Def= "") {
+public static string cValP(ref Collection Coll, string Key, string Def= "") {
   string cValP = "";
-  cValP = P(deQuote(cVal(ref Coll, ref Key, Def)));
+  cValP = P(deQuote(cVal(ref Coll, Key, Def)));
   return cValP;
 }
 

@@ -116,8 +116,8 @@ public static List<string> INISections(string FileName) {
 
   strBuffer = Left(strBuffer, intLen);
   INISections = Split(strBuffer, vbNullChar);
-  List<List<string>> INISections_6953_tmp = new List<List<string>>();
-for (int redim_iter_4670=0;i<0;redim_iter_4670++) {INISections.Add(redim_iter_4670<INISections.Count ? INISections(redim_iter_4670) : null);}
+  List<List<string>> INISections_2947_tmp = new List<List<string>>();
+for (int redim_iter_664=0;i<0;redim_iter_664++) {INISections.Add(redim_iter_664<INISections.Count ? INISections(redim_iter_664) : null);}
   return INISections;
 }
 
@@ -149,8 +149,8 @@ public static List<string> INISectionKeys(string FileName, string Section) {
 
   strBuffer = Left(strBuffer, intLen);
   RET = Split(strBuffer, vbNullChar);
-  List<string> RET_8128_tmp = new List<string>();
-for (int redim_iter_7553=0;i<0;redim_iter_7553++) {RET.Add(redim_iter_7553<RET.Count ? RET(redim_iter_7553) : "");}
+  List<string> RET_8438_tmp = new List<string>();
+for (int redim_iter_7864=0;i<0;redim_iter_7864++) {RET.Add(redim_iter_7864<RET.Count ? RET(redim_iter_7864) : "");}
   for(I=LBound(RET); I<UBound(RET); I++) {
     N = InStr(RET[I], "=");
     if (N > 0) {

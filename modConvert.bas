@@ -633,6 +633,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   Res = ""
   If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
+  If IsInStr(pName, "()") Then Res = Res & "[] ": pName = Replace(pName, "()", "")
   TName = pName
   If Not NeverUnused Then
     If Not SubParam(pName).Used And Not (SubParam(pName).Param And SubParam(pName).Assigned) Then
@@ -648,13 +649,16 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   ConvertParameter = Trim(Res)
 End Function
 
-Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False, Optional ByRef asName As String) As String
+Public Function ConvertPrototype(ByVal SS As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False, Optional ByRef asName As String) As String
   Const retToken = "#RET#"
   Dim Res As String
   Dim fName As String, fArgs As String, retType As String, T As String
   Dim tArg As String
   Dim isSub As Boolean
   Dim hArgs As Boolean
+  Dim S As String
+  
+  S = SS
   
   Res = ""
   returnVariable = ""
@@ -673,6 +677,13 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
   If Left(S, 1) = "(" Then S = Trim(tMid(S, 2))
   fArgs = Trim(nextBy(S, ")"))
   S = Mid(S, Len(fArgs) + 2)
+  Do While Right(fArgs, 1) = "("
+    fArgs = fArgs & ") "
+    Dim tMore As String
+    tMore = Trim(nextBy(S, ")"))
+    fArgs = fArgs & tMore
+    S = Mid(S, Len(tMore) + 2)
+  Loop
   If Left(S, 1) = ")" Then S = Trim(tMid(S, 2))
   
   If Not isSub Then
@@ -693,7 +704,9 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
     tArg = nextBy(fArgs, ",")
     fArgs = LTrim(Mid(fArgs, Len(tArg) + 2))
     
-    Res = Res & IIf(hArgs, ", ", "") & ConvertParameter(tArg)
+    Res = Res & IIf(hArgs, ", ", "")
+    If LMatch(tArg, "ParamArray") Then Res = Res & "params ": tArg = "ByVal " & Trim(Mid(tArg, 12))
+    Res = Res & ConvertParameter(tArg)
     hArgs = True
   Loop Until Len(fArgs) = 0
   
@@ -1209,6 +1222,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 '      If (LMatch(CurrSub, "Friend ")) Then CurrSub = Mid(CurrSub, 8)
 '      If (LMatch(CurrSub, "Function ")) Then CurrSub = Mid(CurrSub, 10)
 '      If (LMatch(CurrSub, "Sub ")) Then CurrSub = Mid(CurrSub, 5)
+'If IsInStr(L, "Public Function IsIn") Then Stop
       O = O & sSpace(Ind) & ConvertPrototype(L, returnVariable, asModule, CurrSub)
       Ind = Ind + SpIndent
     ElseIf L Like "*Property *" Then

@@ -248,7 +248,7 @@ private static string StartControl(string L, Collection Props, bool DoEmpty, str
 
   cType = SplitWord(L, 2);
   cName = SplitWord(L, 3);
-  cIndex = cValP(ref Props, ref "Index");
+  cIndex = cValP(ref Props, "Index");
   if (cIndex != "") {
     cName = cName + "_" + cIndex;
   }
@@ -269,9 +269,9 @@ private static string StartControl(string L, Collection Props, bool DoEmpty, str
     S = S + N + "    xmlns:local=\"clr-namespace:" + AssemblyName() + ".Forms\"";
     S = S + N + "    xmlns:usercontrols=\"clr-namespace:" + AssemblyName() + ".UserControls\"";
     S = S + N + "    mc:Ignorable=\"d\"";
-    S = S + N + "    Title=" + Quote(cValP(ref Props, ref "caption"));
-    S = S + M + "    Height=" + Quote(Px(cValP(ref Props, ref "clientheight", 0) + 435));
-    S = S + M + "    Width=" + Quote(Px(cValP(ref Props, ref "clientwidth", 0) + 435));
+    S = S + N + "    Title=" + Quote(cValP(ref Props, "caption"));
+    S = S + M + "    Height=" + Quote(Px(cValP(ref Props, "clientheight", 0) + 435));
+    S = S + M + "    Width=" + Quote(Px(cValP(ref Props, "clientwidth", 0) + 435));
     S = S + CheckControlEvents("Window", "Form", Code);
     S = S + M + ">";
     S = S + N + " <Grid";
@@ -279,68 +279,68 @@ private static string StartControl(string L, Collection Props, bool DoEmpty, str
     S = S + "<" + tType;
     S = S + " x:Name=\"" + cName + "\"";
 
-    S = S + " Margin=" + Quote(Px(cValP(ref Props, ref "left")) + "," + Px(cValP(ref Props, ref "top")) + ",0,0");
-    S = S + " Width=" + Quote(Px(cValP(ref Props, ref "width")));
-    S = S + " Height=" + Quote(Px(cValP(ref Props, ref "height")));
+    S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
+    S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
+    S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
     S = S + " VerticalAlignment=\"Top\"";
     S = S + " HorizontalAlignment=\"Left\"";
-    S = S + " FontFamily=" + Quote(cValP(ref Props, ref "font.name", "Calibri"));
-    S = S + " FontSize=" + Quote(cValP(ref Props, ref "font.size", 10));
+    S = S + " FontFamily=" + Quote(cValP(ref Props, "font.name", "Calibri"));
+    S = S + " FontSize=" + Quote(cValP(ref Props, "font.size", 10));
 
-    S = S + " Header=\"" + cValP(ref Props, ref "caption") + "\"";
+    S = S + " Header=\"" + cValP(ref Props, "caption") + "\"";
     S = S + "> <Grid Margin=\"0,-15,0,0\"";
   } else if (tType == "Canvas") {
     S = S + "<" + tType;
     S = S + " x:Name=\"" + cName + "\"";
 
-    S = S + " Margin=" + Quote(Px(cValP(ref Props, ref "left")) + "," + Px(cValP(ref Props, ref "top")) + ",0,0");
-    S = S + " Width=" + Quote(Px(cValP(ref Props, ref "width")));
-    S = S + " Height=" + Quote(Px(cValP(ref Props, ref "height")));
+    S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
+    S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
+    S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
   } else if (tType == "Image") {
     S = S + "<" + tType;
 
     S = S + " x:Name=\"" + cName + "\"";
-    S = S + " Margin=" + Quote(Px(cValP(ref Props, ref "left")) + "," + Px(cValP(ref Props, ref "top")) + ",0,0");
-    S = S + " Width=" + Quote(Px(cValP(ref Props, ref "width")));
-    S = S + " Height=" + Quote(Px(cValP(ref Props, ref "height")));
+    S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
+    S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
+    S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
     S = S + " VerticalAlignment=" + Quote("Top");
     S = S + " HorizontalAlignment=" + Quote("Left");
   } else {
     S = "";
     S = S + "<" + tType;
     S = S + " x:Name=\"" + cName + "\"";
-    S = S + " Margin=" + Quote(Px(cValP(ref Props, ref "left")) + "," + Px(cValP(ref Props, ref "top")) + ",0,0");
+    S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
     S = S + " Padding=" + Quote("2,2,2,2");
-    S = S + " Width=" + Quote(Px(cValP(ref Props, ref "width")));
-    S = S + " Height=" + Quote(Px(cValP(ref Props, ref "height")));
+    S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
+    S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
     S = S + " VerticalAlignment=" + Quote("Top");
     S = S + " HorizontalAlignment=" + Quote("Left");
 
   }
 
   if (IsInStr(Features, "Font")) {
-    S = S + " FontFamily=" + Quote(cValP(ref Props, ref "font.name", "Calibri"));
-    S = S + " FontSize=" + Quote(cValP(ref Props, ref "font.size", 10));
-    if (Val(cValP(ref Props, ref "font.weight", "400")) > 400) {
+    S = S + " FontFamily=" + Quote(cValP(ref Props, "font.name", "Calibri"));
+    S = S + " FontSize=" + Quote(cValP(ref Props, "font.size", 10));
+    if (Val(cValP(ref Props, "font.weight", "400")) > 400) {
       S = S + " FontWeight=" + Quote("Bold");
     }
 
   }
 
   if (IsInStr(Features, "Content")) {
-    S = S + " Content=" + QuoteXML(cValP(ref Props, ref "caption") + cValP(ref Props, ref "text"));
+    S = S + " Content=" + QuoteXML(cValP(ref Props, "caption") + cValP(ref Props, "text"));
   }
 
   if (IsInStr(Features, "Header")) {
-    S = S + " Content=" + QuoteXML(cValP(ref Props, ref "caption") + cValP(ref Props, ref "text"));
+    S = S + " Content=" + QuoteXML(cValP(ref Props, "caption") + cValP(ref Props, "text"));
   }
 
-  V = cValP(ref Props, ref "caption") + cValP(ref Props, ref "text");
+  V = cValP(ref Props, "caption") + cValP(ref Props, "text");
   if (IsInStr(Features, "Text") && V != "") {
     S = S + " Text=" + QuoteXML(V);
   }
 
-  V = cValP(ref Props, ref "ToolTipText");
+  V = cValP(ref Props, "ToolTipText");
   if (IsInStr(Features, "ToolTip") && V != "") {
     S = S + " ToolTip=" + Quote(V);
   }

@@ -992,6 +992,10 @@ public static string ConvertParameter(string S, bool NeverUnused= false) {
     Res = Res + IIf(asOut, "out ", "ref ");
   }
   Res = Res + ConvertDataType(pType) + " ";
+  if (IsInStr(pName, "()")) {
+    Res = Res + "[] ";
+    pName = Replace(pName, "()", "");
+  }
   TName = pName;
   if (!NeverUnused) {
     if (!SubParam(pName).Used && !(SubParam(pName).Param && SubParam(pName).Assigned)) {
@@ -1008,7 +1012,7 @@ public static string ConvertParameter(string S, bool NeverUnused= false) {
   return ConvertParameter;
 }
 
-public static string ConvertPrototype(string S, out string returnVariable, bool asModule= false, out string asName) {
+public static string ConvertPrototype(string SS, out string returnVariable, bool asModule= false, out string asName) {
   string ConvertPrototype = "";
   const dynamic retToken = "#RET#";
   string Res = "";
@@ -1024,6 +1028,10 @@ public static string ConvertPrototype(string S, out string returnVariable, bool 
 
   bool hArgs = false;
 
+  string S = "";
+
+
+  S = SS;
 
   Res = "";
   returnVariable = "";
@@ -1061,6 +1069,14 @@ public static string ConvertPrototype(string S, out string returnVariable, bool 
   }
   fArgs = Trim(nextBy(S, ")"));
   S = Mid(S, Len(fArgs) + 2);
+  while(Right(fArgs, 1) == "(") {
+    fArgs = fArgs + ") ";
+    string tMore = "";
+
+    tMore = Trim(nextBy(S, ")"));
+    fArgs = fArgs + tMore;
+    S = Mid(S, Len(tMore) + 2);
+  }
   if (Left(S, 1) == ")") {
     S = Trim(tMid(S, 2));
   }
@@ -1087,7 +1103,12 @@ public static string ConvertPrototype(string S, out string returnVariable, bool 
     tArg = nextBy(fArgs, ",");
     fArgs = LTrim(Mid(fArgs, Len(tArg) + 2));
 
-    Res = Res + IIf(hArgs, ", ", "") + ConvertParameter(tArg);
+    Res = Res + IIf(hArgs, ", ", "");
+    if (LMatch(tArg, "ParamArray")) {
+      Res = Res + "params ";
+      tArg = "ByVal " + Trim(Mid(tArg, 12));
+    }
+    Res = Res + ConvertParameter(tArg);
     hArgs = true;
   } while(!(Len(fArgs) == 0));
 

@@ -155,15 +155,15 @@ return;
   // TODO (not supported): On Error Resume Next
   N = 0;
   N = UBound(Vars) + 1;
-  List<> Vars_4617_tmp = new List<>();
-for (int redim_iter_1306=0;i<0;redim_iter_1306++) {Vars.Add(redim_iter_1306<Vars.Count ? Vars(redim_iter_1306) : null);}
-  dynamic _WithVar_4682;
-  _WithVar_4682 = Vars(N);
-    _WithVar_4682.Name = P();
-    _WithVar_4682.asType = asType;
-    _WithVar_4682.Param = isParam;
-    _WithVar_4682.RetVal = isReturn;
-    _WithVar_4682.asArray = asArray;
+  List<> Vars_8637_tmp = new List<>();
+for (int redim_iter_5326=0;i<0;redim_iter_5326++) {Vars.Add(redim_iter_5326<Vars.Count ? Vars(redim_iter_5326) : null);}
+  dynamic _WithVar_7292;
+  _WithVar_7292 = Vars(N);
+    _WithVar_7292.Name = P();
+    _WithVar_7292.asType = asType;
+    _WithVar_7292.Param = isParam;
+    _WithVar_7292.RetVal = isReturn;
+    _WithVar_7292.asArray = asArray;
 }
 
 public static void SubParamAssign(string P) {
@@ -176,11 +176,11 @@ return;
 
   K = SubParamIndex(P());
   if (K >= 0) {
-    dynamic _WithVar_2088;
-    _WithVar_2088 = Vars(K);
-      _WithVar_2088.Assigned = true;
-      if (!_WithVar_2088.Used) {
-        _WithVar_2088.AssignedBeforeUsed = true;
+    dynamic _WithVar_9625;
+    _WithVar_9625 = Vars(K);
+      _WithVar_9625.Assigned = true;
+      if (!_WithVar_9625.Used) {
+        _WithVar_9625.AssignedBeforeUsed = true;
       }
   }
 }
@@ -338,8 +338,8 @@ public static void AddProperty(string S) {
     // TODO (not supported): On Error Resume Next
     X = UBound(Props) + 1;
     // TODO (not supported): On Error GoTo 0
-    List<> Props_7671_tmp = new List<>();
-for (int redim_iter_422=0;i<0;redim_iter_422++) {Props.Add(redim_iter_422<Props.Count ? Props(redim_iter_422) : null);}
+    List<> Props_445_tmp = new List<>();
+for (int redim_iter_3196=0;i<0;redim_iter_3196++) {Props.Add(redim_iter_3196<Props.Count ? Props(redim_iter_3196) : null);}
   }
 
   Props(X).Name = pName;
@@ -390,10 +390,10 @@ public static string ReadOutProperties(bool asModule= false) {
     if (I == -1) {
 goto NoItems;
     }
-    dynamic _WithVar_5223;
-    _WithVar_5223 = Props(I);
-      if (_WithVar_5223.Name != "" && !(_WithVar_5223.Getter == "" && _WithVar_5223.Setter == "")) {
-        if (_WithVar_5223.asPublic) {
+    dynamic _WithVar_2522;
+    _WithVar_2522 = Props(I);
+      if (_WithVar_2522.Name != "" && !(_WithVar_2522.Getter == "" && _WithVar_2522.Setter == "")) {
+        if (_WithVar_2522.asPublic) {
           R = R + "public ";
         }
         if (asModule) {
@@ -401,27 +401,27 @@ goto NoItems;
         }
 //          If .Getter = "" Then R = R & "writeonly "
 //          If .Setter = "" Then R = R & "readonly "
-        if (_WithVar_5223.asFunc) {
-          R = R + " // TODO: Arguments not allowed on properties: " + _WithVar_5223.funcArgs + vbCrLf;
-          R = R + " //       " + _WithVar_5223.origProto + vbCrLf;
+        if (_WithVar_2522.asFunc) {
+          R = R + " // TODO: Arguments not allowed on properties: " + _WithVar_2522.funcArgs + vbCrLf;
+          R = R + " //       " + _WithVar_2522.origProto + vbCrLf;
         }
-        R = R + M + _WithVar_5223.asType + " " + _WithVar_5223.Name;
+        R = R + M + _WithVar_2522.asType + " " + _WithVar_2522.Name;
         R = R + " {";
 
-        if (_WithVar_5223.Getter != "") {
+        if (_WithVar_2522.Getter != "") {
           R = R + N + "  get {";
-          R = R + N + "    " + _WithVar_5223.asType + " " + _WithVar_5223.Name + ";";
-          T = _WithVar_5223.Getter;
-          T = Replace(T, "Exit(Property)", "return " + _WithVar_5223.Name + ";");
+          R = R + N + "    " + _WithVar_2522.asType + " " + _WithVar_2522.Name + ";";
+          T = _WithVar_2522.Getter;
+          T = Replace(T, "Exit(Property)", "return " + _WithVar_2522.Name + ";");
           R = R + N + "    " + T;
-          R = R + N + "  return " + _WithVar_5223.Name + ";";
+          R = R + N + "  return " + _WithVar_2522.Name + ";";
           R = R + N + "  }";
         }
-        if (_WithVar_5223.Setter != "") {
+        if (_WithVar_2522.Setter != "") {
           R = R + N + "  set {";
-          T = _WithVar_5223.Setter;
+          T = _WithVar_2522.Setter;
           T = ReplaceToken(T, "value", "valueOrig");
-          T = Replace(T, _WithVar_5223.origArgName, "value");
+          T = Replace(T, _WithVar_2522.origArgName, "value");
           T = Replace(T, "Exit Property", "return;");
           R = R + N + "    " + T;
           R = R + N + "  }";
