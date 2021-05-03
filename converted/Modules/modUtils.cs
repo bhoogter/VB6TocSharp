@@ -212,7 +212,8 @@ public static Variant) As Boolean IsIn(string S, dynamic ParamArray_UNUSED) {
   Variant) As Boolean IsIn = null;
   dynamic L = null;
 
-  foreach(var L in K) {
+  foreach(var iterL in K) {
+L = iterL;
     if (S == L) {
       IsIn = true;
       return IsIn;
@@ -617,7 +618,8 @@ public static int CountWords(string Source_UNUSED, string Space_UNUSED= " ") {
 
 // Count actual words.  Blank spaces don't count, before, after, or in the middle.
 // Only a simple split and loop--there may be faster ways...
-  foreach(var L in Split(Source, Space)) {
+  foreach(var iterL in Split(Source, Space)) {
+L = iterL;
     if (L != "") {
       CountWords = CountWords + 1;
     }
@@ -659,8 +661,8 @@ public static void ArrAdd(ref dynamic Arr(_UNUSED) {
 return;
 
   }
-  List<> Arr_8186_tmp = new List<>();
-for (int redim_iter_2138=0;i<0;redim_iter_2138++) {Arr.Add(redim_iter_2138<Arr.Count ? Arr(redim_iter_2138) : null);}
+  List<> Arr_9057_tmp = new List<>();
+for (int redim_iter_3009=0;i<0;redim_iter_3009++) {Arr.Add(redim_iter_3009<Arr.Count ? Arr(redim_iter_3009) : null);}
   Arr(UBound(Arr)) = Item;
 }
 

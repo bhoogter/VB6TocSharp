@@ -102,7 +102,8 @@ public static bool ConvertFileList(string Path, string List, string Sep= vbCrLf)
 
   V = StrCnt(List, Sep) + 1;
   Prg(0, V, N + "/" + V + "...");
-  foreach(var L in Split(List, Sep)) {
+  foreach(var iterL in Split(List, Sep)) {
+L = iterL;
     N = N + 1;
     if (L == "") {
 goto NextItem;
@@ -351,7 +352,8 @@ public static dynamic SanitizeCode(string Str) {
   Building = "";
 
 
-  foreach(var L in Sp) {
+  foreach(var iterL in Sp) {
+L = iterL;
 //If IsInStr(L, "POEDIFolder") Then Stop
 //If IsInStr(L, "Set objSourceArNo = New_CDbTypeAhead") Then Stop
     if (Right(L, 1) == "_") {
@@ -543,7 +545,8 @@ public static string ConvertDeclare(string S, int Ind, bool isGlobal= false, boo
 
 //  If IsInStr(S, "aMin") Then Stop
   Sp = Split(S, ",");
-  foreach(var L in Sp) {
+  foreach(var iterL in Sp) {
+L = iterL;
     L = Trim(L);
     if (LMatch(L, "WithEvents ")) {
       L = Trim(tMid(L, 12));
@@ -1456,7 +1459,8 @@ public static string ConvertGlobals(string Str, bool asModule= false) {
   N = 0;
 //  Prg 0, UBound(S) - LBound(S) + 1, "Globals..."
   InitDeString();
-  foreach(var L in S) {
+  foreach(var iterL in S) {
+L = iterL;
     L = DeComment(L);
     L = DeString(L);
     O = "";

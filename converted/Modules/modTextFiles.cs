@@ -306,7 +306,8 @@ public static int CountLines(string Source, bool IgnoreBlank= true, string Ignor
   dynamic L = null;
 
   Source = Replace(Source, vbLf, "");
-  foreach(var L in Split(Source, vbCr)) {
+  foreach(var iterL in Split(Source, vbCr)) {
+L = iterL;
     if (Trim(L) == ""& IgnoreBlank) {
 // Don't count...
     } else if (IgnorePrefix != "" && Left(LTrim(L), Len(IgnorePrefix)) == IgnorePrefix) {

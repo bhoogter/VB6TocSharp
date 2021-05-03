@@ -436,7 +436,8 @@ public static bool LintFileList(string List_UNUSED, bool AutoFix) {
 
   StartTime = DateTime.Now;;
 
-  foreach(var L in Split(List, vbCrLf)) {
+  foreach(var iterL in Split(List, vbCrLf)) {
+L = iterL;
     if (!LintFile(L, ref ref(E))) {
       if (AutoFix) {
         LintFileIndent(DevelopmentFolder() + L);
@@ -588,7 +589,8 @@ private static string AutoFixLine(string FixFile, string Line, string LineFixes)
 
   AutoFixLine = Line;
   if (LineFixes != "") {
-    foreach(var FixL in Split(LineFixes, lintFixList_Sep)) {
+    foreach(var iterFixL in Split(LineFixes, lintFixList_Sep)) {
+FixL = iterFixL;
       KSpl = Split(FixL, lintFixList_Div);
       if (KSpl(0) == "^") {
         AutoFixLine = KSpl(1) + AutoFixLine;
@@ -1053,7 +1055,8 @@ goto SkipLine;
         if (MM >= 0) {
           vArgs = Left(vArgs, MM);
         }
-        foreach(var Decl in Split(DeString(vArgs), ",")) {
+        foreach(var iterDecl in Split(DeString(vArgs), ",")) {
+Decl = iterDecl;
           Decl = Trim(Decl);
           if (Decl == "_") {
 goto IgnoreParam; // Not checking multi-line declarations for now..  Could insert in-place multi-line read..
@@ -1101,7 +1104,8 @@ IgnoreParam:;
       vArgs = Replace(vArgs, "Public ", "");
       vArgs = Replace(vArgs, "Const ", "");
 
-      foreach(var Decl in Split(DeString(vArgs), ",")) {
+      foreach(var iterDecl in Split(DeString(vArgs), ",")) {
+Decl = iterDecl;
         vName = Trim(SplitWord(Decl, 1, " As "));
         vName = Trim(SplitWord(vName, 1, " = "));
         if (!LintFileTestName(vName, tE)) {

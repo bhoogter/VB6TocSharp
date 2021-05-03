@@ -87,7 +87,8 @@ public static string VBPModules(string ProjectFile= "") {
     ProjectFile = vbpFile;
   }
   S = ReadEntireFile(ProjectFile);
-  foreach(var L in Split(S, vbCrLf)) {
+  foreach(var iterL in Split(S, vbCrLf)) {
+L = iterL;
     if (Left(L, Len(C)) == C) {
       T = Mid(L, Len(C) + 1);
       if (IsInStr(T, ";")) {
@@ -117,7 +118,8 @@ public static string VBPForms(string ProjectFile= "") {
     ProjectFile = vbpFile;
   }
   S = ReadEntireFile(ProjectFile);
-  foreach(var L in Split(S, vbCrLf)) {
+  foreach(var iterL in Split(S, vbCrLf)) {
+L = iterL;
     if (Left(L, Len(C)) == C) {
       T = Mid(L, Len(C) + 1);
       if (IsInStr(T, ";")) {
@@ -168,7 +170,8 @@ public static string VBPClasses(string ProjectFile= "", bool ClassNames= false) 
     ProjectFile = vbpFile;
   }
   S = ReadEntireFile(ProjectFile);
-  foreach(var L in Split(S, vbCrLf)) {
+  foreach(var iterL in Split(S, vbCrLf)) {
+L = iterL;
     if (Left(L, Len(C)) == C) {
       T = Mid(L, Len(C) + 1);
       if (IsInStr(T, ";")) {
@@ -196,7 +199,8 @@ public static string VBPUserControls(string ProjectFile= "") {
     ProjectFile = vbpFile;
   }
   S = ReadEntireFile(ProjectFile);
-  foreach(var L in Split(S, vbCrLf)) {
+  foreach(var iterL in Split(S, vbCrLf)) {
+L = iterL;
     if (Left(L, Len(C)) == C) {
       T = Mid(L, Len(C) + 1);
       if (IsInStr(T, ";")) {

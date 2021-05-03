@@ -111,7 +111,8 @@ public static int ScanRefs() {
   // TODO (not supported): On Error Resume Next
   OutRes = "";
   ScanRefs = 0;
-  foreach(var L in Split(VBPModules(vbpFile), vbCrLf)) {
+  foreach(var iterL in Split(VBPModules(vbpFile), vbCrLf)) {
+L = iterL;
     if (L == "") {
 goto SkipMod;
     }
@@ -119,7 +120,8 @@ goto SkipMod;
 SkipMod:;
   }
 
-  foreach(var L in Split(VBPForms(vbpFile), vbCrLf)) {
+  foreach(var iterL in Split(VBPForms(vbpFile), vbCrLf)) {
+L = iterL;
     L = Replace(L, ".frm", "");
     if (L == "") {
 goto SkipForm;
@@ -168,7 +170,8 @@ private static int ScanRefsFile(string FN) {
   M = FileBaseName(FN);
   S = ReadEntireFile(FN);
   ScanRefsFile = 0;
-  foreach(var LL in Split(S, vbCrLf)) {
+  foreach(var iterLL in Split(S, vbCrLf)) {
+LL = iterLL;
     DoCont = Right(LL, 1) == "_";
     if (!Cont && !DoCont) {
       L = Trim(LL);
@@ -272,7 +275,8 @@ return;
   S = ReadEntireFile(RefList);
   Funcs = new Collection();;
   // TODO (not supported): On Error Resume Next
-  foreach(var L in Split(S, vbCrLf)) {
+  foreach(var iterL in Split(S, vbCrLf)) {
+L = iterL;
     Funcs.Add(L, SplitWord(L, 2, ":"));
   }
   InitLocalFuncs();
@@ -283,7 +287,8 @@ public static void InitLocalFuncs(string S_UNUSED= "") {
   dynamic L = null;
 
   LocalFuncs = new Collection();;
-  foreach(var L in Split(S, vbCrLf)) {
+  foreach(var iterL in Split(S, vbCrLf)) {
+L = iterL;
     LocalFuncs.Add(L, SplitWord(L, 2, ":"));
   }
 }

@@ -155,15 +155,15 @@ return;
   // TODO (not supported): On Error Resume Next
   N = 0;
   N = UBound(Vars) + 1;
-  List<> Vars_8293_tmp = new List<>();
-for (int redim_iter_4982=0;i<0;redim_iter_4982++) {Vars.Add(redim_iter_4982<Vars.Count ? Vars(redim_iter_4982) : null);}
-  dynamic _WithVar_2097;
-  _WithVar_2097 = Vars(N);
-    _WithVar_2097.Name = P();
-    _WithVar_2097.asType = asType;
-    _WithVar_2097.Param = isParam;
-    _WithVar_2097.RetVal = isReturn;
-    _WithVar_2097.asArray = asArray;
+  List<> Vars_4617_tmp = new List<>();
+for (int redim_iter_1306=0;i<0;redim_iter_1306++) {Vars.Add(redim_iter_1306<Vars.Count ? Vars(redim_iter_1306) : null);}
+  dynamic _WithVar_4682;
+  _WithVar_4682 = Vars(N);
+    _WithVar_4682.Name = P();
+    _WithVar_4682.asType = asType;
+    _WithVar_4682.Param = isParam;
+    _WithVar_4682.RetVal = isReturn;
+    _WithVar_4682.asArray = asArray;
 }
 
 public static void SubParamAssign(string P) {
@@ -176,11 +176,11 @@ return;
 
   K = SubParamIndex(P());
   if (K >= 0) {
-    dynamic _WithVar_6906;
-    _WithVar_6906 = Vars(K);
-      _WithVar_6906.Assigned = true;
-      if (!_WithVar_6906.Used) {
-        _WithVar_6906.AssignedBeforeUsed = true;
+    dynamic _WithVar_2088;
+    _WithVar_2088 = Vars(K);
+      _WithVar_2088.Assigned = true;
+      if (!_WithVar_2088.Used) {
+        _WithVar_2088.AssignedBeforeUsed = true;
       }
   }
 }
@@ -212,7 +212,8 @@ return;
   }
 
   Sp = Split(S, ",");
-  foreach(var L in Sp) {
+  foreach(var iterL in Sp) {
+L = iterL;
     if (L != "") {
       SubParamUsed(L);
     }
@@ -337,8 +338,8 @@ public static void AddProperty(string S) {
     // TODO (not supported): On Error Resume Next
     X = UBound(Props) + 1;
     // TODO (not supported): On Error GoTo 0
-    List<> Props_7393_tmp = new List<>();
-for (int redim_iter_145=0;i<0;redim_iter_145++) {Props.Add(redim_iter_145<Props.Count ? Props(redim_iter_145) : null);}
+    List<> Props_7671_tmp = new List<>();
+for (int redim_iter_422=0;i<0;redim_iter_422++) {Props.Add(redim_iter_422<Props.Count ? Props(redim_iter_422) : null);}
   }
 
   Props(X).Name = pName;
@@ -389,10 +390,10 @@ public static string ReadOutProperties(bool asModule= false) {
     if (I == -1) {
 goto NoItems;
     }
-    dynamic _WithVar_1608;
-    _WithVar_1608 = Props(I);
-      if (_WithVar_1608.Name != "" && !(_WithVar_1608.Getter == "" && _WithVar_1608.Setter == "")) {
-        if (_WithVar_1608.asPublic) {
+    dynamic _WithVar_5223;
+    _WithVar_5223 = Props(I);
+      if (_WithVar_5223.Name != "" && !(_WithVar_5223.Getter == "" && _WithVar_5223.Setter == "")) {
+        if (_WithVar_5223.asPublic) {
           R = R + "public ";
         }
         if (asModule) {
@@ -400,27 +401,27 @@ goto NoItems;
         }
 //          If .Getter = "" Then R = R & "writeonly "
 //          If .Setter = "" Then R = R & "readonly "
-        if (_WithVar_1608.asFunc) {
-          R = R + " // TODO: Arguments not allowed on properties: " + _WithVar_1608.funcArgs + vbCrLf;
-          R = R + " //       " + _WithVar_1608.origProto + vbCrLf;
+        if (_WithVar_5223.asFunc) {
+          R = R + " // TODO: Arguments not allowed on properties: " + _WithVar_5223.funcArgs + vbCrLf;
+          R = R + " //       " + _WithVar_5223.origProto + vbCrLf;
         }
-        R = R + M + _WithVar_1608.asType + " " + _WithVar_1608.Name;
+        R = R + M + _WithVar_5223.asType + " " + _WithVar_5223.Name;
         R = R + " {";
 
-        if (_WithVar_1608.Getter != "") {
+        if (_WithVar_5223.Getter != "") {
           R = R + N + "  get {";
-          R = R + N + "    " + _WithVar_1608.asType + " " + _WithVar_1608.Name + ";";
-          T = _WithVar_1608.Getter;
-          T = Replace(T, "Exit(Property)", "return " + _WithVar_1608.Name + ";");
+          R = R + N + "    " + _WithVar_5223.asType + " " + _WithVar_5223.Name + ";";
+          T = _WithVar_5223.Getter;
+          T = Replace(T, "Exit(Property)", "return " + _WithVar_5223.Name + ";");
           R = R + N + "    " + T;
-          R = R + N + "  return " + _WithVar_1608.Name + ";";
+          R = R + N + "  return " + _WithVar_5223.Name + ";";
           R = R + N + "  }";
         }
-        if (_WithVar_1608.Setter != "") {
+        if (_WithVar_5223.Setter != "") {
           R = R + N + "  set {";
-          T = _WithVar_1608.Setter;
+          T = _WithVar_5223.Setter;
           T = ReplaceToken(T, "value", "valueOrig");
-          T = Replace(T, _WithVar_1608.origArgName, "value");
+          T = Replace(T, _WithVar_5223.origArgName, "value");
           T = Replace(T, "Exit Property", "return;");
           R = R + N + "    " + T;
           R = R + N + "  }";

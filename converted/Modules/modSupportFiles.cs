@@ -228,7 +228,8 @@ public static dynamic CreateProjectFile(string vbpFile) {
   S = S + N + "      <SubType>Code</SubType>";
   S = S + N + "    </Compile>";
 
-  foreach(var L in Split(VBPForms(vbpFile), vbCrLf)) {
+  foreach(var iterL in Split(VBPForms(vbpFile), vbCrLf)) {
+L = iterL;
     if (L == "") {
 goto SkipForm;
     }
@@ -246,7 +247,8 @@ SkipForm:;
 
   S = S + N + "    <Compile Include=\"VBExtension.cs\" />";
   S = S + N + "    <Compile Include=\"VBConstants.cs\" />";
-  foreach(var L in Split(VBPClasses(vbpFile) & vbCrLf & VBPModules(vbpFile), vbCrLf)) {
+  foreach(var iterL in Split(VBPClasses(vbpFile) & vbCrLf & VBPModules(vbpFile), vbCrLf)) {
+L = iterL;
     if (L == "") {
 goto SkipClass;
     }

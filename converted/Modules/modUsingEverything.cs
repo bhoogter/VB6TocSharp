@@ -157,13 +157,15 @@ public static string UsingEverything(string PackageName= "") {
     E = E + N + "using " + AssemblyName() + ".Forms;";
 
     Path = FilePath(vbpFile);
-    foreach(var L in Split(VBPModules(vbpFile), vbCrLf)) {
+    foreach(var iterL in Split(VBPModules(vbpFile), vbCrLf)) {
+L = iterL;
       if (L != "") {
         Name = ModuleName(ReadEntireFile(Path + L));
         E = E + N + "using static " + PackagePrefix + Name + ";";
       }
     }
-    foreach(var L in Split(VBPForms(vbpFile), vbCrLf)) {
+    foreach(var iterL in Split(VBPForms(vbpFile), vbCrLf)) {
+L = iterL;
       if (L != "") {
         Name = ModuleName(ReadEntireFile(Path + L));
         E = E + N + "using static " + AssemblyName() + ".Forms." + Name + ";";
