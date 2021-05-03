@@ -112,6 +112,7 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "    <Reference Include=""Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL"" />"
   S = S & N & "    <Reference Include=""System"" />"
   S = S & N & "    <Reference Include=""System.Data"" />"
+  S = S & N & "    <Reference Include=""System.Drawing"" />"
   S = S & N & "    <Reference Include=""System.Xml"" />"
   S = S & N & "    <Reference Include=""Microsoft.CSharp"" />"
   S = S & N & "    <Reference Include=""System.Core"" />"

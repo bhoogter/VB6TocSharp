@@ -1,7 +1,8 @@
+using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -10,15 +11,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
-using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6;
-using WinCDS.Forms;
-using static System.Drawing.Printing.PrinterSettings;
-using static System.Text.RegularExpressions.Regex;
 using static Microsoft.VisualBasic.Constants;
-using static Microsoft.VisualBasic.Conversion;
-using static modDataValidation;
-using static modStringFunctions;
 
 public static class VBExtension
 {
@@ -45,7 +38,7 @@ public static class VBExtension
 
     public static List<string> PrinterNames()
     {
-        StringCollection col = System.Drawing.Printing.PrinterSettings.InstalledPrinters;
+        System.Drawing.Printing.PrinterSettings.StringCollection col = System.Drawing.Printing.PrinterSettings.InstalledPrinters;
         string[] arr = new string[col.Count];
         col.CopyTo(arr, 0);
         return new List<string>(arr);
@@ -209,7 +202,6 @@ public static class VBExtension
     public static string VBReadFileLine(dynamic A, dynamic B) { return ""; }
     public static bool DoEvents(Window Frm = null)
     {
-        if (Frm == null) Frm = MainMenu1.instance;
         Frm.Dispatcher.Invoke(new Action(delegate () { }), DispatcherPriority.ContextIdle);
         return true;
     }
@@ -230,6 +222,9 @@ public static class VBExtension
         if (v != null) s += v.ToString();
         return s;
     }
+
+    private static String FormatQuantity(decimal d) { return d.ToString("0.##"); }
+    private static String CurrencyFormat(decimal d) { return d.ToString("0.00"); }
 
     public static bool HasEmptyText(this TextBox textBox) { return string.IsNullOrEmpty(textBox.Text); }
     public static decimal getValue(this TextBox textBox) { try { return Decimal.Parse(textBox.Text); } catch { return 0; } }
@@ -417,6 +412,8 @@ public static class VBExtension
         return SanitizeNls(s, vbLf);
     }
 
+    public static bool IsInStr(string src, string find) { return Strings.InStr(src, find) != 0; }
+
     public static string SanitizeNls(string s, string desired)
     {
         bool hCr = IsInStr(s, vbCr);
@@ -510,7 +507,7 @@ public static class VBExtension
     public static int AddItem(this ListBox c, string C, bool Selected) { int x = c.Items.Add(new ComboboxItem(C)); return SelectItem(c, x, Selected); }
     public static int AddItem(this ListBox c, string C, int D, bool Selected) { int x = c.Items.Add(new ComboboxItem(C, D)); return SelectItem(c, x, Selected); }
     public static void RemoveItem(this ListBox c, int Index) { c.Items.RemoveAt(Index); }
-    public static string List(this ListBox c, int Index) { return modNumbers.InRange(0, Index, c.Items.Count) ? c.Items[Index].ToString() : ""; }
+    public static string List(this ListBox c, int Index) { return (Index >= 0 && Index < c.Items.Count) ? c.Items[Index].ToString() : ""; }
 
     public static bool getSelected(this ListBox c, int I) { return c.SelectedItems.Contains(c.Items[I]); }
     public static void setSelected(this ListBox c, int I, bool V)
@@ -801,14 +798,14 @@ public static class VBExtension
     {
         List<FrameworkElement> lst = w.Controls(T);
         if (lst.Count == 0) return null;
-        return lst[modNumbers.FitRange(0, n, lst.Count - 1)];
+        return lst[n < 0 ? 0 : n >= lst.Count ? lst.Count - 1 : n];
     }
     public static FrameworkElement ControlOf(this Panel w, Type T, int n = 0)
     {
         List<FrameworkElement> lst = new List<FrameworkElement>();
         foreach (var l in w.getControls(true)) if (l.GetType() == T) lst.Add(l);
         if (lst.Count == 0) return null;
-        return lst[modNumbers.FitRange(0, n, lst.Count - 1)];
+        return lst[n < 0 ? 0 : n >= lst.Count ? lst.Count - 1 : n];
     }
 
 
