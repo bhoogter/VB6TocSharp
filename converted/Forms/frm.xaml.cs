@@ -117,14 +117,23 @@ private void cmdExit_Click() {
 
 private void cmdFile_Click(object sender, RoutedEventArgs e) { cmdFile_Click(); }
 private void cmdFile_Click() {
+  bool Success = false;
+
+  if (txtFile.Text == "") {
+    MsgBox("Enter a file in the box.", vbExclamation, "No File Entered");
+return;
+
+  }
   if (!ConfigValid) {
 return;
 
   }
   IsWorking();
-  ConvertFile(txtFile.Text);
+  Success = ConvertFile(txtFile.Text);
   IsWorking(true);
-  MsgBox("Converted " + txtFile.Text + ".");
+  if (Success) {
+    MsgBox("Converted " + txtFile.Text + ".");
+  }
 }
 
 private void cmdForms_Click(object sender, RoutedEventArgs e) { cmdForms_Click(); }
@@ -237,7 +246,9 @@ return;
 
 private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }
 private void Form_Load() {
+  modConfig.Hush = true;
   modConfig.LoadSettings();
+  modConfig.Hush = false;
   txtSrc.Text = vbpFile;
 }
 

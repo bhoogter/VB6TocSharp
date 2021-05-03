@@ -1,0 +1,8 @@
+C:\WinCDS.NET\cnv\converted\obj\Debug\prj.csprojAssemblyReference.cache
+C:\WinCDS.NET\cnv\converted\obj\Debug\Interop.ADODB.dll
+C:\WinCDS.NET\cnv\converted\obj\Debug\prj.csproj.ResolveComReference.cache
+C:\WinCDS.NET\cnv\converted\obj\Debug\Forms\frm.g.cs
+C:\WinCDS.NET\cnv\converted\obj\Debug\Forms\frmConfig.g.cs
+C:\WinCDS.NET\cnv\converted\obj\Debug\Application.g.cs
+C:\WinCDS.NET\cnv\converted\obj\Debug\VB2CS_MarkupCompile.cache
+C:\WinCDS.NET\cnv\converted\obj\Debug\VB2CS_MarkupCompile.lref

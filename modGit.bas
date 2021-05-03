@@ -14,7 +14,7 @@ Public Const CheckOut As String = "checkout "
 Private Function Gitfolder() As String
   Gitfolder = App.Path & "\"
 End Function
-Private Function GitCmd(ByVal C As String, Optional ByVal NoOutput As Boolean = False, Optional ByVal HideCommand = False) As String
+Private Function GitCmd(ByVal C As String, Optional ByVal NoOutput As Boolean = False, Optional ByVal HideCommand As Boolean = False) As String
   Dim ErrSt As String
   PushDir Gitfolder
   If Not HideCommand Then GitOut "$ " & C

@@ -116,7 +116,7 @@ public static int ScanRefs() {
 goto SkipMod;
     }
     ScanRefs = ScanRefs + ScanRefsFile(FilePath(vbpFile) + L);
-SkipMod:
+SkipMod:;
   }
 
   foreach(var L in Split(VBPForms(vbpFile), vbCrLf)) {
@@ -141,7 +141,7 @@ goto SkipForm;
 //'''''''''''''''''''''''''''''''''''''''''''''''''''''''''''
 
     ScanRefs = ScanRefs + 1;
-SkipForm:
+SkipForm:;
   }
   RefList(KillRef: true);
   WriteFile(RefList, OutRes);
@@ -179,11 +179,11 @@ private static int ScanRefsFile(string FN) {
     } else if (!Cont && DoCont) {
       L = Trim(Left(LL, Len(LL) - 2));
       Cont = true;
-goto ;
+goto NextLine;
     } else if (Cont && DoCont) {
       L = L + Trim(Left(LL, Len(LL) - 2));
       Cont = true;
-goto ;
+goto NextLine;
     }
 
     if (tLMatch(L, "Function ") || tLMatch(L, "Public Function ") || tLMatch(L, "Sub ") || tLMatch(L, "Public Sub ") || false) {
@@ -244,7 +244,7 @@ goto ;
       OutRes = OutRes + vbCrLf + F;
       ScanRefsFile = ScanRefsFile + 1;
     }
-NextLine:
+NextLine:;
   }
   return ScanRefsFile;
 }
@@ -265,7 +265,7 @@ private static void InitFuncs() {
   if (Dir(RefList) == "") {
     ScanRefs();
   }
-  if (!(Funcs Is Nothing)) {
+  if (!(Funcs == null)) {
 return;
 
   }
@@ -415,7 +415,7 @@ public static int FuncRefDeclArgCnt(string FName) {
 
     }
     FuncRefDeclArgCnt = FuncRefDeclArgCnt + 1;
-  } while(!(true);
+  } while(!(true));
   return FuncRefDeclArgCnt;
 }
 

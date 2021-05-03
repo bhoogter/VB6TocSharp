@@ -97,8 +97,8 @@ public static string INIRead(string sSection, string sKeyName, string sINIFileNa
   return INIRead;
 }
 
-public static String( INISections(string FileName) {
-  String( INISections = null;
+public static List<string> INISections(string FileName) {
+  List<string> INISections = null;
   // TODO (not supported): On Error Resume Next
   string strBuffer = "";
   int intLen = 0;
@@ -116,13 +116,13 @@ public static String( INISections(string FileName) {
 
   strBuffer = Left(strBuffer, intLen);
   INISections = Split(strBuffer, vbNullChar);
-  List<String(> INISections_5976_tmp = new List<String(>();
-for (int redim_iter_3693=0;i<0;redim_iter_3693++) {INISections.Add(redim_iter_3693<INISections.Count ? INISections(redim_iter_3693) : null);}
+  List<List<string>> INISections_5872_tmp = new List<List<string>>();
+for (int redim_iter_3589=0;i<0;redim_iter_3589++) {INISections.Add(redim_iter_3589<INISections.Count ? INISections(redim_iter_3589) : null);}
   return INISections;
 }
 
-public static String( INISectionKeys(string FileName, string Section) {
-  String( INISectionKeys = null;
+public static List<string> INISectionKeys(string FileName, string Section) {
+  List<string> INISectionKeys = null;
   // TODO (not supported): On Error Resume Next
   string strBuffer = "";
   int intLen = 0;
@@ -149,14 +149,14 @@ public static String( INISectionKeys(string FileName, string Section) {
 
   strBuffer = Left(strBuffer, intLen);
   RET = Split(strBuffer, vbNullChar);
-  List<string> RET_2743_tmp = new List<string>();
-for (int redim_iter_2168=0;i<0;redim_iter_2168++) {RET.Add(redim_iter_2168<RET.Count ? RET(redim_iter_2168) : "");}
+  List<string> RET_7001_tmp = new List<string>();
+for (int redim_iter_6426=0;i<0;redim_iter_6426++) {RET.Add(redim_iter_6426<RET.Count ? RET(redim_iter_6426) : "");}
   for(I=LBound(RET); I<UBound(RET); I++) {
     N = InStr(RET[I], "=");
     if (N > 0) {
       RET[I] = Left(RET[I], N - 1);
     } else {
-      Debug.Print("modINI.INISectionKeys - No '=' character found in line.  Section=" + Section + ", Line=" + RET[I] + ", file=" + FileName());
+      Console.WriteLine("modINI.INISectionKeys - No '=' character found in line.  Section=" + Section + ", Line=" + RET[I] + ", file=" + FileName());
     }
   }
   INISectionKeys = RET;

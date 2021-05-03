@@ -396,7 +396,7 @@ private static string DeSpace(string S) {
       return DeSpace;
 
     }
-  } while(!(true);
+  } while(!(true));
   return DeSpace;
 }
 
@@ -437,15 +437,15 @@ public static bool LintFileList(string List_UNUSED, bool AutoFix) {
   StartTime = DateTime.Now;;
 
   foreach(var L in Split(List, vbCrLf)) {
-    if (!LintFile(L, ref E)) {
+    if (!LintFile(L, ref ref(E))) {
       if (AutoFix) {
         LintFileIndent(DevelopmentFolder() + L);
         Debug.PrintNNL("x");
       } else {
-        Debug.Print(vbCrLf + "LINT FAILED: " + LintFileShort(L));
+        Console.WriteLine(vbCrLf + "LINT FAILED: " + LintFileShort(L));
         MsgBox(E);
-        Debug.Print(E);
-        Debug.Print("?LintFile(\"" + L + "\")");
+        Console.WriteLine(E);
+        Console.WriteLine("?LintFile(\"" + L + "\")");
         return LintFileList;
 
       }
@@ -455,11 +455,11 @@ public static bool LintFileList(string List_UNUSED, bool AutoFix) {
     X = X + 1;
     if (X >= lintDotsPerRow) {
       X = 0;
-      Console.WriteLn();
+      Console.WriteLine();
     }
     DoEvents();
   }
-  Debug.Print(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now;) + "secs).");
+  Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now;) + "secs).");
   LintFileList = true;
   return LintFileList;
 }
@@ -475,7 +475,7 @@ public static bool LintFile(string FileName, ref string ErrStr, bool AutoFix= fa
   LintFile = true;
 
 //  FileName = MakePathAbsolute(FileName, DevelopmentFolder)
-  if (!FileExists(FileName())) {
+  if (!FileExists(FileName[])) {
     LintFile = true;
     return LintFile;
 
@@ -499,7 +499,7 @@ public static bool LintFile(string FileName, ref string ErrStr, bool AutoFix= fa
 
   if (ErrStr != "") {
     if (aOutput) {
-      Debug.Print(ErrStr);
+      Console.WriteLine(ErrStr);
     }
     if (Alert) {
       MsgBox(ErrStr);
@@ -531,7 +531,7 @@ private static int LintModuleFirstLine(string FileName) {
 
     }
     LintModuleFirstLine = LintModuleFirstLine + 1;
-  } while(!(true);
+  } while(!(true));
   return LintModuleFirstLine;
 }
 
@@ -646,7 +646,7 @@ public static bool LintFileIndent(string FileName, ref string ErrStr, bool AutoF
   string LineFixes = "";
 
 
-  if (!FileExists(FileName())) {
+  if (!FileExists(FileName[])) {
     LintFileIndent = true;
     return LintFileIndent;
 
@@ -679,7 +679,7 @@ goto NotRealLine;
       if (Blanks == lintLint_MaxBlankLines + 1) {
         AddErrStr(ErrStr, FileName(), LNo, OL, "Too many sequential blank lines.", lintErrorTypes.ltWhtS);
       }
-goto ;
+goto SkipLine;
     }
     if (Continued) {
 goto SkipLine;
@@ -824,10 +824,10 @@ goto SkipLine; // Processer Directives
       }
     }
 
-SkipLine:
+SkipLine:;
     Continued = (Right(L, 2) == " _");
 
-NotRealLine:
+NotRealLine:;
     if (AutoFix) {
       AutoFixLine(FixFile, FL, LineFixes);
     }
@@ -847,7 +847,7 @@ NotRealLine:
   return LintFileIndent;
 
 
-FailedLint:
+FailedLint:;
   AddErrStr(ErrStr, FileName(), LNo, "", "Lint Error", lintErrorTypes.ltLErr);
   // TODO (not supported):   Resume Next
   return LintFileIndent;
@@ -1090,7 +1090,7 @@ goto IgnoreParam; // Not checking multi-line declarations for now..  Could inser
             AddErrStr(ErrStr, FileName(), LNo, OL, tE, lintErrorTypes.ltType);
           }
 
-IgnoreParam:
+IgnoreParam:;
         }
       }
     } else if (LMatch(tL, "Private Declare ") || LMatch(tL, "Public Declare ") || LMatch(tL, "Declare ")) {
@@ -1121,7 +1121,7 @@ IgnoreParam:
         }
       }
     }
-SkipLine:
+SkipLine:;
     Continued = (Right(L, 2) == " _");
 
     if (AutoFix) {
@@ -1248,7 +1248,7 @@ goto SkipLine;
       AddErrStr(ErrStr, FileName(), LNo, OL, "Self Reference [Me.*] is unnecessary.", lintErrorTypes.ltSelf); //@NO-LINT
     }
 
-SkipLine:
+SkipLine:;
     Continued = (Right(L, 2) == " _");
   }
 

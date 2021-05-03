@@ -67,6 +67,7 @@ End Function
 
 Public Function FileExt(ByVal FN As String, Optional ByVal vLCase As Boolean = True) As String
   If FN = "" Then Exit Function
+  If InStr(FN, ".") = 0 Then Exit Function
   FileExt = Mid(FN, InStrRev(FN, "."))
   FileExt = IIf(vLCase, LCase(FileExt), FileExt)
 End Function

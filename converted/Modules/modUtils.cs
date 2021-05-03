@@ -199,11 +199,11 @@ public static bool IsIDE() {
 
 // works on a very simple princicple... debug statements don't get compiled...
   // TODO (not supported):   On Error GoTo IDEInUse
-  Debug.Print(1/0); //division by zero error
+  Console.WriteLine(1/0); //division by zero error
   IsIDE = false;
   return IsIDE;
 
-IDEInUse:
+IDEInUse:;
   IsIDE = true;
   return IsIDE;
 }
@@ -227,7 +227,7 @@ public static bool WriteOut(string F, string S, string O= "") {
   if (!IsConverted(F, O)) {
     WriteOut = WriteFile(OutputFolder(O) + F, S, true);
   } else {
-    Debug.Print("Already converted: " + F);
+    Console.WriteLine("Already converted: " + F);
   }
   return WriteOut;
 }
@@ -241,6 +241,10 @@ public static bool IsConverted(string F, string O= "") {
 public static string FileExt(string FN, bool vLCase= true) {
   string FileExt = "";
   if (FN == "") {
+    return FileExt;
+
+  }
+  if (InStr(FN, ".") == 0) {
     return FileExt;
 
   }
@@ -362,7 +366,7 @@ public static int nextByPCt(string Src, string Del= "\"", int Ind_UNUSED= 1) {
     } else {
       M = 0;
     }
-  } while(!(true);
+  } while(!(true));
   nextByPCt = N - M;
   return nextByPCt;
 }
@@ -386,7 +390,7 @@ public static string nextByP(string Src, string Del= "\"", int Ind= 1) {
     N = N + 1;
     T = nextBy(Src, Del, N);
     R = R + IIf(Len(R) == 0, "", Del) + T;
-  } while(!(StrQCnt(R, "(") == StrQCnt(R, ")"));
+  } while(!(StrQCnt(R, "(") == StrQCnt(R, ")")));
   if (Ind <= 1) {
     nextByP = R;
   } else {
@@ -655,8 +659,8 @@ public static void ArrAdd(ref dynamic Arr(_UNUSED) {
 return;
 
   }
-  List<> Arr_15_tmp = new List<>();
-for (int redim_iter_3967=0;i<0;redim_iter_3967++) {Arr.Add(redim_iter_3967<Arr.Count ? Arr(redim_iter_3967) : null);}
+  List<> Arr_8186_tmp = new List<>();
+for (int redim_iter_2138=0;i<0;redim_iter_2138++) {Arr.Add(redim_iter_2138<Arr.Count ? Arr(redim_iter_2138) : null);}
   Arr(UBound(Arr)) = Item;
 }
 
@@ -708,7 +712,7 @@ public static int CodeSectionLoc(string S) {
       return CodeSectionLoc;
 
     }
-  } while(!(Mid(S, N, 10) == "Attribute ");
+  } while(!(Mid(S, N, 10) == "Attribute "));
 
   CodeSectionLoc = N;
   return CodeSectionLoc;
@@ -723,7 +727,7 @@ public static dynamic CodeSectionGlobalEndLoc(string S) {
       return CodeSectionGlobalEndLoc;
 
     }
-  } while(!(Mid(S, CodeSectionGlobalEndLoc - 8, 8) == "Declare ");
+  } while(!(Mid(S, CodeSectionGlobalEndLoc - 8, 8) == "Declare "));
   if (CodeSectionGlobalEndLoc >= 8) {
     if (Mid(S, CodeSectionGlobalEndLoc - 7, 7) == "Friend ") {
       CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc - 7;

@@ -99,7 +99,7 @@ goto NextItem;
       }
       VBPModules = VBPModules + IIf(VBPModules == "", "", vbCrLf) + T;
     }
-NextItem:
+NextItem:;
   }
   return VBPModules;
 }
@@ -151,7 +151,7 @@ break;
 }
       VBPForms = VBPForms + IIf(VBPForms == "", "", vbCrLf) + T;
     }
-NextItem:
+NextItem:;
   }
   return VBPForms;
 }
@@ -176,7 +176,7 @@ public static string VBPClasses(string ProjectFile= "", bool ClassNames= false) 
       }
       VBPClasses = VBPClasses + IIf(VBPClasses == "", "", vbCrLf) + T;
     }
-NextItem:
+NextItem:;
   }
   if (ClassNames) {
     VBPClasses = Replace(VBPClasses, ".cls", "");
@@ -204,7 +204,7 @@ public static string VBPUserControls(string ProjectFile= "") {
       }
       VBPUserControls = VBPUserControls + IIf(VBPUserControls == "", "", vbCrLf) + T;
     }
-NextItem:
+NextItem:;
   }
   return VBPUserControls;
 }

@@ -171,12 +171,12 @@ public static string DeString(string S) {
   A = InStr(S, Q);
   C = A;
   if (A > 0) {
-MidQuote:
+MidQuote:;
     B = InStr(C + 1, S, Q);
     if (B > 0) {
       if (Mid(S, B + 1, 1) == Q) {
         C = B + 1;
-goto ;
+goto MidQuote;
       }
       nStringCnt = nStringCnt + 1;
       Token = DeStringToken(nStringCnt);

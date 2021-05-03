@@ -114,7 +114,7 @@ goto NextItem;
 
     ConvertFile(Path + L);
 
-NextItem:
+NextItem:;
     Prg(N);
     DoEvents();
   }
@@ -141,9 +141,12 @@ public static bool ConvertFile(string someFile, bool UIOnly= false) {
       break;
     default:
       MsgBox("UNKNOWN VB TYPE: " + someFile);
+      return ConvertFile;
+
 break;
 }
   FormName = "";
+  ConvertFile = true;
   return ConvertFile;
 }
 
@@ -171,7 +174,7 @@ public static bool ConvertForm(string frmFile, bool UIOnly= false) {
   fName = ModuleName(S);
   F = fName + ".xaml.cs";
   if (IsConverted(F, frmFile)) {
-    Debug.Print("Form Already Converted: " + F);
+    Console.WriteLine("Form Already Converted: " + F);
     return ConvertForm;
 
   }
@@ -238,7 +241,7 @@ public static dynamic ConvertModule(string basFile) {
   fName = ModuleName(S);
   F = fName + ".cs";
   if (IsConverted(F, basFile)) {
-    Debug.Print("Module Already Converted: " + F);
+    Console.WriteLine("Module Already Converted: " + F);
     return ConvertModule;
 
   }
@@ -286,7 +289,7 @@ public static dynamic ConvertClass(string clsFile) {
   fName = ModuleName(S);
   F = fName + ".cs";
   if (IsConverted(F, clsFile)) {
-    Debug.Print("Class Already Converted: " + F);
+    Console.WriteLine("Class Already Converted: " + F);
     return ConvertClass;
 
   }
@@ -356,7 +359,7 @@ public static dynamic SanitizeCode(string Str) {
 
       C = Trim(Left(L, Len(L) - 1));
       Building = Building + GetMultiLineSpace(Building, C) + C;
-goto ;
+goto NextLine;
     }
     if (Building != "") {
       L = Building + GetMultiLineSpace(Building, Trim(L)) + Trim(L);
@@ -397,7 +400,7 @@ goto ;
           L = Trim(Mid(L, Len(F) + 2));
           R = R + SanitizeCode[L];
 
-        } while(!(false);
+        } while(!(false));
       }
     } else {
       R = R + N + ReComment(L, true);
@@ -406,7 +409,7 @@ goto ;
     if (FinishSplitIf) {
       R = R + N + "End If";
     }
-NextLine:
+NextLine:;
   }
 
   SanitizeCode = R;
@@ -443,7 +446,7 @@ public static string ConvertCodeSegment(string S, bool asModule= false) {
       N = N + 1;
       F = RegExNMatch(S, P(), N);
       T = RegExNPos(S, P(), N);
-    } while(!(!IsInCode(S, T) && F != "");
+    } while(!(!IsInCode(S, T) && F != ""));
     if (F == "") {
       break;
     }
@@ -461,7 +464,7 @@ public static string ConvertCodeSegment(string S, bool asModule= false) {
     do {
       N = N + 1;
       E = RegExNPos(Mid(S, T), K, N) + Len(K) + T;
-    } while(!(!IsInCode(S, E) && E != 0);
+    } while(!(!IsInCode(S, E) && E != 0));
 
     if (T > 1) {
       Pre = nlTrim(Left(S, T - 1));
@@ -476,7 +479,7 @@ public static string ConvertCodeSegment(string S, bool asModule= false) {
     S = nlTrim(Mid(S, E + 1));
 
     R = R + CommentBlock(Pre) + ConvertSub(Body, asModule) + vbCrLf;
-  } while(!(true);
+  } while(!(true));
 
   R = ReadOutProperties(asModule) + vbCrLf2 + R;
 
@@ -518,8 +521,8 @@ public static string ConvertDeclare(string S, int Ind, bool isGlobal= false, boo
 
   string ArraySpec = "";
   bool isArr = false;
-  string aMax = "";
-  string aMin = "";
+  int aMax = 0;
+  int aMin = 0;
   string aTodo = "";
 
   Res = "";
@@ -538,6 +541,7 @@ public static string ConvertDeclare(string S, int Ind, bool isGlobal= false, boo
     asPrivate = true;
   }
 
+//  If IsInStr(S, "aMin") Then Stop
   Sp = Split(S, ",");
   foreach(var L in Sp) {
     L = Trim(L);
@@ -563,11 +567,11 @@ public static string ConvertDeclare(string S, int Ind, bool isGlobal= false, boo
       } else {
         L = Trim(tMid(L, Len(ArraySpec) + 3));
         aMin = 0;
-        aMax = SplitWord(ArraySpec);
+        aMax = Val(SplitWord(ArraySpec));
         ArraySpec = Trim(tMid(ArraySpec, Len(aMax) + 1));
         if (tLeft(ArraySpec, 3) == "To ") {
           aMin = aMax;
-          aMax = tMid(ArraySpec, 4);
+          aMax = Val(tMid(ArraySpec, 4));
         }
       }
     }
@@ -607,7 +611,7 @@ public static string ConvertDeclare(string S, int Ind, bool isGlobal= false, boo
       }
     }
 
-    SubParamDecl(pName, pType, IIf(isArr, aMax, ""), false, false);
+    SubParamDecl(pName, pType, IIf(isArr, "" + aMax, ""), false, false);
   }
 
   ConvertDeclare = Res;
@@ -710,7 +714,7 @@ public static string ConvertAPIDef(string S) {
     aArgs = tMid(aArgs, Len(tArg) + 2);
     S = S + IIf(has, ", ", "") + ConvertParameter(tArg, true);
     has = true;
-  } while(!(true);
+  } while(!(true));
   S = S + ");";
 
 
@@ -807,7 +811,7 @@ public static string ConvertEvent(string S) {
     }
     tArgs = tArgs + IIf(N == 1, "", ", ");
     tArgs = tArgs + ConvertParameter(A, true);
-  } while(!(true);
+  } while(!(true));
 
   N = vbCrLf;
   M = "";
@@ -1064,7 +1068,7 @@ public static string ConvertPrototype(string S, out string returnVariable, bool 
     } else {
       retType = "Variant";
     }
-    if (Right(retType, 1) == ")") {
+    if (Right(retType, 1) == ")" && Right(retType, 2) != "()") {
       retType = Left(retType, Len(retType) - 1);
     }
     Res = Replace(Res, retToken, ConvertDataType(retType));
@@ -1082,7 +1086,7 @@ public static string ConvertPrototype(string S, out string returnVariable, bool 
 
     Res = Res + IIf(hArgs, ", ", "") + ConvertParameter(tArg);
     hArgs = true;
-  } while(!(Len(fArgs) == 0);
+  } while(!(Len(fArgs) == 0));
 
   Res = Res + ") {";
   if (retType != "") {
@@ -1122,6 +1126,7 @@ public static string ConvertElement(string S) {
 
   }
 
+//If IsInStr(S, "Debug.Print") Then Stop
   if (Left(Trim(S), 2) == "&H") {
     ConvertElement = "0x" + Mid(Trim(S), 3);
     return ConvertElement;
@@ -1202,7 +1207,7 @@ public static string ConvertElement(string S) {
   FirstToken = RegExNMatch(S, patTokenDot, 0);
   FirstWord = SplitWord(S, 1);
   if (FirstWord == "Not") {
-    S = "!" + Mid(S, 5);
+    S = "!" + ConvertValue(Mid(S, 5));
     FirstWord = SplitWord(Mid(S, 2));
   }
   if (S == FirstWord) {
@@ -1220,7 +1225,7 @@ goto ManageFunctions;
     ConvertElement = S;
   }
 
-ManageFunctions:
+ManageFunctions:;
 //If IsInStr(ConvertElement, "New_CDbTypeAhead") Then Stop
   if (RegExTest(ConvertElement, "(\\!)?[a-zA-Z0-9_.]+[ ]*\\(.*\\)$")) {
     if ((Left(ConvertElement, 1) == "!")) {
@@ -1230,7 +1235,7 @@ ManageFunctions:
     }
   }
 
-DoReplacements:
+DoReplacements:;
   if (IsInStr(ConvertElement, ":=")) {
     string Ts = "";
 
@@ -1249,7 +1254,7 @@ DoReplacements:
   ConvertElement = Replace(ConvertElement, " And ", " && ");
   ConvertElement = Replace(ConvertElement, " Mod ", " % ");
   ConvertElement = Replace(ConvertElement, "Err.", "Err().");
-  ConvertElement = Replace(ConvertElement, "Debug.Print", "Console.WriteLn");
+  ConvertElement = Replace(ConvertElement, "Debug.Print", "Console.WriteLine");
 
   ConvertElement = Replace(ConvertElement, "NullDate", "NullDate");
   while(IsInStr(ConvertElement, ", ,")) {
@@ -1406,7 +1411,7 @@ break;
 }
 
 
-    if (Left(F, 1) == "(" && Right(F, 1) == ")") {
+    if (Left(F, 1) == "("& Right(F, 1) == ")") {
       O = O + "(" + ConvertValue[Mid(F, 2, Len(F) - 2)] + ")" + OpN;
     } else {
       O = O + ConvertElement(F) + OpN;
@@ -1588,6 +1593,8 @@ break;
       ConvertCodeLine = ConvertElement(ConvertCodeLine);
     } else if (FirstWord == "RaiseEvent") {
       ConvertCodeLine = ConvertValue(S);
+    } else if (FirstWord == "Debug.Print") {
+      ConvertCodeLine = "Console.WriteLine(" + ConvertValue(Rest) + ")";
     } else if (StrQCnt(FirstWord, "(") == 0) {
       ConvertCodeLine = "";
       ConvertCodeLine = ConvertCodeLine + FirstWord + "(";
@@ -1599,7 +1606,7 @@ break;
           break;
         }
         ConvertCodeLine = ConvertCodeLine + IIf(N == 1, "", ", ") + ConvertValue(B);
-      } while(!(true);
+      } while(!(true));
       ConvertCodeLine = ConvertCodeLine + ")";
 //      ConvertCodeLine = ConvertElement(ConvertCodeLine)
     } else {

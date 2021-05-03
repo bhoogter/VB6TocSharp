@@ -196,6 +196,7 @@ public static class VBExtension
         return CDate(A);
     }
 
+    public static dynamic Item(this Collection C, dynamic key) { return C[key]; }
     public static bool IsList(object A) { return A != null && (A is System.Collections.IList); }
     public static int LBound(object A) { return A != null && (A is System.Collections.IList) ? (((System.Collections.IList)A).Count == 0 ? -1 : 0) : 0; }
     public static int UBound(object A) { return A != null && (A is System.Collections.IList) ? ((System.Collections.IList)A).Count - 1 : 0; }

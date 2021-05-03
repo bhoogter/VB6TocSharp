@@ -87,7 +87,7 @@ private void Form_Load() {
   txtVBPFile.Text = modConfig.vbpFile;
   txtOutput.Text = modConfig.OutputFolder;
   txtAssemblyName.Text = modConfig.AssemblyName;
-  modConfig.Hush = true;
+  modConfig.Hush = false;
 }
 
 private void cmdCancel_Click(object sender, RoutedEventArgs e) { cmdCancel_Click(); }

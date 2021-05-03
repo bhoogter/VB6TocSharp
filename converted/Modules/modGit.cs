@@ -90,7 +90,7 @@ private static string Gitfolder() {
   return Gitfolder;
 }
 
-private static string GitCmd(string C, bool NoOutput= false, dynamic HideCommand= false) {
+private static string GitCmd(string C, bool NoOutput= false, bool HideCommand= false) {
   string GitCmd = "";
   string ErrSt = "";
 
@@ -116,7 +116,7 @@ private static bool GitOut(string Msg) {
     Msg = Mid(Msg, 2);
   }
   if (Len(Msg) > 0) {
-    Debug.Print(Msg);
+    Console.WriteLine(Msg);
   }
   return GitOut;
 }
@@ -133,7 +133,7 @@ public static bool Git(string C) {
 
 public static dynamic GitConf(string vName= "", string vEMail= "", bool Clear= false) {
   dynamic GitConf = null;
-  if (!IsIDE) {
+  if (!IsIDE()) {
     return GitConf;
 
   }
@@ -144,8 +144,8 @@ public static dynamic GitConf(string vName= "", string vEMail= "", bool Clear= f
     GitCmd("git config --unset --global user.name", true);
     GitCmd("git config --unset --global user.email", true);
   } else if (vName == "" || vEMail == "") {
-    Debug.Print("user.name=" + Trim(Replace(Replace(GitCmd("git config --global user.name", true, true), vbCr, ""), vbLf, "")));
-    Debug.Print("user.email=" + Trim(Replace(Replace(GitCmd("git config --global user.email", true, true), vbCr, ""), vbLf, "")));
+    Console.WriteLine("user.name=" + Trim(Replace(Replace(GitCmd("git config --global user.name", true, true), vbCr, ""), vbLf, "")));
+    Console.WriteLine("user.email=" + Trim(Replace(Replace(GitCmd("git config --global user.email", true, true), vbCr, ""), vbLf, "")));
   } else {
 //    GitCmd "git config --unset --global user.name", True
 //    GitCmd "git config --unset --global user.email", True
@@ -157,7 +157,7 @@ public static dynamic GitConf(string vName= "", string vEMail= "", bool Clear= f
 
 public static bool GitPull(bool withReset= true) {
   bool GitPull = false;
-  if (!IsIDE) {
+  if (!IsIDE()) {
     return GitPull;
 
   }
@@ -179,7 +179,7 @@ public static bool GitPull(bool withReset= true) {
 
 public static dynamic GitStatus() {
   dynamic GitStatus = null;
-  if (!IsIDE) {
+  if (!IsIDE()) {
     return GitStatus;
 
   }
@@ -190,7 +190,7 @@ public static dynamic GitStatus() {
 
 public static bool GitReset(bool Hard= false, bool toMaster= false) {
   bool GitReset = false;
-  if (!IsIDE) {
+  if (!IsIDE()) {
     return GitReset;
 
   }
@@ -213,7 +213,7 @@ public static bool GitReset(bool Hard= false, bool toMaster= false) {
 
 public static bool GitPush(string Committer_UNUSED, string CommitMessage) {
   bool GitPush = false;
-  if (!IsIDE) {
+  if (!IsIDE()) {
     return GitPush;
 
   }
@@ -255,13 +255,13 @@ public static dynamic GitLog(int CharLimit= 3000) {
   dynamic GitLog = null;
   string Res = "";
 
-  if (!IsIDE) {
+  if (!IsIDE()) {
     return GitLog;
 
   }
   Res = GitCmd("git log", true);
   Res = Left(Res, CharLimit);
-  Debug.Print(Res);
+  Console.WriteLine(Res);
   return GitLog;
 }
 

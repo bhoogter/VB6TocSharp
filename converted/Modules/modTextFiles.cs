@@ -209,7 +209,7 @@ public static string ReadFile(string FileName, int Startline= 1, int NumLines= 0
   Static(CacheFileDate(As(String)));
   Static(CacheFileLoad() As String);
 
-  if (FileName() == "" || !FileExists(FileName())) {
+  if (FileName() == "" || !FileExists(FileName[])) {
 //    WasEOF = True
     return ReadFile;
 
@@ -412,7 +412,7 @@ public static bool VBFileCountLines(string FileName, out int Totl, out int Code,
   Cmnt = 0;
 
   // TODO (not supported): On Error Resume Next
-  if (!FileExists(FileName())) {
+  if (!FileExists(FileName[])) {
     return VBFileCountLines;
 
   }

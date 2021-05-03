@@ -163,7 +163,7 @@ public static string RunCmdToOutput(string cmd, out string ErrStr, bool AsAdmin=
   return RunCmdToOutput;
 
 
-RunError:
+RunError:;
   RunCmdToOutput = "";
   ErrStr = "ShellOut.RunCmdToOutput: Command Execution Error - [" + Err().Number + "] " + Err().Description;
   return RunCmdToOutput;
@@ -192,10 +192,10 @@ public static void ShellAndWait(ref dynamic AppToRun, enSW SW= enSW.enSW_NORMAL)
   rc = WaitForSingleObject(NameOfProc.hProcess, INFINITE);
   rc = CloseHandle(NameOfProc.hProcess);
 
-ErrorRoutineResume:
+ErrorRoutineResume:;
 return;
 
-ErrorRoutineErr:
+ErrorRoutineErr:;
   MsgBox("AppShell.Form1.ShellAndWait: " + Err + Error);
   // TODO (not supported):     Resume Next
 
@@ -235,15 +235,15 @@ public static string TempFile(string UseFolder= "", string UsePrefix= "tmp_", st
   return TempFile;
 
 
-TestWriteFailed:
+TestWriteFailed:;
   MsgBox("Failed to write temp file " + TempFile + "." + vbCrLf + Err().Description, vbCritical);
   return TempFile;
 
-TestReadFailed:
+TestReadFailed:;
   MsgBox("Failed to read temp file " + TempFile + "." + vbCrLf + Err().Description, vbCritical);
   return TempFile;
 
-TestClearFailed:
+TestClearFailed:;
   if (Err().Number == 53) {
     Err().Clear();
     // TODO (not supported):     Resume Next

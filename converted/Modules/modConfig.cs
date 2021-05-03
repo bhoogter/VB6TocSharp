@@ -146,8 +146,10 @@ public static string OutputFolder(string F= "") {
   }
   return OutputFolder;
 
-CantMakeOutputFolder:
-  MsgBox("Failed creating folder.  Perhaps create it yourself?" + vbCrLf + OutputFolder);
+CantMakeOutputFolder:;
+  if (!Hush) {
+    MsgBox("Failed creating folder.  Perhaps create it yourself?" + vbCrLf + OutputFolder);
+  }
   return OutputFolder;
 }
 

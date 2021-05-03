@@ -1,8 +1,8 @@
 Attribute VB_Name = "modVB6ToCS"
 Option Explicit
 
-Public Function ConvertDefaultDefault(ByVal dType As String) As String
-  Select Case dType
+Public Function ConvertDefaultDefault(ByVal DType As String) As String
+  Select Case DType
     Case "Integer", "Long", "Double", "Currency", "Byte", "Single"
                       ConvertDefaultDefault = 0
     Case "Date":      ConvertDefaultDefault = "DateTime.MinValue"
@@ -17,7 +17,8 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "Object", "Any", "Variant", "Variant()":
                                   ConvertDataType = DefaultDataType
     Case "Form", "Control":       ConvertDataType = "Window"
-    Case "String", "String()":    ConvertDataType = "string"
+    Case "String":                ConvertDataType = "string"
+    Case "String()":              ConvertDataType = "List<string>"
     Case "Long":                  ConvertDataType = "int"
     Case "Integer":               ConvertDataType = "int"
     Case "Double", "Single":      ConvertDataType = "decimal"

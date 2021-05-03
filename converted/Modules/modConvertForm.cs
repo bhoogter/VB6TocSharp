@@ -86,7 +86,8 @@ public static string Frm2Xml(string F) {
 
   Sp = Split(F, vbCrLf);
 
-  foreach(var L in Sp) {
+  foreach(var iterL in Sp) {
+L = iterL;
     L = Trim(L);
     if (L == "") {
 goto NextLine;
@@ -101,7 +102,7 @@ goto NextLine;
     } else {
       R = R + sSpace(I * SpIndent) + "<prop name=\"" + SplitWord(L, 1, "=") + "\" value=\"" + SplitWord(L, 2, "=", true, true) + "\" />" + vbCrLf;
     }
-NextLine:
+NextLine:;
   }
   Frm2Xml = R;
   return Frm2Xml;
@@ -121,7 +122,8 @@ public static dynamic FormControls(string Src, string F, bool asLocal= true) {
 
   Sp = Split(F, vbCrLf);
 
-  foreach(var L in Sp) {
+  foreach(var iterL in Sp) {
+L = iterL;
     L = Trim(L);
     if (L == "") {
 goto NextLine;
@@ -140,7 +142,7 @@ goto NextLine;
 break;
 }
     }
-NextLine:
+NextLine:;
   }
   FormControls = R;
   return FormControls;
@@ -148,7 +150,7 @@ NextLine:
 
 public static string ConvertFormUi(string F, string CodeSection) {
   string ConvertFormUi = "";
-  List<dynamic> Stck = new List<dynamic> (new dynamic[101]);
+  List<dynamic> Stck = new List<dynamic> (new dynamic[1]);
 
   dynamic Sp = null;
   dynamic L = null;
@@ -204,7 +206,7 @@ goto NextLine;
           Props.Add(pV, pK);
           // TODO (not supported): On Error GoTo 0
         }
-      } while(!(true);
+      } while(!(true));
       K = K + J - 1;
       R = R + sSpace(I * SpIndent) + StartControl(L, Props, LMatch(M, "End"), CodeSection, Tag) + vbCrLf;
       I = I + 1;
@@ -217,7 +219,7 @@ goto NextLine;
         R = R + sSpace(I * SpIndent) + EndControl(Tag) + vbCrLf;
       }
     }
-NextLine:
+NextLine:;
   }
   ConvertFormUi = R;
   return ConvertFormUi;

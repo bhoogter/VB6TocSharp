@@ -75,9 +75,9 @@ static class modVB6ToCS {
 // Option Explicit
 
 
-public static string ConvertDefaultDefault(string dType) {
+public static string ConvertDefaultDefault(string DType) {
   string ConvertDefaultDefault = "";
-  switch(dType) {
+  switch(DType) {
     case "Integer":
       ConvertDefaultDefault = 0;
       break;
@@ -108,6 +108,9 @@ public static string ConvertDataType(string S) {
       break;
     case "String":
       ConvertDataType = "string";
+      break;
+    case "String()":
+      ConvertDataType = "List<string>";
       break;
     case "Long":
       ConvertDataType = "int";
@@ -193,7 +196,7 @@ public static string ConvertDataType(string S) {
         ConvertDataType = S;
       } else {
         ConvertDataType = S;
-        Debug.Print("Unknown Data Type: " + S);
+        Console.WriteLine("Unknown Data Type: " + S);
       }
 break;
 }
@@ -426,7 +429,7 @@ public static dynamic ControlData(string cType, out string Name, out bool Cont, 
 
       break;
     default:
-      Debug.Print("Unknown Control Type: " + cType);
+      Console.WriteLine("Unknown Control Type: " + cType);
       Name = "Label";
 break;
 }

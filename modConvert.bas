@@ -310,7 +310,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
   Dim asPrivate As Boolean
   Dim pName As String, pType As String, pWithEvents As Boolean
   Dim Res As String
-  Dim ArraySpec As String, isArr As Boolean, aMax As String, aMin As String, aTodo As String
+  Dim ArraySpec As String, isArr As Boolean, aMax As Long, aMin As Long, aTodo As String
   Res = ""
   
   SS = S
@@ -319,6 +319,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
   If tLeft(S, 4) = "Dim " Then S = Mid(Trim(S), 5): asPrivate = True
   If tLeft(S, 8) = "Private " Then S = tMid(S, 9): asPrivate = True
   
+'  If IsInStr(S, "aMin") Then Stop
   Sp = Split(S, ",")
   For Each L In Sp
     L = Trim(L)
@@ -337,11 +338,11 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
       Else
         L = Trim(tMid(L, Len(ArraySpec) + 3))
         aMin = 0
-        aMax = SplitWord(ArraySpec)
+        aMax = Val(SplitWord(ArraySpec))
         ArraySpec = Trim(tMid(ArraySpec, Len(aMax) + 1))
         If tLeft(ArraySpec, 3) = "To " Then
           aMin = aMax
-          aMax = tMid(ArraySpec, 4)
+          aMax = Val(tMid(ArraySpec, 4))
         End If
       End If
     End If
@@ -380,7 +381,7 @@ Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional By
       End If
     End If
     
-    SubParamDecl pName, pType, IIf(isArr, aMax, ""), False, False
+    SubParamDecl pName, pType, IIf(isArr, "" & aMax, ""), False, False
   Next
   
   ConvertDeclare = Res
@@ -680,7 +681,7 @@ Public Function ConvertPrototype(ByVal S As String, Optional ByRef returnVariabl
     Else
       retType = "Variant"
     End If
-    If Right(retType, 1) = ")" Then retType = Left(retType, Len(retType) - 1)
+    If Right(retType, 1) = ")" And Right(retType, 2) <> "()" Then retType = Left(retType, Len(retType) - 1)
     Res = Replace(Res, retToken, ConvertDataType(retType))
   End If
   
@@ -721,6 +722,7 @@ Public Function ConvertElement(ByVal S As String) As String
   S = Trim(S)
   If S = "" Then Exit Function
   
+'If IsInStr(S, "Debug.Print") Then Stop
   If Left(Trim(S), 2) = "&H" Then
     ConvertElement = "0x" & Mid(Trim(S), 3)
     Exit Function
@@ -787,7 +789,7 @@ Public Function ConvertElement(ByVal S As String) As String
   FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)
   If FirstWord = "Not" Then
-    S = "!" & Mid(S, 5)
+    S = "!" & ConvertValue(Mid(S, 5))
     FirstWord = SplitWord(Mid(S, 2))
   End If
   If S = FirstWord Then ConvertElement = S: GoTo ManageFunctions
@@ -827,7 +829,7 @@ DoReplacements:
   ConvertElement = Replace(ConvertElement, " And ", " && ")
   ConvertElement = Replace(ConvertElement, " Mod ", " % ")
   ConvertElement = Replace(ConvertElement, "Err.", "Err().")
-  ConvertElement = Replace(ConvertElement, "Debug.Print", "Console.WriteLn")
+  ConvertElement = Replace(ConvertElement, "Debug.Print", "Console.WriteLine")
   
   ConvertElement = Replace(ConvertElement, "NullDate", "NullDate")
   Do While IsInStr(ConvertElement, ", ,")
@@ -1078,6 +1080,8 @@ Public Function ConvertCodeLine(ByVal S As String) As String
       ConvertCodeLine = ConvertElement(ConvertCodeLine)
     ElseIf FirstWord = "RaiseEvent" Then
       ConvertCodeLine = ConvertValue(S)
+    ElseIf FirstWord = "Debug.Print" Then
+      ConvertCodeLine = "Console.WriteLine(" & ConvertValue(Rest) & ")"
     ElseIf StrQCnt(FirstWord, "(") = 0 Then
       ConvertCodeLine = ""
       ConvertCodeLine = ConvertCodeLine & FirstWord & "("
@@ -1157,6 +1161,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
   
 '  If IsInStr(Str, "Dim oFTP As New FTP") Then Stop
 '  If IsInStr(Str, "cHolding") Then Stop
+'If IsInStr(Str, "IsIDE") Then Stop
 
   
   Select Case ScanFirst
@@ -1191,6 +1196,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If ScanFirst = vbFalse Then Stop
 'If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
 'If IsInStr(L, "GetCustomerBalance") Then Stop
+'If IsInStr(L, "IsIDE") Then Stop
 
 
     Dim PP As String
@@ -1222,9 +1228,9 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
         O = O & "return;" & vbCrLf
       End If
     ElseIf tLMatch(L, "GoTo ") Then
-      O = O & "goto " & SplitWord(L, 2) & ";"
+      O = O & "goto " & SplitWord(Trim(L), 2) & ";"
     ElseIf RegExTest(Trim(L), "^[a-zA-Z_][a-zA-Z_0-9]*:$") Then ' Goto Label
-      O = O & L
+      O = O & L & ";" ' c# requires a trailing ; on goto labels without trailing statements.  Likely a C# bug/oversight, but it's there.
     ElseIf tLeft(L, 3) = "Dim" Then
       O = ConvertDeclare(L, Ind)
     ElseIf tLeft(L, 5) = "Const" Then
@@ -1301,7 +1307,9 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 9) = "For Each " Then
       L = tMid(L, 10)
-      O = O & sSpace(Ind) & "foreach(var " & SplitWord(L, 1, " In ") & " in " & SplitWord(L, 2, " In ") & ") {"
+      Dim iterVar As String
+      iterVar = SplitWord(L, 1, " In ")
+      O = O & sSpace(Ind) & "foreach(var iter" & iterVar & " in " & SplitWord(L, 2, " In ") & ") {" & vbCrLf & iterVar & " = iter" & iterVar & ";"
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 4) = "For " Then
       Dim forKey As String, forStr As String, forEnd As String
@@ -1314,10 +1322,10 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
       Ind = Ind + SpIndent
     ElseIf tLeft(L, 11) = "Loop While " Then
       Ind = Ind - SpIndent
-      O = O & sSpace(Ind) & "} while(!(" & ConvertValue(tMid(L, 12)) & ");"
+      O = O & sSpace(Ind) & "} while(!(" & ConvertValue(tMid(L, 12)) & "));"
     ElseIf tLeft(L, 11) = "Loop Until " Then
       Ind = Ind - SpIndent
-      O = O & sSpace(Ind) & "} while(!(" & ConvertValue(tMid(L, 12)) & ");"
+      O = O & sSpace(Ind) & "} while(!(" & ConvertValue(tMid(L, 12)) & "));"
     ElseIf tLeft(L, 5) = "Loop" Then
       Ind = Ind - SpIndent
       O = O & sSpace(Ind) & "}"
@@ -1356,6 +1364,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
     Else
 'If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
 'If IsInStr(L, "RaiseEvent") Then Stop
+'If IsInStr(L, "Debug.Print") Then Stop
       O = sSpace(Ind) & ConvertCodeLine(L)
     End If
     
