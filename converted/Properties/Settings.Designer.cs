@@ -8,7 +8,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WinCDS.Properties {
+namespace VB2CS.Properties {
 
 
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]

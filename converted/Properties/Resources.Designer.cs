@@ -9,7 +9,7 @@
 // </auto-generated>
 //------------------------------------------------------------------------------
 
-namespace WinCDS.Properties {
+namespace VB2CS.Properties {
     using System;
 
 

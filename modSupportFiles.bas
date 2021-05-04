@@ -49,7 +49,7 @@ Public Function ApplicationXAML() As String
   R = R & M & "<Application x:Class=""Application"" "
   R = R & N & "xmlns = ""http://schemas.microsoft.com/winfx/2006/xaml/presentation"" "
   R = R & N & "xmlns:x=""http://schemas.microsoft.com/winfx/2006/xaml"" "
-  R = R & N & "xmlns:local=""clr-namespace:WpfApp1"" "
+  R = R & N & "xmlns:local=""clr-namespace:" & AssemblyName & """ "
   R = R & N & "StartupUri=""MainWindow.xaml""> "
   R = R & N & "  <Application.Resources>"
   R = R & N & "  </Application.Resources>"
@@ -238,7 +238,7 @@ Public Function AppXamlCsFile() As String
   R = R & N & "using System.Threading.Tasks;"
   R = R & N & "using System.Windows;"
   R = R & N & ""
-  R = R & N & "namespace WpfApp2"
+  R = R & N & "namespace " & AssemblyName
   R = R & N & "{"
   R = R & N & "  /// <summary>"
   R = R & N & "  /// Interaction logic for App.xaml"
@@ -251,24 +251,6 @@ Public Function AppXamlCsFile() As String
 
   AppXamlCsFile = R
 End Function
-
-'Public Function AppXamlFile() As String
-'  Dim R As String, M As String, N As String
-'  R = "": M = "": N = vbCrLf
-'
-'  modConfig.AssemblyName
-'
-'
-'  R = R & M & "<Application x:Class=""WpfApp2.App"""
-'  R = R & N & "    xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"""
-'  R = R & N & "    xmlns:X=""http://schemas.microsoft.com/winfx/2006/xaml"""
-'  R = R & N & "    xmlns:local=""clr-namespace:""" & modConfig.AssemblyName & """"
-'  R = R & N & "    StartupUri=""MainWindow.xaml"">"
-'  R = R & N & "    <Application.Resources/>"
-'  R = R & N & "</Application>"
-'
-'  AppXamlFile = R
-'End Function
 
 Public Function SettingsSettingsFile() As String
   Dim R As String, M As String, N As String
@@ -299,7 +281,7 @@ Public Function SettingsDesignerCsFile() As String
   R = R & N & "// </auto-generated>"
   R = R & N & "//------------------------------------------------------------------------------"
   R = R & N & ""
-  R = R & N & "namespace WinCDS.Properties {"
+  R = R & N & "namespace " & AssemblyName & ".Properties {"
   R = R & N & ""
   R = R & N & ""
   R = R & N & "    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]"
@@ -332,12 +314,12 @@ Public Function AssemblyInfoFile()
   R = R & N & "// General Information about an assembly is controlled through the following"
   R = R & N & "// set of attributes. Change these attribute values to modify the information"
   R = R & N & "// associated with an assembly."
-  R = R & N & "[assembly: AssemblyTitle(""WpfApp2"")]"
+  R = R & N & "[assembly: AssemblyTitle(""" & AssemblyName & """)]"
   R = R & N & "[assembly: AssemblyDescription("""")]"
   R = R & N & "[assembly: AssemblyConfiguration("""")]"
   R = R & N & "[assembly: AssemblyCompany("""")]"
-  R = R & N & "[assembly: AssemblyProduct(""WpfApp2"")]"
-  R = R & N & "[assembly: AssemblyCopyright(""Copyright -¬  2018"")]"
+  R = R & N & "[assembly: AssemblyProduct(""" & AssemblyName & """)]"
+  R = R & N & "[assembly: AssemblyCopyright(""Copyright " & Year(Now) & """)]"
   R = R & N & "[assembly: AssemblyTrademark("""")]"
   R = R & N & "[assembly: AssemblyCulture("""")]"
   R = R & N & ""
@@ -522,7 +504,7 @@ Public Function ResourcesDesignerCsFile()
   R = R & N & "// </auto-generated>"
   R = R & N & "//------------------------------------------------------------------------------"
   R = R & N & ""
-  R = R & N & "namespace WinCDS.Properties {"
+  R = R & N & "namespace " & AssemblyName & ".Properties {"
   R = R & N & "    using System;"
   R = R & N & ""
   R = R & N & ""
