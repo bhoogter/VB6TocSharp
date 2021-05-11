@@ -1051,7 +1051,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     Exit Function
   End If
   
-  If RegExTest(Trim(S), "^[a-zA-Z0-9_.()]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.()]+ \= ") Then
+  If RegExTest(Trim(S), "^[a-zA-Z0-9_.()]+ \= ") Or RegExTest(Trim(S), "^Set [a-zA-Z0-9_.()]+ \= ") Then ' Assignment
     T = InStr(S, "=")
     A = Trim(Left(S, T - 1))
     If tLeft(A, 4) = "Set " Then A = Trim(Mid(A, 5))
@@ -1379,6 +1379,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 'If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
 'If IsInStr(L, "RaiseEvent") Then Stop
 'If IsInStr(L, "Debug.Print") Then Stop
+'If IsInStr(L, "HasGit") Then Stop
       O = sSpace(Ind) & ConvertCodeLine(L)
     End If
     

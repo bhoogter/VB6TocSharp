@@ -14,7 +14,7 @@ Public Const CheckOut As String = "checkout "
 Private Function Gitfolder() As String
   Gitfolder = App.Path & "\"
 End Function
-Private Function GitCmd(ByVal C As String, Optional ByVal NoOutput As Boolean = False, Optional ByVal HideCommand As Boolean = False) As String
+Public Function GitCmd(ByVal C As String, Optional ByVal NoOutput As Boolean = False, Optional ByVal HideCommand As Boolean = False) As String
   Dim ErrSt As String
   PushDir Gitfolder
   If Not HideCommand Then GitOut "$ " & C
@@ -68,10 +68,19 @@ Public Function GitPull(Optional ByVal withReset As Boolean = True) As Boolean
   GitPull = True
 End Function
 
-Public Function GitStatus()
+Public Function GitStatus() As String
   If Not IsIDE Then Exit Function
-  GitCmd "git status"
-  GitStatus = True
+  GitStatus = GitCmd("git status")
+End Function
+
+Public Function GitVersion() As String
+  If Not IsIDE Then Exit Function
+  GitVersion = GitCmd("git --version")
+End Function
+
+Public Function HasGit() As Boolean
+  If Not IsIDE Then Exit Function
+  HasGit = GitVersion <> ""
 End Function
 
 Public Function GitReset(Optional ByVal Hard As Boolean = False, Optional ByVal toMaster As Boolean = False) As Boolean

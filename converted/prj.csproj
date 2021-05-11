@@ -104,6 +104,7 @@
     <Compile Include="Modules\modGit.cs" />
     <Compile Include="Modules\modDirStack.cs" />
     <Compile Include="Modules\modShell.cs" />
+    <Compile Include="Modules\modTestCases.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

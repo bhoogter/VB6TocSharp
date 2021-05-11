@@ -28,7 +28,7 @@ static class modGit
         return Gitfolder;
     }
 
-    private static string GitCmd(string C, bool NoOutput = false, bool HideCommand = false)
+    public static string GitCmd(string C, bool NoOutput = false, bool HideCommand = false)
     {
         string GitCmd = "";
         string ErrSt = "";
@@ -135,17 +135,40 @@ static class modGit
         return GitPull;
     }
 
-    public static dynamic GitStatus()
+    public static string GitStatus()
     {
-        dynamic GitStatus = null;
+        string GitStatus = "";
         if (!IsIDE())
         {
             return GitStatus;
 
         }
-        GitCmd("git status");
-        GitStatus = true;
+        GitStatus = GitCmd("git status");
         return GitStatus;
+    }
+
+    public static string GitVersion()
+    {
+        string GitVersion = "";
+        if (!IsIDE())
+        {
+            return GitVersion;
+
+        }
+        GitVersion = GitCmd("git --version");
+        return GitVersion;
+    }
+
+    public static bool HasGit()
+    {
+        bool HasGit = false;
+        if (!IsIDE())
+        {
+            return HasGit;
+
+        }
+        HasGit = GitVersion() != "";
+        return HasGit;
     }
 
     public static bool GitReset(bool Hard = false, bool toMaster = false)

@@ -22,12 +22,14 @@ On Error Resume Next
 End Function
 
 Public Function ScanRefs() As Long
-  Dim L, T As String
+  Dim L, T As String, LL As String
 On Error Resume Next
   OutRes = ""
   ScanRefs = 0
   For Each L In Split(VBPModules(vbpFile), vbCrLf)
     If L = "" Then GoTo SkipMod
+    LL = Replace(L, ".bas", "")
+    OutRes = OutRes & vbCrLf & LL & ":" & LL & ":Module:"
     ScanRefs = ScanRefs + ScanRefsFile(FilePath(vbpFile) & L)
 SkipMod:
   Next
@@ -196,6 +198,12 @@ Public Function IsFormRef(ByVal FName As String) As Boolean
   Dim T As String
   T = SplitWord(FName, 1, ".")
   IsFormRef = FuncRef(T) <> "" And FuncRefEntity(T) = "Form"
+End Function
+
+Public Function IsModuleRef(ByVal FName As String) As Boolean
+  Dim T As String
+  T = SplitWord(FName, 1, ".")
+  IsModuleRef = FuncRef(T) <> "" And FuncRefEntity(T) = "Module"
 End Function
 
 Public Function IsControlRef(ByVal Src As String, Optional ByVal FormName As String) As Boolean

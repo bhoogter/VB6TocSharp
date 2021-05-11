@@ -32,6 +32,7 @@ Module=modLinter; modLinter.bas
 Module=modGit; modGit.bas
 Module=modDirStack; modDirStack.bas
 Module=modShell; modShell.bas
+Module=modTestCases; modTestCases.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""
