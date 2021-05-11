@@ -1,4 +1,6 @@
+using System;
 using static Microsoft.VisualBasic.Constants;
+using static Microsoft.VisualBasic.DateAndTime;
 using static Microsoft.VisualBasic.FileSystem;
 using static Microsoft.VisualBasic.Strings;
 using static modConfig;
@@ -79,7 +81,7 @@ static class modSupportFiles
         R = R + M + "<Application x:Class=\"Application\" ";
         R = R + N + "xmlns = \"http://schemas.microsoft.com/winfx/2006/xaml/presentation\" ";
         R = R + N + "xmlns:x=\"http://schemas.microsoft.com/winfx/2006/xaml\" ";
-        R = R + N + "xmlns:local=\"clr-namespace:WpfApp1\" ";
+        R = R + N + "xmlns:local=\"clr-namespace:" + AssemblyName() + "\" ";
         R = R + N + "StartupUri=\"MainWindow.xaml\"> ";
         R = R + N + "  <Application.Resources>";
         R = R + N + "  </Application.Resources>";
@@ -147,6 +149,7 @@ static class modSupportFiles
         S = S + N + "    <Reference Include=\"Microsoft.VisualBasic.PowerPacks.Vs, Version=10.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a, processorArchitecture=MSIL\" />";
         S = S + N + "    <Reference Include=\"System\" />";
         S = S + N + "    <Reference Include=\"System.Data\" />";
+        S = S + N + "    <Reference Include=\"System.Drawing\" />";
         S = S + N + "    <Reference Include=\"System.Xml\" />";
         S = S + N + "    <Reference Include=\"Microsoft.CSharp\" />";
         S = S + N + "    <Reference Include=\"System.Core\" />";
@@ -252,14 +255,14 @@ static class modSupportFiles
     public static string VBExtensionClass()
     {
         string VBExtensionClass = "";
-        VBExtensionClass = ReadEntireFile(App.Path + "\\\\VBExtension.cs");
+        VBExtensionClass = ReadEntireFile(AppDomain.CurrentDomain.BaseDirectory + "\\\\VBExtension.cs");
         return VBExtensionClass;
     }
 
     public static string VBAConstantsClass()
     {
         string VBAConstantsClass = "";
-        VBAConstantsClass = ReadEntireFile(App.Path + "\\\\VBConstants.cs");
+        VBAConstantsClass = ReadEntireFile(AppDomain.CurrentDomain.BaseDirectory + "\\\\VBConstants.cs");
         return VBAConstantsClass;
     }
 
@@ -304,7 +307,7 @@ static class modSupportFiles
         R = R + N + "using System.Threading.Tasks;";
         R = R + N + "using System.Windows;";
         R = R + N + "";
-        R = R + N + "namespace WpfApp2";
+        R = R + N + "namespace " + AssemblyName();
         R = R + N + "{";
         R = R + N + "  /// <summary>";
         R = R + N + "  /// Interaction logic for App.xaml";
@@ -319,25 +322,6 @@ static class modSupportFiles
         return AppXamlCsFile;
     }
 
-    /*
-    'Public Function AppXamlFile() As String
-    '  Dim R As String, M As String, N As String
-    '  R = "": M = "": N = vbCrLf
-
-    '  modConfig.AssemblyName
-
-
-    '  R = R & M & "<Application x:Class=""WpfApp2.App"""
-    '  R = R & N & "    xmlns=""http://schemas.microsoft.com/winfx/2006/xaml/presentation"""
-    '  R = R & N & "    xmlns:X=""http://schemas.microsoft.com/winfx/2006/xaml"""
-    '  R = R & N & "    xmlns:local=""clr-namespace:""" & modConfig.AssemblyName & """"
-    '  R = R & N & "    StartupUri=""MainWindow.xaml"">"
-    '  R = R & N & "    <Application.Resources/>"
-    '  R = R & N & "</Application>"
-
-    '  AppXamlFile = R
-    'End Function
-    */
     public static string SettingsSettingsFile()
     {
         string SettingsSettingsFile = "";
@@ -382,7 +366,7 @@ static class modSupportFiles
         R = R + N + "// </auto-generated>";
         R = R + N + "//------------------------------------------------------------------------------";
         R = R + N + "";
-        R = R + N + "namespace WinCDS.Properties {";
+        R = R + N + "namespace " + AssemblyName() + ".Properties {";
         R = R + N + "";
         R = R + N + "";
         R = R + N + "    [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]";
@@ -423,12 +407,12 @@ static class modSupportFiles
         R = R + N + "// General Information about an assembly is controlled through the following";
         R = R + N + "// set of attributes. Change these attribute values to modify the information";
         R = R + N + "// associated with an assembly.";
-        R = R + N + "[assembly: AssemblyTitle(\"WpfApp2\")]";
+        R = R + N + "[assembly: AssemblyTitle(\"" + AssemblyName() + "\")]";
         R = R + N + "[assembly: AssemblyDescription(\"\")]";
         R = R + N + "[assembly: AssemblyConfiguration(\"\")]";
         R = R + N + "[assembly: AssemblyCompany(\"\")]";
-        R = R + N + "[assembly: AssemblyProduct(\"WpfApp2\")]";
-        R = R + N + "[assembly: AssemblyCopyright(\"Copyright -¬  2018\")]";
+        R = R + N + "[assembly: AssemblyProduct(\"" + AssemblyName() + "\")]";
+        R = R + N + "[assembly: AssemblyCopyright(\"Copyright " + Year(DateTime.Now;) +"\")]";
         R = R + N + "[assembly: AssemblyTrademark(\"\")]";
         R = R + N + "[assembly: AssemblyCulture(\"\")]";
         R = R + N + "";
@@ -629,7 +613,7 @@ static class modSupportFiles
         R = R + N + "// </auto-generated>";
         R = R + N + "//------------------------------------------------------------------------------";
         R = R + N + "";
-        R = R + N + "namespace WinCDS.Properties {";
+        R = R + N + "namespace " + AssemblyName() + ".Properties {";
         R = R + N + "    using System;";
         R = R + N + "";
         R = R + N + "";

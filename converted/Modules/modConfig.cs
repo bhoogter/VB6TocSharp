@@ -1,3 +1,4 @@
+using System;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
 using static Microsoft.VisualBasic.Interaction;
@@ -55,7 +56,7 @@ static class modConfig
     public static string INIFile()
     {
         string INIFile = "";
-        INIFile = App.Path + "\\VB6toCS.INI";
+        INIFile = AppDomain.CurrentDomain.BaseDirectory + "\\VB6toCS.INI";
         return INIFile;
     }
 

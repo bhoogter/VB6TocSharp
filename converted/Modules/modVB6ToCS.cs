@@ -7,6 +7,7 @@ using static modProjectFiles;
 using static modRegEx;
 using static modSubTracking;
 using static modUtils;
+using static VBExtension;
 
 
 static class modVB6ToCS
@@ -390,6 +391,16 @@ static class modVB6ToCS
         string W = "";
         string R = "";
 
+
+        switch (Trim(S))
+        {
+            case "Array()":
+                S = "new List<dynamic>()";
+                break;
+            case "App.Path":
+                S = "AppDomain.CurrentDomain.BaseDirectory";
+                break;
+        }
 
         Complete = false;
         W = RegExNMatch(Trim(S), patToken);

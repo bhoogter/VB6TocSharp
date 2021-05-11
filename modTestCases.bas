@@ -59,7 +59,7 @@ Public Sub testBooleans()
   If Not modGit.HasGit() Then Debug.Print
 End Sub
 
-Public Function TestCallWithBooleanFunction(B As Boolean) As Boolean
+Public Function TestCallWithBooleanFunction(ByVal B As Boolean) As Boolean
   TestCallWithBooleanFunction = True
 End Function
 
@@ -67,6 +67,15 @@ End Function
 Public Function testFunctionWithPropertyInName() As String()
   testFunctionWithPropertyInName = Array()
 End Function
+
+Public Sub TestPrivateLocalFunctionCall()
+  PrivateLocalFunctionCall
+  Call PrivateLocalFunctionCall
+End Sub
+
+Private Sub PrivateLocalFunctionCall()
+  ' empty
+End Sub
 
 
 ' This will only be readable if the file converts with correct braces.

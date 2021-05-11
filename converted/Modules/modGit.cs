@@ -21,11 +21,11 @@ static class modGit
     public const string CheckOut = "checkout ";
 
 
-    private static string Gitfolder()
+    private static string GitFolder()
     {
-        string Gitfolder = "";
-        Gitfolder = App.Path + "\\";
-        return Gitfolder;
+        string GitFolder = "";
+        GitFolder = AppDomain.CurrentDomain.BaseDirectory + "\\";
+        return GitFolder;
     }
 
     public static string GitCmd(string C, bool NoOutput = false, bool HideCommand = false)
@@ -33,7 +33,7 @@ static class modGit
         string GitCmd = "";
         string ErrSt = "";
 
-        PushDir(Gitfolder);
+        PushDir(GitFolder());
         if (!HideCommand)
         {
             GitOut("$ " + C);

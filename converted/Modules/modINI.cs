@@ -60,8 +60,8 @@ static class modINI
 
         strBuffer = Left(strBuffer, intLen);
         INISections = Split(strBuffer, vbNullChar);
-        List<List<string>> INISections_2947_tmp = new List<List<string>>();
-        for (int redim_iter_664 = 0; i < 0; redim_iter_664++) { INISections.Add(redim_iter_664 < INISections.Count ? INISections(redim_iter_664) : null); }
+        List<List<string>> INISections_8732_tmp = new List<List<string>>();
+        for (int redim_iter_6448 = 0; i < 0; redim_iter_6448++) { INISections.Add(redim_iter_6448 < INISections.Count ? INISections(redim_iter_6448) : null); }
         return INISections;
     }
 
@@ -99,8 +99,8 @@ static class modINI
 
         strBuffer = Left(strBuffer, intLen);
         RET = Split(strBuffer, vbNullChar);
-        List<string> RET_8438_tmp = new List<string>();
-        for (int redim_iter_7864 = 0; i < 0; redim_iter_7864++) { RET.Add(redim_iter_7864 < RET.Count ? RET(redim_iter_7864) : ""); }
+        List<string> RET_1541_tmp = new List<string>();
+        for (int redim_iter_967 = 0; i < 0; redim_iter_967++) { RET.Add(redim_iter_967 < RET.Count ? RET(redim_iter_967) : ""); }
         for (I = LBound(RET); I < UBound(RET); I++)
         {
             N = InStr(RET[I], "=");

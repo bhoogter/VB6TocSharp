@@ -11,12 +11,12 @@ Public Const BR As String = "branch "
 Public Const Stash As String = "stash"
 Public Const CheckOut As String = "checkout "
 
-Private Function Gitfolder() As String
-  Gitfolder = App.Path & "\"
+Private Function GitFolder() As String
+  GitFolder = App.Path & "\"
 End Function
 Public Function GitCmd(ByVal C As String, Optional ByVal NoOutput As Boolean = False, Optional ByVal HideCommand As Boolean = False) As String
   Dim ErrSt As String
-  PushDir Gitfolder
+  PushDir GitFolder
   If Not HideCommand Then GitOut "$ " & C
   GitCmd = RunCmdToOutput(C, ErrSt)
   PopDir

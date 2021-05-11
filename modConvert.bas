@@ -7,6 +7,8 @@ Dim WithLevel As Long, MaxWithLevel As Long
 Dim WithVars As String, WithTypes As String, WithAssign As String
 Dim FormName As String
 
+Dim CurrentModule As String
+
 Dim CurrSub As String
 
 Public Function ConvertProject(ByVal vbpFile As String)
@@ -39,6 +41,7 @@ End Function
 
 Public Function ConvertFile(ByVal someFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean
   If Not IsInStr(someFile, "\") Then someFile = vbpPath & someFile
+  CurrentModule = ""
   Select Case LCase(FileExt(someFile))
     Case ".bas": ConvertFile = ConvertModule(someFile)
     Case ".cls": ConvertFile = ConvertClass(someFile)
@@ -52,7 +55,7 @@ End Function
 
 Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Boolean = False) As Boolean
   Dim S As String, J As Long, Preamble As String, Code As String, Globals As String, Functions As String
-  Dim X As String, fName As String
+  Dim X As String, FName As String
   Dim F As String
   If Not FileExists(frmFile) Then
     MsgBox "File not found in ConvertForm: " & frmFile
@@ -60,8 +63,9 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   End If
   
   S = ReadEntireFile(frmFile)
-  fName = ModuleName(S)
-  F = fName & ".xaml.cs"
+  FName = moduleName(S)
+  CurrentModule = FName
+  F = FName & ".xaml.cs"
   If IsConverted(F, frmFile) Then Debug.Print "Form Already Converted: " & F: Exit Function
   
   J = CodeSectionLoc(S)
@@ -69,26 +73,26 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   Code = Mid(S, J)
   
   X = ConvertFormUi(Preamble, Code)
-  F = fName & ".xaml"
+  F = FName & ".xaml"
   WriteOut F, X, frmFile
   If UIOnly Then Exit Function
   
   J = CodeSectionGlobalEndLoc(Code)
   Globals = ConvertGlobals(Left(Code, J))
-  InitLocalFuncs FormControls(fName, Preamble) & ScanRefsFileToString(frmFile)
+  InitLocalFuncs FormControls(FName, Preamble) & ScanRefsFileToString(frmFile)
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = ""
-  X = X & UsingEverything(fName) & vbCrLf
+  X = X & UsingEverything(FName) & vbCrLf
   X = X & vbCrLf
   X = X & "namespace " & AssemblyName & ".Forms" & vbCrLf
   X = X & "{" & vbCrLf
-  X = X & "public partial class " & fName & " : Window {" & vbCrLf
-  X = X & "  private static " & fName & " _instance;" & vbCrLf
-  X = X & "  public static " & fName & " instance { set { _instance = null; } get { return _instance ?? (_instance = new " & fName & "()); }}"
-  X = X & "  public static void Load() { if (_instance == null) { dynamic A = " + fName + ".instance; } }"
+  X = X & "public partial class " & FName & " : Window {" & vbCrLf
+  X = X & "  private static " & FName & " _instance;" & vbCrLf
+  X = X & "  public static " & FName & " instance { set { _instance = null; } get { return _instance ?? (_instance = new " & FName & "()); }}"
+  X = X & "  public static void Load() { if (_instance == null) { dynamic A = " + FName + ".instance; } }"
   X = X & "  public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }"
-  X = X & "  public " & fName & "() { InitializeComponent(); }" & vbCrLf
+  X = X & "  public " & FName & "() { InitializeComponent(); }" & vbCrLf
   X = X & vbCrLf
   X = X & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
@@ -97,24 +101,25 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   
   X = deWS(X)
   
-  F = fName & ".xaml.cs"
+  F = FName & ".xaml.cs"
   WriteOut F, X, frmFile
 End Function
 
 
 Public Function ConvertModule(ByVal basFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
-  Dim F As String, X As String, fName As String
+  Dim F As String, X As String, FName As String
   If Not FileExists(basFile) Then
     MsgBox "File not found in ConvertModule: " & basFile
     Exit Function
   End If
   S = ReadEntireFile(basFile)
-  fName = ModuleName(S)
-  F = fName & ".cs"
+  FName = moduleName(S)
+  CurrentModule = FName
+  F = FName & ".cs"
   If IsConverted(F, basFile) Then Debug.Print "Module Already Converted: " & F: Exit Function
   
-  fName = ModuleName(S)
+  FName = moduleName(S)
   Code = Mid(S, CodeSectionLoc(S))
   
   J = CodeSectionGlobalEndLoc(Code)
@@ -122,9 +127,9 @@ Public Function ConvertModule(ByVal basFile As String)
   Functions = ConvertCodeSegment(Mid(Code, J), True)
   
   X = ""
-  X = X & UsingEverything(fName) & vbCrLf
+  X = X & UsingEverything(FName) & vbCrLf
   X = X & vbCrLf
-  X = X & "static class " & fName & " {" & vbCrLf
+  X = X & "static class " & FName & " {" & vbCrLf
   X = X & nlTrim(Globals & vbCrLf & vbCrLf & Functions)
   X = X & vbCrLf & "}"
   
@@ -135,15 +140,16 @@ End Function
 
 Public Function ConvertClass(ByVal clsFile As String)
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
-  Dim F As String, X As String, fName As String
+  Dim F As String, X As String, FName As String
   Dim cName As String
   If Not FileExists(clsFile) Then
     MsgBox "File not found in ConvertModule: " & clsFile
     Exit Function
   End If
   S = ReadEntireFile(clsFile)
-  fName = ModuleName(S)
-  F = fName & ".cs"
+  FName = moduleName(S)
+  CurrentModule = FName
+  F = FName & ".cs"
   If IsConverted(F, clsFile) Then Debug.Print "Class Already Converted: " & F: Exit Function
 
   Code = Mid(S, CodeSectionLoc(S))
@@ -153,15 +159,15 @@ Public Function ConvertClass(ByVal clsFile As String)
   Functions = ConvertCodeSegment(Mid(Code, J))
   
   X = ""
-  X = X & UsingEverything(fName) & vbCrLf
+  X = X & UsingEverything(FName) & vbCrLf
   X = X & vbCrLf
-  X = X & "public class " & fName & " {" & vbCrLf
+  X = X & "public class " & FName & " {" & vbCrLf
   X = X & Globals & vbCrLf & vbCrLf & Functions
   X = X & vbCrLf & "}"
   
   X = deWS(X)
   
-  F = fName & ".cs"
+  F = FName & ".cs"
   WriteOut F, X, clsFile
 End Function
 
@@ -606,7 +612,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   Dim isByRef As Boolean, asOut As Boolean
   Dim Res As String
   Dim pName As String, pType As String, pDef As String
-  Dim TName As String
+  Dim tName As String
   
   S = Trim(S)
   If tLeft(S, 9) = "Optional " Then isOptional = True: S = Mid(S, 10)
@@ -634,13 +640,13 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
   If IsInStr(pName, "()") Then Res = Res & "[] ": pName = Replace(pName, "()", "")
-  TName = pName
+  tName = pName
   If Not NeverUnused Then
     If Not SubParam(pName).Used And Not (SubParam(pName).Param And SubParam(pName).Assigned) Then
-      TName = TName & "_UNUSED"
+      tName = tName & "_UNUSED"
     End If
   End If
-  Res = Res & TName
+  Res = Res & tName
   If isOptional And Not isByRef Then
     Res = Res & "= " & pDef
   End If
@@ -652,7 +658,7 @@ End Function
 Public Function ConvertPrototype(ByVal SS As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False, Optional ByRef asName As String) As String
   Const retToken = "#RET#"
   Dim Res As String
-  Dim fName As String, fArgs As String, retType As String, T As String
+  Dim FName As String, fArgs As String, retType As String, T As String
   Dim tArg As String
   Dim isSub As Boolean
   Dim hArgs As Boolean
@@ -670,10 +676,10 @@ Public Function ConvertPrototype(ByVal SS As String, Optional ByRef returnVariab
   If LMatch(S, "Sub ") Then Res = Res & "void ": S = Mid(S, 5): isSub = True
   If LMatch(S, "Function ") Then Res = Res & retToken & " ": S = Mid(S, 10)
   
-  fName = Trim(SplitWord(Trim(S), 1, "("))
-  asName = fName
+  FName = Trim(SplitWord(Trim(S), 1, "("))
+  asName = FName
   
-  S = Trim(tMid(S, Len(fName) + 2))
+  S = Trim(tMid(S, Len(FName) + 2))
   If Left(S, 1) = "(" Then S = Trim(tMid(S, 2))
   fArgs = Trim(nextBy(S, ")"))
   S = Mid(S, Len(fArgs) + 2)
@@ -696,7 +702,7 @@ Public Function ConvertPrototype(ByVal SS As String, Optional ByRef returnVariab
     Res = Replace(Res, retToken, ConvertDataType(retType))
   End If
   
-  Res = Res & fName
+  Res = Res & FName
   Res = Res & "("
   hArgs = False
   Do
@@ -712,7 +718,7 @@ Public Function ConvertPrototype(ByVal SS As String, Optional ByRef returnVariab
   
   Res = Res & ") {"
   If retType <> "" Then
-    returnVariable = fName
+    returnVariable = FName
     Res = Res & vbCrLf & sSpace(SpIndent) & ConvertDataType(retType) & " " & returnVariable & " = " & ConvertDefaultDefault(retType) & ";"
     SubParamDecl returnVariable, retType, False, False, True
   End If
@@ -764,6 +770,9 @@ Public Function ConvertElement(ByVal S As String) As String
 'If IsInStr(S, ":=") Then Stop
 'If IsInStr(S, "GetRecordNotFound") Then Stop
 'If IsInStr(S, "Nonretro_14day") Then Stop
+'If IsInStr(S, "Git") Then Stop
+'If IsInStr(S, "GitFolder") Then Stop
+'If IsInStr(S, "Array") Then Stop
 
   S = RegExReplace(S, patNotToken & patToken & "!" & patToken & patNotToken, "$1$2(""$3"")$4") ' RS!Field -> RS("Field")
   S = RegExReplace(S, "^" & patToken & "!" & patToken & patNotToken, "$1(""$2"")$3") ' RS!Field -> RS("Field")
@@ -778,9 +787,28 @@ Public Function ConvertElement(ByVal S As String) As String
     If IsFuncRef(Trim(S)) And S <> CurrSub Then
       ConvertElement = Trim(S) & "()"
       Exit Function
+    ElseIf IsPrivateFuncRef(CurrentModule, Trim(S)) And S <> CurrSub Then
+      ConvertElement = Trim(S) & "()"
+      Exit Function
     ElseIf IsEnumRef(Trim(S)) Then
       ConvertElement = EnumRefRepl(Trim(S))
       Exit Function
+    End If
+  End If
+
+  If RegExTest(Trim(S), "^" & patTokenDot & "$") And StrCnt(S, ".") = 1 Then
+'    If S = "SqFt" Then Stop
+    Dim First As String, Second As String
+    First = SplitWord(S, 1, ".")
+    Second = SplitWord(S, 2, ".")
+    If IsModuleRef(First) And IsFuncRef(Second) Then
+      If IsFuncRef(Trim(Second)) And S <> CurrSub Then
+        ConvertElement = Trim(S) & "()"
+        Exit Function
+      ElseIf IsEnumRef(Trim(S)) Then
+        ConvertElement = EnumRefRepl(Trim(S))
+        Exit Function
+      End If
     End If
   End If
 
@@ -868,19 +896,19 @@ DoReplacements:
 End Function
 
 Public Function ConvertFunctionCall(ByVal fCall As String) As String
-  Dim I As Long, N As Long, TB As String, Ts As String, TName As String
+  Dim I As Long, N As Long, TB As String, Ts As String, tName As String
   Dim TV As String
   Dim vP As Variable
 'Debug.Print "ConvertFunctionCall: " & fCall
 
   TB = ""
-  TName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*")
-  TB = TB & TName
+  tName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*")
+  TB = TB & tName
 
-  Ts = Mid(fCall, Len(TName) + 2)
+  Ts = Mid(fCall, Len(tName) + 2)
   Ts = Left(Ts, Len(Ts) - 1)
   
-  vP = SubParam(TName)
+  vP = SubParam(tName)
   If ConvertDataType(vP.asType) = "Recordset" Then
     TB = TB & ".Fields["
     TB = TB & ConvertValue(Ts)
@@ -896,11 +924,11 @@ Public Function ConvertFunctionCall(ByVal fCall As String) As String
     For I = 1 To N
       If I <> 1 Then TB = TB & ", "
       TV = nextByP(Ts, ",", I)
-      If IsFuncRef(TName) Then
+      If IsFuncRef(tName) Then
         If Trim(TV) = "" Then
-          TB = TB & ConvertElement(FuncRefArgDefault(TName, I))
+          TB = TB & ConvertElement(FuncRefArgDefault(tName, I))
         Else
-          If FuncRefArgByRef(TName, I) Then TB = TB & "ref "
+          If FuncRefArgByRef(tName, I) Then TB = TB & "ref "
           TB = TB & ConvertValue(TV)
         End If
       Else
@@ -1042,6 +1070,8 @@ Public Function ConvertCodeLine(ByVal S As String) As String
 'If IsInStr(S, "optTagIncoming") Then Stop
 'If IsInStr(S, "Kill modAshleyItemAlign") Then Stop
 'If IsInStr(S, "PRFolder") Then Stop
+'If IsInStr(S, "Array()") Then Stop
+'If IsInStr(S, "App.Path") Then Stop
 
   If Trim(S) = "" Then ConvertCodeLine = "": Exit Function
   Dim Complete As Boolean
@@ -1086,6 +1116,9 @@ Public Function ConvertCodeLine(ByVal S As String) As String
     ConvertCodeLine = ConvertCodeLine & B
   Else
 'Debug.Print S
+'If IsInStr(S, "Call ") Then Stop
+    If LMatch(LTrim(S), "Call ") Then S = Mid(LTrim(S), 6)
+
     FirstWord = SplitWord(Trim(S))
     Rest = SplitWord(Trim(S), 2, , , True)
     If Rest = "" Then

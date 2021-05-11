@@ -151,7 +151,7 @@ static class modUtils
     public static string DevelopmentFolder()
     {
         string DevelopmentFolder = "";
-        DevelopmentFolder = App.Path + "\\";
+        DevelopmentFolder = AppDomain.CurrentDomain.BaseDirectory + "\\";
         return DevelopmentFolder;
     }
 
@@ -711,8 +711,8 @@ static class modUtils
             return;
 
         }
-        List<dynamic> Arr_4291_tmp = new List<dynamic>();
-        for (int redim_iter_8243 = 0; i < 0; redim_iter_8243++) { Arr.Add(redim_iter_8243 < Arr.Count ? Arr(redim_iter_8243) : null); }
+        List<dynamic> Arr_7029_tmp = new List<dynamic>();
+        for (int redim_iter_981 = 0; i < 0; redim_iter_981++) { Arr.Add(redim_iter_981 < Arr.Count ? Arr(redim_iter_981) : null); }
         Arr[UBound(Arr)] = Item;
     }
 

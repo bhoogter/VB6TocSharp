@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic;
+using System;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
 using static Microsoft.VisualBasic.Strings;
@@ -9,6 +10,7 @@ using static modRegEx;
 using static modTextFiles;
 using static modUtils;
 using static modVB6ToCS;
+using static VBExtension;
 
 
 static class modRefScan
@@ -27,7 +29,7 @@ static class modRefScan
     {
         string RefList = "";
         // TODO (not supported): On Error Resume Next
-        RefList = App.Path + "\\refs.txt";
+        RefList = AppDomain.CurrentDomain.BaseDirectory + "\\refs.txt";
         if (KillRef)
         {
             File.Delete(RefList); ();
@@ -55,6 +57,7 @@ static class modRefScan
         int ScanRefs = 0;
         dynamic L = null;
         string T = "";
+        string LL = "";
 
         // TODO (not supported): On Error Resume Next
         OutRes = "";
@@ -66,6 +69,8 @@ static class modRefScan
             {
                 goto SkipMod;
             }
+            LL = Replace(L, ".bas", "");
+            OutRes = OutRes + vbCrLf + LL + ":" + LL + ":Module:";
             ScanRefs = ScanRefs + ScanRefsFile(FilePath(vbpFile) + L);
         SkipMod:;
         }
@@ -98,7 +103,7 @@ static class modRefScan
         SkipForm:;
         }
         RefList(KillRef: true);
-        WriteFile(RefList, OutRes);
+        WriteFile(RefList(), OutRes);
         OutRes = "";
         return ScanRefs;
     }
@@ -171,6 +176,26 @@ static class modRefScan
                 G = nextBy(G, "(");
 
                 F = M + ":" + G + ":Function:" + F;
+                OutRes = OutRes + vbCrLf + F;
+                ScanRefsFile = ScanRefsFile + 1;
+            }
+            else if (tLMatch(L, "Private Function ") || tLMatch(L, "Private Sub ") || false)
+            {
+                F = Trim(L);
+                F = Trim(nextBy(F, ":"));
+
+                G = F;
+                if (tLMatch(G, "Private Function "))
+                {
+                    G = Mid(G, 17);
+                }
+                if (tLMatch(G, "Private Sub "))
+                {
+                    G = Mid(G, 12);
+                }
+                G = nextBy(G, "(");
+
+                F = M + ":" + Trim(M) + "." + Trim(G) + ":Private Function:" + F;
                 OutRes = OutRes + vbCrLf + F;
                 ScanRefsFile = ScanRefsFile + 1;
             }
@@ -249,7 +274,7 @@ static class modRefScan
         string S = "";
         dynamic L = null;
 
-        if (Dir(RefList) == "")
+        if (Dir(RefList()) == "")
         {
             ScanRefs();
         }
@@ -258,7 +283,7 @@ static class modRefScan
             return;
 
         }
-        S = ReadEntireFile(RefList);
+        S = ReadEntireFile(RefList());
         Funcs = new Collection(); ;
         // TODO (not supported): On Error Resume Next
         foreach (var iterL in Split(S, vbCrLf))
@@ -282,10 +307,10 @@ static class modRefScan
         }
     }
 
-    public static string FuncRef(string FName)
+    public static string FuncRef(string fName)
     {
         string FuncRef = "";
-        if (FName == cFuncRef_Name)
+        if (fName == cFuncRef_Name)
         {
             FuncRef = cFuncRef_Value;
             return FuncRef;
@@ -294,60 +319,80 @@ static class modRefScan
 
         InitFuncs();
         // TODO (not supported): On Error Resume Next
-        FuncRef = Funcs(FName);
+        FuncRef = Funcs(fName);
         if (FuncRef == "")
         {
-            FuncRef = LocalFuncs(FName);
+            FuncRef = LocalFuncs(fName);
         }
 
-        cFuncRef_Name = FName;
+        cFuncRef_Name = fName;
         cFuncRef_Value = FuncRef;
         return FuncRef;
     }
 
-    public static string FuncRefModule(string FName)
+    public static string FuncRefModule(string fName)
     {
         string FuncRefModule = "";
-        FuncRefModule = nextBy(FuncRef(FName), ":");
+        FuncRefModule = nextBy(FuncRef(fName), ":");
         return FuncRefModule;
     }
 
-    public static string FuncRefEntity(string FName)
+    public static string FuncRefEntity(string fName)
     {
         string FuncRefEntity = "";
-        FuncRefEntity = nextBy(FuncRef(FName), ":", 3);
+        FuncRefEntity = nextBy(FuncRef(fName), ":", 3);
         return FuncRefEntity;
     }
 
-    public static string FuncRefDecl(string FName)
+    public static string FuncRefDecl(string fName)
     {
         string FuncRefDecl = "";
-        FuncRefDecl = nextBy(FuncRef(FName), ":", 4);
+        FuncRefDecl = nextBy(FuncRef(fName), ":", 4);
         return FuncRefDecl;
     }
 
-    public static bool IsFuncRef(string FName)
+    public static bool IsFuncRef(string fName)
     {
         bool IsFuncRef = false;
-        IsFuncRef = FuncRef(FName) != "" && FuncRefEntity(FName) == "Function";
+        IsFuncRef = FuncRef(fName) != "" && FuncRefEntity(fName) == "Function";
         return IsFuncRef;
     }
 
-    public static bool IsEnumRef(string FName)
+    public static bool IsPrivateFuncRef(string Module, string fName)
+    {
+        bool IsPrivateFuncRef = false;
+        string tName = "";
+
+        tName = Trim(Module) + "." + Trim(fName);
+        IsPrivateFuncRef = FuncRef(tName) != "" && FuncRefEntity(tName) == "Private Function";
+        return IsPrivateFuncRef;
+    }
+
+    public static bool IsEnumRef(string fName)
     {
         bool IsEnumRef = false;
-        IsEnumRef = FuncRef(FName) != "" && FuncRefEntity(FName) == "Enum";
+        IsEnumRef = FuncRef(fName) != "" & FuncRefEntity(fName) == "Enum";
         return IsEnumRef;
     }
 
-    public static bool IsFormRef(string FName)
+    public static bool IsFormRef(string fName)
     {
         bool IsFormRef = false;
         string T = "";
 
-        T = SplitWord(FName, 1, ".");
+        T = SplitWord(fName, 1, ".");
         IsFormRef = FuncRef(T) != "" && FuncRefEntity(T) == "Form";
         return IsFormRef;
+    }
+
+    public static bool IsModuleRef(string fName)
+    {
+        bool IsModuleRef = false;
+        string T = "";
+
+        T = SplitWord(fName, 1, ".");
+        IsModuleRef = FuncRef(T) != "" && FuncRefEntity(T) == "Module";
+        return IsModuleRef;
     }
 
     public static bool IsControlRef(string Src, string FormName = "")
@@ -364,24 +409,24 @@ static class modRefScan
         TTok = Tok + "." + Tok2;
         FTok = FormName + "." + Tok;
         //If IsInStr(Src, "SetFocus") Then Stop
-        if (FuncRef(TTok) != "" && FuncRefEntity(TTok) == "Control" || FuncRef(FTok) != "" && FuncRefEntity(FTok) == "Control")
+        if (FuncRef(TTok) != "" & FuncRefEntity(TTok) == "Control" || FuncRef(FTok) != "" && FuncRefEntity(FTok) == "Control")
         {
             IsControlRef = true;
         }
         return IsControlRef;
     }
 
-    public static string FuncRefDeclTyp(string FName)
+    public static string FuncRefDeclTyp(string fName)
     {
         string FuncRefDeclTyp = "";
-        FuncRefDeclTyp = SplitWord(FuncRefDecl(FName), 1);
+        FuncRefDeclTyp = SplitWord(FuncRefDecl(fName), 1);
         return FuncRefDeclTyp;
     }
 
-    public static string FuncRefDeclRet(string FName)
+    public static string FuncRefDeclRet(string fName)
     {
         string FuncRefDeclRet = "";
-        FuncRefDeclRet = FuncRefDecl(FName);
+        FuncRefDeclRet = FuncRefDecl(fName);
         FuncRefDeclRet = Trim(Mid(FuncRefDeclRet, InStrRev(FuncRefDeclRet, " ")));
         if (Right(FuncRefDeclRet, 1) == ")" && Right(FuncRefDeclRet, 2) != "()")
         {
@@ -390,34 +435,34 @@ static class modRefScan
         return FuncRefDeclRet;
     }
 
-    public static string FuncRefDeclArgs(string FName)
+    public static string FuncRefDeclArgs(string fName)
     {
         string FuncRefDeclArgs = "";
         // TODO (not supported): On Error Resume Next
-        FuncRefDeclArgs = FuncRefDecl(FName);
+        FuncRefDeclArgs = FuncRefDecl(fName);
         FuncRefDeclArgs = Mid(FuncRefDeclArgs, InStr(FuncRefDeclArgs, "(") + 1);
         FuncRefDeclArgs = Left(FuncRefDeclArgs, InStrRev(FuncRefDeclArgs, ")") - 1);
         FuncRefDeclArgs = Trim(FuncRefDeclArgs);
         return FuncRefDeclArgs;
     }
 
-    public static string FuncRefDeclArgN(string FName, int N)
+    public static string FuncRefDeclArgN(string fName, int N)
     {
         string FuncRefDeclArgN = "";
         string F = "";
 
-        F = FuncRefDeclArgs(FName);
+        F = FuncRefDeclArgs(fName);
         FuncRefDeclArgN = nextBy(F, ", ", N);
         return FuncRefDeclArgN;
     }
 
-    public static int FuncRefDeclArgCnt(string FName)
+    public static int FuncRefDeclArgCnt(string fName)
     {
         int FuncRefDeclArgCnt = 0;
         string F = "";
         string K = "";
 
-        F = FuncRefDeclArgs(FName);
+        F = FuncRefDeclArgs(fName);
         FuncRefDeclArgCnt = 0;
         do
         {
@@ -432,10 +477,10 @@ static class modRefScan
         return FuncRefDeclArgCnt;
     }
 
-    public static string FuncRefArgType(string FName, int N)
+    public static string FuncRefArgType(string fName, int N)
     {
         string FuncRefArgType = "";
-        FuncRefArgType = FuncRefDeclArgN(FName, N);
+        FuncRefArgType = FuncRefDeclArgN(fName, N);
         if (FuncRefArgType == "")
         {
             return FuncRefArgType;
@@ -445,34 +490,34 @@ static class modRefScan
         return FuncRefArgType;
     }
 
-    public static bool FuncRefArgByRef(string FName, int N)
+    public static bool FuncRefArgByRef(string fName, int N)
     {
         bool FuncRefArgByRef = false;
-        FuncRefArgByRef = !IsInStr(FuncRefDeclArgN(FName, N), "ByVal ");
+        FuncRefArgByRef = !IsInStr(FuncRefDeclArgN(fName, N), "ByVal ");
         return FuncRefArgByRef;
     }
 
-    public static bool FuncRefArgOptional(string FName, int N)
+    public static bool FuncRefArgOptional(string fName, int N)
     {
         bool FuncRefArgOptional = false;
-        FuncRefArgOptional = IsInStr(FuncRefDeclArgN(FName, N), "Optional ");
+        FuncRefArgOptional = IsInStr(FuncRefDeclArgN(fName, N), "Optional ");
         return FuncRefArgOptional;
     }
 
-    public static string FuncRefArgDefault(string FName, int N)
+    public static string FuncRefArgDefault(string fName, int N)
     {
         string FuncRefArgDefault = "";
         string aTyp = "";
 
-        if (!FuncRefArgOptional(FName, N))
+        if (!FuncRefArgOptional(fName, N))
         {
             return FuncRefArgDefault;
 
         }
-        FuncRefArgDefault = SplitWord(FuncRefDeclArgN(FName, N), 2, " = ", true, true);
+        FuncRefArgDefault = SplitWord(FuncRefDeclArgN(fName, N), 2, " = ", true, true);
         if (FuncRefArgDefault == "")
         {
-            FuncRefArgDefault = ConvertDefaultDefault(FuncRefArgType(FName, N));
+            FuncRefArgDefault = ConvertDefaultDefault(FuncRefArgType(fName, N));
         }
         return FuncRefArgDefault;
     }
@@ -484,15 +529,15 @@ static class modRefScan
         return EnumRefRepl;
     }
 
-    public static string FormRefRepl(string FName)
+    public static string FormRefRepl(string fName)
     {
         string FormRefRepl = "";
         string T = "";
         string U = "";
 
-        T = SplitWord(FName, 1, ".");
+        T = SplitWord(fName, 1, ".");
         U = FuncRefModule(T) + ".instance";
-        FormRefRepl = Replace(FName, T, U);
+        FormRefRepl = Replace(fName, T, U);
         return FormRefRepl;
     }
 

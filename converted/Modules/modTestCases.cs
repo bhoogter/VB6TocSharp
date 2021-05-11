@@ -40,26 +40,26 @@ static class modTestCases
         bool NB = false;
 
 
-        B = HasGit;
         B = HasGit();
-        B = modGit.HasGit;
+        B = HasGit();
+        B = modGit.HasGit();
         B = modGit.HasGit();
 
-        B = !HasGit;
         B = !HasGit();
-        B = !modGit.HasGit;
+        B = !HasGit();
+        B = !modGit.HasGit();
         B = !modGit.HasGit();
 
-        TestCallWithBooleanFunction(HasGit);
-        TestCallWithBooleanFunction(!HasGit);
-        TestCallWithBooleanFunction(modGit.HasGit);
-        TestCallWithBooleanFunction(!modGit.HasGit);
+        TestCallWithBooleanFunction(HasGit());
+        TestCallWithBooleanFunction(!HasGit());
+        TestCallWithBooleanFunction(modGit.HasGit());
+        TestCallWithBooleanFunction(!modGit.HasGit());
         TestCallWithBooleanFunction(HasGit());
         TestCallWithBooleanFunction(!HasGit());
         TestCallWithBooleanFunction(modGit.HasGit());
         TestCallWithBooleanFunction(!modGit.HasGit());
 
-        if (HasGit)
+        if (HasGit())
         {
             Console.WriteLine("");
         }
@@ -67,7 +67,7 @@ static class modTestCases
         {
             Console.WriteLine("");
         }
-        if (modGit.HasGit)
+        if (modGit.HasGit())
         {
             Console.WriteLine();
         }
@@ -76,7 +76,7 @@ static class modTestCases
             Console.WriteLine();
         }
 
-        if (!HasGit)
+        if (!HasGit())
         {
             Console.WriteLine("");
         }
@@ -84,7 +84,7 @@ static class modTestCases
         {
             Console.WriteLine("");
         }
-        if (!modGit.HasGit)
+        if (!modGit.HasGit())
         {
             Console.WriteLine();
         }
@@ -94,7 +94,7 @@ static class modTestCases
         }
     }
 
-    public static bool TestCallWithBooleanFunction(ref bool B_UNUSED)
+    public static bool TestCallWithBooleanFunction(bool B_UNUSED)
     {
         bool TestCallWithBooleanFunction = false;
         TestCallWithBooleanFunction = true;
@@ -107,8 +107,19 @@ static class modTestCases
     public static List<string> testFunctionWithPropertyInName()
     {
         List<string> testFunctionWithPropertyInName = null;
-        testFunctionWithPropertyInName = Array();
+        testFunctionWithPropertyInName = new(List<dynamic>());
         return testFunctionWithPropertyInName;
+    }
+
+    public static void TestPrivateLocalFunctionCall()
+    {
+        PrivateLocalFunctionCall();
+        PrivateLocalFunctionCall();
+    }
+
+    private static void PrivateLocalFunctionCall()
+    {
+        // empty
     }
 
     /*

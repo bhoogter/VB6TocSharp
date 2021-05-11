@@ -150,6 +150,11 @@ End Function
 Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As Boolean)
   Dim W As String, R As String
   
+  Select Case Trim(S)
+    Case "Array()":       S = "new List<dynamic>()"
+    Case "App.Path":      S = "AppDomain.CurrentDomain.BaseDirectory"
+  End Select
+  
   Complete = False
   W = RegExNMatch(Trim(S), patToken)
   R = SplitWord(Trim(S), 2, , , True)

@@ -29,6 +29,7 @@ static class modConvert
     private static string WithTypes = "";
     private static string WithAssign = "";
     private static string FormName = "";
+    private static string CurrentModule = "";
     private static string CurrSub = "";
 
 
@@ -84,6 +85,7 @@ static class modConvert
         {
             someFile = vbpPath + someFile;
         }
+        CurrentModule = "";
         switch (LCase(FileExt(someFile)))
         {
             case ".bas":
@@ -119,7 +121,7 @@ static class modConvert
         string Functions = "";
 
         string X = "";
-        string fName = "";
+        string FName = "";
 
         string F = "";
 
@@ -131,8 +133,9 @@ static class modConvert
         }
 
         S = ReadEntireFile(frmFile);
-        fName = ModuleName(S);
-        F = fName + ".xaml.cs";
+        FName = moduleName(S);
+        CurrentModule = FName;
+        F = FName + ".xaml.cs";
         if (IsConverted(F, frmFile))
         {
             Console.WriteLine("Form Already Converted: " + F);
@@ -145,7 +148,7 @@ static class modConvert
         Code = Mid(S, J);
 
         X = ConvertFormUi(Preamble, Code);
-        F = fName + ".xaml";
+        F = FName + ".xaml";
         WriteOut(F, X, frmFile);
         if (UIOnly)
         {
@@ -155,20 +158,20 @@ static class modConvert
 
         J = CodeSectionGlobalEndLoc(Code);
         Globals = ConvertGlobals(Left(Code, J));
-        InitLocalFuncs(FormControls(fName, Preamble) + ScanRefsFileToString(frmFile));
+        InitLocalFuncs(FormControls(FName, Preamble) + ScanRefsFileToString(frmFile));
         Functions = ConvertCodeSegment(Mid(Code, J));
 
         X = "";
-        X = X + UsingEverything(fName) + vbCrLf;
+        X = X + UsingEverything(FName) + vbCrLf;
         X = X + vbCrLf;
         X = X + "namespace " + AssemblyName() + ".Forms" + vbCrLf;
         X = X + "{" + vbCrLf;
-        X = X + "public partial class " + fName + " : Window {" + vbCrLf;
-        X = X + "  private static " + fName + " _instance;" + vbCrLf;
-        X = X + "  public static " + fName + " instance { set { _instance = null; } get { return _instance ?? (_instance = new " + fName + "()); }}";
-        X = X + "  public static void Load() { if (_instance == null) { dynamic A = " + fName + ".instance; } }";
+        X = X + "public partial class " + FName + " : Window {" + vbCrLf;
+        X = X + "  private static " + FName + " _instance;" + vbCrLf;
+        X = X + "  public static " + FName + " instance { set { _instance = null; } get { return _instance ?? (_instance = new " + FName + "()); }}";
+        X = X + "  public static void Load() { if (_instance == null) { dynamic A = " + FName + ".instance; } }";
         X = X + "  public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }";
-        X = X + "  public " + fName + "() { InitializeComponent(); }" + vbCrLf;
+        X = X + "  public " + FName + "() { InitializeComponent(); }" + vbCrLf;
         X = X + vbCrLf;
         X = X + vbCrLf;
         X = X + Globals + vbCrLf + vbCrLf + Functions;
@@ -177,7 +180,7 @@ static class modConvert
 
         X = deWS(X);
 
-        F = fName + ".xaml.cs";
+        F = FName + ".xaml.cs";
         WriteOut(F, X, frmFile);
         return ConvertForm;
     }
@@ -193,7 +196,7 @@ static class modConvert
 
         string F = "";
         string X = "";
-        string fName = "";
+        string FName = "";
 
         if (!FileExists(basFile))
         {
@@ -202,8 +205,9 @@ static class modConvert
 
         }
         S = ReadEntireFile(basFile);
-        fName = ModuleName(S);
-        F = fName + ".cs";
+        FName = moduleName(S);
+        CurrentModule = FName;
+        F = FName + ".cs";
         if (IsConverted(F, basFile))
         {
             Console.WriteLine("Module Already Converted: " + F);
@@ -211,7 +215,7 @@ static class modConvert
 
         }
 
-        fName = ModuleName(S);
+        FName = moduleName(S);
         Code = Mid(S, CodeSectionLoc(S));
 
         J = CodeSectionGlobalEndLoc(Code);
@@ -219,9 +223,9 @@ static class modConvert
         Functions = ConvertCodeSegment(Mid(Code, J), true);
 
         X = "";
-        X = X + UsingEverything(fName) + vbCrLf;
+        X = X + UsingEverything(FName) + vbCrLf;
         X = X + vbCrLf;
-        X = X + "static class " + fName + " {" + vbCrLf;
+        X = X + "static class " + FName + " {" + vbCrLf;
         X = X + nlTrim(Globals + vbCrLf + vbCrLf + Functions);
         X = X + vbCrLf + "}";
 
@@ -242,7 +246,7 @@ static class modConvert
 
         string F = "";
         string X = "";
-        string fName = "";
+        string FName = "";
 
         string cName = "";
 
@@ -253,8 +257,9 @@ static class modConvert
 
         }
         S = ReadEntireFile(clsFile);
-        fName = ModuleName(S);
-        F = fName + ".cs";
+        FName = moduleName(S);
+        CurrentModule = FName;
+        F = FName + ".cs";
         if (IsConverted(F, clsFile))
         {
             Console.WriteLine("Class Already Converted: " + F);
@@ -269,15 +274,15 @@ static class modConvert
         Functions = ConvertCodeSegment(Mid(Code, J));
 
         X = "";
-        X = X + UsingEverything(fName) + vbCrLf;
+        X = X + UsingEverything(FName) + vbCrLf;
         X = X + vbCrLf;
-        X = X + "public class " + fName + " {" + vbCrLf;
+        X = X + "public class " + FName + " {" + vbCrLf;
         X = X + Globals + vbCrLf + vbCrLf + Functions;
         X = X + vbCrLf + "}";
 
         X = deWS(X);
 
-        F = fName + ".cs";
+        F = FName + ".cs";
         WriteOut(F, X, clsFile);
         return ConvertClass;
     }
@@ -1041,7 +1046,7 @@ static class modConvert
         string pType = "";
         string pDef = "";
 
-        string TName = "";
+        string tName = "";
 
 
         S = Trim(S);
@@ -1098,15 +1103,15 @@ static class modConvert
             Res = Res + "[] ";
             pName = Replace(pName, "()", "");
         }
-        TName = pName;
+        tName = pName;
         if (!NeverUnused)
         {
             if (!SubParam(pName).Used && !(SubParam(pName).Param && SubParam(pName).Assigned))
             {
-                TName = TName + "_UNUSED";
+                tName = tName + "_UNUSED";
             }
         }
-        Res = Res + TName;
+        Res = Res + tName;
         if (isOptional && !isByRef)
         {
             Res = Res + "= " + pDef;
@@ -1123,7 +1128,7 @@ static class modConvert
         const dynamic retToken = "#RET#";
         string Res = "";
 
-        string fName = "";
+        string FName = "";
         string fArgs = "";
         string retType = "";
         string T = "";
@@ -1172,10 +1177,10 @@ static class modConvert
             S = Mid(S, 10);
         }
 
-        fName = Trim(SplitWord(Trim(S), 1, "("));
-        asName = fName;
+        FName = Trim(SplitWord(Trim(S), 1, "("));
+        asName = FName;
 
-        S = Trim(tMid(S, Len(fName) + 2));
+        S = Trim(tMid(S, Len(FName) + 2));
         if (Left(S, 1) == "(")
         {
             S = Trim(tMid(S, 2));
@@ -1213,7 +1218,7 @@ static class modConvert
             Res = Replace(Res, retToken, ConvertDataType(retType));
         }
 
-        Res = Res + fName;
+        Res = Res + FName;
         Res = Res + "(";
         hArgs = false;
         do
@@ -1238,7 +1243,7 @@ static class modConvert
         Res = Res + ") {";
         if (retType != "")
         {
-            returnVariable = fName;
+            returnVariable = FName;
             Res = Res + vbCrLf + sSpace(SpIndent) + ConvertDataType(retType) + " " + returnVariable + " = " + ConvertDefaultDefault(retType) + ";";
             SubParamDecl(returnVariable, retType, false, false, true);
         }
@@ -1320,6 +1325,9 @@ static class modConvert
         //If IsInStr(S, ":=") Then Stop
         //If IsInStr(S, "GetRecordNotFound") Then Stop
         //If IsInStr(S, "Nonretro_14day") Then Stop
+        //If IsInStr(S, "Git") Then Stop
+        //If IsInStr(S, "GitFolder") Then Stop
+        //If IsInStr(S, "Array") Then Stop
 
         S = RegExReplace(S, patNotToken + patToken + "!" + patToken + patNotToken, "$1$2(\"$3\")$4"); // RS!Field -> RS("Field")
         S = RegExReplace(S, "^" + patToken + "!" + patToken + patNotToken, "$1(\"$2\")$3"); // RS!Field -> RS("Field")
@@ -1343,11 +1351,42 @@ static class modConvert
                 return ConvertElement;
 
             }
+            else if (IsPrivateFuncRef(CurrentModule, Trim(S)) && S != CurrSub)
+            {
+                ConvertElement = Trim(S) + "()";
+                return ConvertElement;
+
+            }
             else if (IsEnumRef(Trim(S)))
             {
                 ConvertElement = EnumRefRepl(Trim(S));
                 return ConvertElement;
 
+            }
+        }
+
+        if (RegExTest(Trim(S), "^" + patTokenDot + "$") && StrCnt(S, ".") == 1)
+        {
+            //    If S = "SqFt" Then Stop
+            string First = "";
+            string Second = "";
+
+            First = SplitWord(S, 1, ".");
+            Second = SplitWord(S, 2, ".");
+            if (IsModuleRef(First) && IsFuncRef(Second))
+            {
+                if (IsFuncRef(Trim(Second)) && S != CurrSub)
+                {
+                    ConvertElement = Trim(S) + "()";
+                    return ConvertElement;
+
+                }
+                else if (IsEnumRef(Trim(S)))
+                {
+                    ConvertElement = EnumRefRepl(Trim(S));
+                    return ConvertElement;
+
+                }
             }
         }
 
@@ -1473,7 +1512,7 @@ static class modConvert
         int N = 0;
         string TB = "";
         string Ts = "";
-        string TName = "";
+        string tName = "";
 
         string TV = "";
 
@@ -1482,13 +1521,13 @@ static class modConvert
         //Debug.Print "ConvertFunctionCall: " & fCall
 
         TB = "";
-        TName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*");
-        TB = TB + TName;
+        tName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*");
+        TB = TB + tName;
 
-        Ts = Mid(fCall, Len(TName) + 2);
+        Ts = Mid(fCall, Len(tName) + 2);
         Ts = Left(Ts, Len(Ts) - 1);
 
-        vP = SubParam(TName);
+        vP = SubParam(tName);
         if (ConvertDataType(vP.asType) == "Recordset")
         {
             TB = TB + ".Fields[";
@@ -1513,15 +1552,15 @@ static class modConvert
                     TB = TB + ", ";
                 }
                 TV = nextByP(Ts, ",", I);
-                if (IsFuncRef(TName))
+                if (IsFuncRef(tName))
                 {
                     if (Trim(TV) == "")
                     {
-                        TB = TB + ConvertElement(FuncRefArgDefault(TName, I));
+                        TB = TB + ConvertElement(FuncRefArgDefault(tName, I));
                     }
                     else
                     {
-                        if (FuncRefArgByRef(TName, I))
+                        if (FuncRefArgByRef(tName, I))
                         {
                             TB = TB + "ref ";
                         }
@@ -1614,7 +1653,7 @@ static class modConvert
             }
 
 
-            if (Left(F, 1) == "(" & Right(F, 1) == ")")
+            if (Left(F, 1) == "(" && Right(F, 1) == ")")
             {
                 O = O + "(" + ConvertValue[Mid(F, 2, Len(F) - 2)] + ")" + OpN;
             }
@@ -1757,6 +1796,11 @@ static class modConvert
         //If IsInStr(S, "optTagIncoming") Then Stop
         //If IsInStr(S, "Kill modAshleyItemAlign") Then Stop
         //If IsInStr(S, "PRFolder") Then Stop
+        //If IsInStr(S, "Array()") Then Stop
+        if (IsInStr(S, "App.Path"))
+        {
+            Stop();
+        }
 
         if (Trim(S) == "")
         {
@@ -1775,7 +1819,7 @@ static class modConvert
         }
 
         if (RegExTest(Trim(S), "^[a-zA-Z0-9_.()]+ \\= ") || RegExTest(Trim(S), "^Set [a-zA-Z0-9_.()]+ \\= "))
-        {
+        { // Assignment
             T = InStr(S, "=");
             A = Trim(Left(S, T - 1));
             if (tLeft(A, 4) == "Set ")
@@ -1830,6 +1874,12 @@ static class modConvert
         else
         {
             //Debug.Print S
+            //If IsInStr(S, "Call ") Then Stop
+            if (LMatch(LTrim(S), "Call "))
+            {
+                S = Mid(LTrim(S), 6);
+            }
+
             FirstWord = SplitWord(Trim(S));
             Rest = SplitWord(Trim(S), 2, " ", true, true);
             if (Rest == "")

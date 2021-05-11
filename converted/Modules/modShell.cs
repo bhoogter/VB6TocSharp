@@ -168,7 +168,7 @@ static class modShell
         }
         if (UseFolder == "")
         {
-            UseFolder = App.Path + DIRSEP;
+            UseFolder = AppDomain.CurrentDomain.BaseDirectory + DIRSEP;
         }
         if (Right(UseFolder, 1) != DIRSEP)
         {
