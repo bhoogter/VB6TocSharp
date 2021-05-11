@@ -7,7 +7,7 @@ Private nStringCnt As Long
 
 Private Const DeStringToken_Base1 As String = "STRING_"
 Private Const DeStringToken_Base2 As String = "TOKEN_"
-Private Const DeStringToken_Base As String = DeStringToken_Base1 & DeStringToken_Base2
+Public Const DeStringToken_Base As String = DeStringToken_Base1 & DeStringToken_Base2
 
 
 Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean = False) As String

@@ -4,13 +4,13 @@ using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
 using static Microsoft.VisualBasic.Strings;
 using static modConfig;
+using static modControlProperties;
 using static modConvertForm;
 using static modProjectFiles;
 using static modRegEx;
 using static modTextFiles;
 using static modUtils;
 using static modVB6ToCS;
-using static VBExtension;
 
 
 static class modRefScan

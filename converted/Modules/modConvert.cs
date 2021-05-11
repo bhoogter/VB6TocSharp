@@ -22,7 +22,7 @@ using static VBExtension;
 static class modConvert
 {
     // Option Explicit
-    public const dynamic WithMark = "_WithVar_";
+    public const string WithMark = "_WithVar_";
     private static int WithLevel = 0;
     private static int MaxWithLevel = 0;
     private static string WithVars = "";
@@ -121,7 +121,7 @@ static class modConvert
         string Functions = "";
 
         string X = "";
-        string FName = "";
+        string fName = "";
 
         string F = "";
 
@@ -133,9 +133,9 @@ static class modConvert
         }
 
         S = ReadEntireFile(frmFile);
-        FName = moduleName(S);
-        CurrentModule = FName;
-        F = FName + ".xaml.cs";
+        fName = ModuleName(S);
+        CurrentModule = fName;
+        F = fName + ".xaml.cs";
         if (IsConverted(F, frmFile))
         {
             Console.WriteLine("Form Already Converted: " + F);
@@ -148,7 +148,7 @@ static class modConvert
         Code = Mid(S, J);
 
         X = ConvertFormUi(Preamble, Code);
-        F = FName + ".xaml";
+        F = fName + ".xaml";
         WriteOut(F, X, frmFile);
         if (UIOnly)
         {
@@ -158,20 +158,20 @@ static class modConvert
 
         J = CodeSectionGlobalEndLoc(Code);
         Globals = ConvertGlobals(Left(Code, J));
-        InitLocalFuncs(FormControls(FName, Preamble) + ScanRefsFileToString(frmFile));
+        InitLocalFuncs(FormControls(fName, Preamble) + ScanRefsFileToString(frmFile));
         Functions = ConvertCodeSegment(Mid(Code, J));
 
         X = "";
-        X = X + UsingEverything(FName) + vbCrLf;
+        X = X + UsingEverything(fName) + vbCrLf;
         X = X + vbCrLf;
         X = X + "namespace " + AssemblyName() + ".Forms" + vbCrLf;
         X = X + "{" + vbCrLf;
-        X = X + "public partial class " + FName + " : Window {" + vbCrLf;
-        X = X + "  private static " + FName + " _instance;" + vbCrLf;
-        X = X + "  public static " + FName + " instance { set { _instance = null; } get { return _instance ?? (_instance = new " + FName + "()); }}";
-        X = X + "  public static void Load() { if (_instance == null) { dynamic A = " + FName + ".instance; } }";
+        X = X + "public partial class " + fName + " : Window {" + vbCrLf;
+        X = X + "  private static " + fName + " _instance;" + vbCrLf;
+        X = X + "  public static " + fName + " instance { set { _instance = null; } get { return _instance ?? (_instance = new " + fName + "()); }}";
+        X = X + "  public static void Load() { if (_instance == null) { dynamic A = " + fName + ".instance; } }";
         X = X + "  public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }";
-        X = X + "  public " + FName + "() { InitializeComponent(); }" + vbCrLf;
+        X = X + "  public " + fName + "() { InitializeComponent(); }" + vbCrLf;
         X = X + vbCrLf;
         X = X + vbCrLf;
         X = X + Globals + vbCrLf + vbCrLf + Functions;
@@ -180,7 +180,7 @@ static class modConvert
 
         X = deWS(X);
 
-        F = FName + ".xaml.cs";
+        F = fName + ".xaml.cs";
         WriteOut(F, X, frmFile);
         return ConvertForm;
     }
@@ -196,7 +196,7 @@ static class modConvert
 
         string F = "";
         string X = "";
-        string FName = "";
+        string fName = "";
 
         if (!FileExists(basFile))
         {
@@ -205,9 +205,9 @@ static class modConvert
 
         }
         S = ReadEntireFile(basFile);
-        FName = moduleName(S);
-        CurrentModule = FName;
-        F = FName + ".cs";
+        fName = ModuleName(S);
+        CurrentModule = fName;
+        F = fName + ".cs";
         if (IsConverted(F, basFile))
         {
             Console.WriteLine("Module Already Converted: " + F);
@@ -215,7 +215,7 @@ static class modConvert
 
         }
 
-        FName = moduleName(S);
+        fName = ModuleName(S);
         Code = Mid(S, CodeSectionLoc(S));
 
         J = CodeSectionGlobalEndLoc(Code);
@@ -223,9 +223,9 @@ static class modConvert
         Functions = ConvertCodeSegment(Mid(Code, J), true);
 
         X = "";
-        X = X + UsingEverything(FName) + vbCrLf;
+        X = X + UsingEverything(fName) + vbCrLf;
         X = X + vbCrLf;
-        X = X + "static class " + FName + " {" + vbCrLf;
+        X = X + "static class " + fName + " {" + vbCrLf;
         X = X + nlTrim(Globals + vbCrLf + vbCrLf + Functions);
         X = X + vbCrLf + "}";
 
@@ -246,7 +246,7 @@ static class modConvert
 
         string F = "";
         string X = "";
-        string FName = "";
+        string fName = "";
 
         string cName = "";
 
@@ -257,9 +257,9 @@ static class modConvert
 
         }
         S = ReadEntireFile(clsFile);
-        FName = moduleName(S);
-        CurrentModule = FName;
-        F = FName + ".cs";
+        fName = ModuleName(S);
+        CurrentModule = fName;
+        F = fName + ".cs";
         if (IsConverted(F, clsFile))
         {
             Console.WriteLine("Class Already Converted: " + F);
@@ -274,15 +274,15 @@ static class modConvert
         Functions = ConvertCodeSegment(Mid(Code, J));
 
         X = "";
-        X = X + UsingEverything(FName) + vbCrLf;
+        X = X + UsingEverything(fName) + vbCrLf;
         X = X + vbCrLf;
-        X = X + "public class " + FName + " {" + vbCrLf;
+        X = X + "public class " + fName + " {" + vbCrLf;
         X = X + Globals + vbCrLf + vbCrLf + Functions;
         X = X + vbCrLf + "}";
 
         X = deWS(X);
 
-        F = FName + ".cs";
+        F = fName + ".cs";
         WriteOut(F, X, clsFile);
         return ConvertClass;
     }
@@ -306,8 +306,8 @@ static class modConvert
     public static dynamic SanitizeCode(string Str)
     {
         dynamic SanitizeCode = null;
-        const dynamic NamedParamSrc = ":=";
-        const dynamic NamedParamTok = "###NAMED-PARAMETER###";
+        const string NamedParamSrc = ":=";
+        const string NamedParamTok = "###NAMED-PARAMETER###";
         dynamic Sp = null;
         dynamic L = null;
 
@@ -450,11 +450,11 @@ static class modConvert
             {
                 K = "End Function";
             }
-            if (IsInStr(F, " Sub "))
+            else if (IsInStr(F, " Sub "))
             {
                 K = "End Sub";
             }
-            if (IsInStr(F, " Property "))
+            else if (IsInStr(F, " Property "))
             {
                 K = "End Property";
             }
@@ -780,8 +780,9 @@ static class modConvert
         string ConvertConstant = "";
         string cName = "";
         string cType = "";
-        string cVal = "";
+        string cValue = "";
         bool isPrivate = false;
+        string dataType = "";
 
         if (tLeft(S, 7) == "Public ")
         {
@@ -816,20 +817,40 @@ static class modConvert
         if (Left(S, 1) == "=")
         {
             S = Trim(Mid(S, 2));
-            cVal() = ConvertValue(S);
+            cValue = ConvertValue(S);
         }
         else
         {
-            cVal() = ConvertDefaultDefault(cType);
+            cValue = ConvertDefaultDefault(cType);
+        }
+
+        dataType = ConvertDataType(cType);
+        if (dataType == "dynamic")
+        { // c# can't handle constants of type 'dynamic' when type can be inferred.
+            if (LMatch(cValue, DeStringToken_Base))
+            {
+                dataType = "string";
+            }
+            else if (IsNumeric(cValue))
+            {
+                if (IsInStr(cValue, "."))
+                {
+                    dataType = "decimal";
+                }
+                else
+                {
+                    dataType = "int";
+                }
+            }
         }
 
         if (cType == "Date")
         {
-            ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") + "static readonly " + ConvertDataType(cType) + " " + cName + " = " + cVal() + ";";
+            ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") + "static readonly " + dataType + " " + cName + " = " + cValue + ";";
         }
         else
         {
-            ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") + "const " + ConvertDataType(cType) + " " + cName + " = " + cVal() + ";";
+            ConvertConstant = IIf(isGlobal, IIf(isPrivate, "private ", "public "), "") + "const " + dataType + " " + cName + " = " + cValue + ";";
         }
         return ConvertConstant;
     }
@@ -843,8 +864,9 @@ static class modConvert
         bool isPrivate = false;
 
         string R = "";
-        string N = "";
+        int N = 0;
         string M = "";
+        string O = "";
 
         int I = 0;
         int J = 0;
@@ -888,11 +910,11 @@ static class modConvert
             tArgs = tArgs + ConvertParameter(A, true);
         } while (!(true));
 
-        N = vbCrLf;
+        O = vbCrLf;
         M = "";
         R = "";
         R = R + M + "public delegate void " + cName + "Handler(" + tArgs + ");";
-        R = R + N + "public event " + cName + "Handler event" + cName + ";";
+        R = R + O + "public event " + cName + "Handler event" + cName + ";";
 
         ConvertEvent = R;
         return ConvertEvent;
@@ -1046,7 +1068,7 @@ static class modConvert
         string pType = "";
         string pDef = "";
 
-        string tName = "";
+        string TName = "";
 
 
         S = Trim(S);
@@ -1103,15 +1125,15 @@ static class modConvert
             Res = Res + "[] ";
             pName = Replace(pName, "()", "");
         }
-        tName = pName;
+        TName = pName;
         if (!NeverUnused)
         {
             if (!SubParam(pName).Used && !(SubParam(pName).Param && SubParam(pName).Assigned))
             {
-                tName = tName + "_UNUSED";
+                TName = TName + "_UNUSED";
             }
         }
-        Res = Res + tName;
+        Res = Res + TName;
         if (isOptional && !isByRef)
         {
             Res = Res + "= " + pDef;
@@ -1125,10 +1147,10 @@ static class modConvert
     public static string ConvertPrototype(string SS, out string returnVariable, bool asModule = false, out string asName)
     {
         string ConvertPrototype = "";
-        const dynamic retToken = "#RET#";
+        const string retToken = "#RET#";
         string Res = "";
 
-        string FName = "";
+        string fName = "";
         string fArgs = "";
         string retType = "";
         string T = "";
@@ -1177,10 +1199,10 @@ static class modConvert
             S = Mid(S, 10);
         }
 
-        FName = Trim(SplitWord(Trim(S), 1, "("));
-        asName = FName;
+        fName = Trim(SplitWord(Trim(S), 1, "("));
+        asName = fName;
 
-        S = Trim(tMid(S, Len(FName) + 2));
+        S = Trim(tMid(S, Len(fName) + 2));
         if (Left(S, 1) == "(")
         {
             S = Trim(tMid(S, 2));
@@ -1218,7 +1240,7 @@ static class modConvert
             Res = Replace(Res, retToken, ConvertDataType(retType));
         }
 
-        Res = Res + FName;
+        Res = Res + fName;
         Res = Res + "(";
         hArgs = false;
         do
@@ -1243,7 +1265,7 @@ static class modConvert
         Res = Res + ") {";
         if (retType != "")
         {
-            returnVariable = FName;
+            returnVariable = fName;
             Res = Res + vbCrLf + sSpace(SpIndent) + ConvertDataType(retType) + " " + returnVariable + " = " + ConvertDefaultDefault(retType) + ";";
             SubParamDecl(returnVariable, retType, false, false, true);
         }
@@ -1512,7 +1534,7 @@ static class modConvert
         int N = 0;
         string TB = "";
         string Ts = "";
-        string tName = "";
+        string TName = "";
 
         string TV = "";
 
@@ -1521,13 +1543,13 @@ static class modConvert
         //Debug.Print "ConvertFunctionCall: " & fCall
 
         TB = "";
-        tName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*");
-        TB = TB + tName;
+        TName = RegExNMatch(fCall, "^[a-zA-Z0-9_.]*");
+        TB = TB + TName;
 
-        Ts = Mid(fCall, Len(tName) + 2);
+        Ts = Mid(fCall, Len(TName) + 2);
         Ts = Left(Ts, Len(Ts) - 1);
 
-        vP = SubParam(tName);
+        vP = SubParam(TName);
         if (ConvertDataType(vP.asType) == "Recordset")
         {
             TB = TB + ".Fields[";
@@ -1552,15 +1574,15 @@ static class modConvert
                     TB = TB + ", ";
                 }
                 TV = nextByP(Ts, ",", I);
-                if (IsFuncRef(tName))
+                if (IsFuncRef(TName))
                 {
                     if (Trim(TV) == "")
                     {
-                        TB = TB + ConvertElement(FuncRefArgDefault(tName, I));
+                        TB = TB + ConvertElement(FuncRefArgDefault(TName, I));
                     }
                     else
                     {
-                        if (FuncRefArgByRef(tName, I))
+                        if (FuncRefArgByRef(TName, I))
                         {
                             TB = TB + "ref ";
                         }
@@ -1797,10 +1819,7 @@ static class modConvert
         //If IsInStr(S, "Kill modAshleyItemAlign") Then Stop
         //If IsInStr(S, "PRFolder") Then Stop
         //If IsInStr(S, "Array()") Then Stop
-        if (IsInStr(S, "App.Path"))
-        {
-            Stop();
-        }
+        //If IsInStr(S, "App.Path") Then Stop
 
         if (Trim(S) == "")
         {
@@ -2008,5 +2027,371 @@ static class modConvert
 
         PostConvertCodeLine = S;
         return PostConvertCodeLine;
+    }
+
+    public static dynamic ConvertSub(string Str, bool asModule = false, vbTriState ScanFirst = vbTriState.vbUseDefault)
+    {
+        dynamic ConvertSub = null;
+        string oStr = "";
+
+        string Res = "";
+
+        dynamic S = null;
+        dynamic L = null;
+        string O = "";
+        string T = "";
+        string U = "";
+        string V = "";
+
+        int CM = 0;
+        int cN = 0;
+
+        int K = 0;
+
+        int Ind = 0;
+
+        int inCase = 0;
+
+        string returnVariable = "";
+
+
+        //  If IsInStr(Str, "Dim oFTP As New FTP") Then Stop
+        //  If IsInStr(Str, "cHolding") Then Stop
+        //If IsInStr(Str, "IsIDE") Then Stop
+
+
+        switch (ScanFirst)
+        {
+            case vbTriState.vbUseDefault:
+                oStr = Str;
+                ConvertSub(oStr, asModule, vbTriState.vbTrue);
+                //                          If IsInStr(Str, "StoreStockToolTipText") Then Stop
+                ConvertSub = ConvertSub[oStr, asModule, vbFalse];
+                return ConvertSub;
+
+                break;
+            case vbTriState.vbTrue:
+                SubBegin();
+                break;
+            case vbTriState.vbFalse:
+                SubBegin(true);
+                break;
+        }
+
+
+        Res = "";
+        Str = Replace(Str, vbLf, "");
+        S = Split(Str, vbCr);
+        Ind = 0;
+
+        //If IsInStr(Str, " WinCDSDataPath(") Then Stop
+        //If IsInStr(Str, " RunShellExecute(") Then Stop
+        //If IsInStr(Str, " ValidateSI(") Then Stop
+        foreach (var iterL in S)
+        {
+            L = iterL;
+            //If IsInStr(L, "OrdVoid") Then Stop
+            //If IsInStr(L, "MsgBox") Then Stop
+            //If IsInStr(L, "And Not IsDoddsLtd Then") Then Stop
+            L = DeComment(L);
+            L = DeString(L);
+            O = "";
+
+            //If IsInStr(L, "1/1/2001") Then Stop
+            //If ScanFirst = vbFalse Then Stop
+            //If IsInStr(L, "Public Function GetFileAutonumber") Then Stop
+            //If IsInStr(L, "GetCustomerBalance") Then Stop
+            //If IsInStr(L, "IsIDE") Then Stop
+
+
+            string PP = "";
+            string PQ = "";
+
+            PP = "^(Public |Private |)(Friend |)(Function |Sub )" + patToken + "[ ]*\\(";
+            PQ = "^(Public |Private )(Property )(Get |Let |Set )" + patToken + "[ ]*\\(";
+            if (RegExNMatch(L, PP) != "")
+            {
+                int nK = 0;
+
+                //      CurrSub = nextBy(L, "(", 1)
+                //      If (LMatch(CurrSub, "Public ")) Then CurrSub = Mid(CurrSub, 8)
+                //      If (LMatch(CurrSub, "Private ")) Then CurrSub = Mid(CurrSub, 9)
+                //      If (LMatch(CurrSub, "Friend ")) Then CurrSub = Mid(CurrSub, 8)
+                //      If (LMatch(CurrSub, "Function ")) Then CurrSub = Mid(CurrSub, 10)
+                //      If (LMatch(CurrSub, "Sub ")) Then CurrSub = Mid(CurrSub, 5)
+                //If IsInStr(L, "Public Function IsIn") Then Stop
+                O = O + sSpace(Ind) + ConvertPrototype(L, ref returnVariable, asModule, ref CurrSub);
+                Ind = Ind + SpIndent;
+            }
+            else if (RegExNMatch(L, PQ) != "")
+            {
+                //      If IsInStr(L, "edi888_Admin888_Src") Then Stop
+                AddProperty(Str);
+                return ConvertSub;// repacked later...  not added here.
+
+            }
+            else if (tLMatch(L, "End Sub") || tLMatch(L, "End Function"))
+            {
+                if (returnVariable != "")
+                {
+                    O = O + sSpace(Ind) + "return " + returnVariable + ";" + vbCrLf;
+                }
+                Ind = Ind - SpIndent;
+                O = O + sSpace(Ind) + "}";
+            }
+            else if (tLMatch(L, "Exit Function") || tLMatch(L, "Exit Sub"))
+            {
+                if (returnVariable != "")
+                {
+                    O = O + sSpace(Ind) + "return " + returnVariable + ";" + vbCrLf;
+                }
+                else
+                {
+                    O = O + "return;" + vbCrLf;
+                }
+            }
+            else if (tLMatch(L, "GoTo "))
+            {
+                O = O + "goto " + SplitWord(Trim(L), 2) + ";";
+            }
+            else if (RegExTest(Trim(L), "^[a-zA-Z_][a-zA-Z_0-9]*:$"))
+            { // Goto Label
+                O = O + L + ";"; // c# requires a trailing ; on goto labels without trailing statements.  Likely a C# bug/oversight, but it's there.
+            }
+            else if (tLeft(L, 3) == "Dim")
+            {
+                O = ConvertDeclare(L, Ind);
+            }
+            else if (tLeft(L, 5) == "Const")
+            {
+                O = sSpace(Ind) + ConvertConstant(L, false);
+            }
+            else if (tLeft(L, 3) == "If ")
+            { // Code sanitization prevents all single-line ifs.
+              //If IsInStr(L, "optDelivered") Then Stop
+              //If IsInStr(L, "PRFolder") Then Stop
+                T = Mid(Trim(L), 4, Len(Trim(L)) - 8);
+                O = sSpace(Ind) + "if (" + ConvertValue(T) + ") {";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 7) == "ElseIf ")
+            {
+                T = tMid(L, 8);
+                if (Right(Trim(L), 5) == " Then")
+                {
+                    T = Left(T, Len(T) - 5);
+                }
+                O = sSpace(Ind - SpIndent) + "} else if (" + ConvertValue(T) + ") {";
+            }
+            else if (tLeft(L, 5) == "Else")
+            {
+                O = sSpace(Ind - SpIndent) + "} else {";
+            }
+            else if (tLeft(L, 6) == "End If")
+            {
+                Ind = Ind - SpIndent;
+                O = sSpace(Ind) + "}";
+            }
+            else if (tLeft(L, 12) == "Select Case ")
+            {
+                O = O + sSpace(Ind) + "switch(" + ConvertValue(tMid(L, 13)) + ") {";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 10) == "End Select")
+            {
+                if (inCase > 0)
+                {
+                    Ind = Ind - SpIndent;
+                    inCase = inCase - 1;
+                }
+                Ind = Ind - SpIndent;
+                O = O + "break;" + vbCrLf;
+                O = O + "}";
+            }
+            else if (tLeft(L, 9) == "Case Else")
+            {
+                if (inCase > 0)
+                {
+                    O = O + sSpace(Ind) + "break;" + vbCrLf;
+                    Ind = Ind - SpIndent;
+                    inCase = inCase - 1;
+                }
+                O = O + sSpace(Ind) + "default:";
+                inCase = inCase + 1;
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 5) == "Case ")
+            {
+                T = Mid(Res, InStrRev(Res, "switch("));
+                if (RegExTest(T, "case [^:]+:"))
+                {
+                    O = O + sSpace(Ind) + "break;" + vbCrLf;
+                    Ind = Ind - SpIndent;
+                    inCase = inCase - 1;
+                }
+                T = tMid(L, 6);
+                if (tLeft(T, 5) == "Like " || tLeft(T, 3) == "Is " || T == "* = *")
+                {
+                    O = O + "// TODO: Cannot convert case: " + T + vbCrLf;
+                    O = O + sSpace(Ind) + "case 0: ";
+                }
+                else if (nextBy(T, ",", 2) != "")
+                {
+                    O = O + sSpace(Ind);
+                    do
+                    {
+                        U = nextBy(T, ", ");
+                        if (U == "")
+                        {
+                            break;
+                        }
+                        T = Trim(Mid(T, Len(U) + 1));
+                        O = O + "case " + ConvertValue(U) + ": ";
+                    } while (!(true));
+                }
+                else if (T == "* To *")
+                {
+                    O = O + "// CONVERSION: Case was " + T + vbCrLf;
+                    O = O + sSpace(Ind);
+                    cN = Val(SplitWord(T, 1, " To "));
+                    CM = Val(SplitWord(T, 2, " To "));
+                    for (K = cN; K < CM; K++)
+                    {
+                        O = O + "case " + K + ": ";
+                    }
+                }
+                else
+                {
+                    dynamic TT = null;
+                    dynamic LL = null;
+
+                    //          O = O & sSpace(Ind) & "case " & ConvertValue(T) & ":"
+                    O = O + Space(Ind);
+                    foreach (var iterLL in Split(T, ","))
+                    {
+                        LL = iterLL;
+                        O = O + "case " + ConvertValue(T) + ": ";
+                    }
+                }
+                inCase = inCase + 1;
+                Ind = Ind + SpIndent;
+            }
+            else if (Trim(L) == "Do")
+            {
+                O = O + sSpace(Ind) + "do {";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 9) == "Do While ")
+            {
+                O = O + sSpace(Ind) + "while(" + ConvertValue(tMid(L, 10)) + ") {";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 9) == "Do Until ")
+            {
+                O = O + sSpace(Ind) + "while(!(" + ConvertValue(tMid(L, 10)) + ")) {";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 9) == "For Each ")
+            {
+                L = tMid(L, 10);
+                string iterVar = "";
+
+                iterVar = SplitWord(L, 1, " In ");
+                O = O + sSpace(Ind) + "foreach(var iter" + iterVar + " in " + SplitWord(L, 2, " In ") + ") {" + vbCrLf + iterVar + " = iter" + iterVar + ";";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 4) == "For ")
+            {
+                string forKey = "";
+                string forStr = "";
+                string forEnd = "";
+
+                L = tMid(L, 5);
+                forKey = SplitWord(L, 1, "=");
+                L = SplitWord(L, 2, "=");
+                forStr = SplitWord(L, 1, " To ");
+                forEnd = SplitWord(L, 2, " To ");
+                O = O + sSpace(Ind) + "for(" + ConvertElement(forKey) + "=" + ConvertElement(forStr) + "; " + ConvertElement(forKey) + "<" + ConvertElement(forEnd) + "; " + ConvertElement(forKey) + "++) {";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 11) == "Loop While ")
+            {
+                Ind = Ind - SpIndent;
+                O = O + sSpace(Ind) + "} while(!(" + ConvertValue(tMid(L, 12)) + "));";
+            }
+            else if (tLeft(L, 11) == "Loop Until ")
+            {
+                Ind = Ind - SpIndent;
+                O = O + sSpace(Ind) + "} while(!(" + ConvertValue(tMid(L, 12)) + "));";
+            }
+            else if (tLeft(L, 5) == "Loop")
+            {
+                Ind = Ind - SpIndent;
+                O = O + sSpace(Ind) + "}";
+            }
+            else if (tLeft(L, 8) == "Exit For" || tLeft(L, 7) == "Exit Do" || tLeft(L, 10) == "Exit While")
+            {
+                O = O + sSpace(Ind) + "break;";
+            }
+            else if (tLeft(L, 5) == "Next")
+            {
+                Ind = Ind - SpIndent;
+                O = sSpace(Ind) + "}";
+            }
+            else if (tLeft(L, 5) == "With ")
+            {
+                WithLevel = WithLevel + 1;
+
+                T = ConvertValue(tMid(L, 6));
+                U = ConvertDataType(SubParam(T).asType);
+                V = WithMark + IIf(SubParam(T).Name != "", T, Random());
+                if (U == "")
+                {
+                    U = DefaultDataType;
+                }
+
+                Stack(WithAssign, T);
+                Stack(WithTypes, U);
+                Stack(WithVars, V);
+
+                O = O + sSpace(Ind) + U + " " + V + ";" + vbCrLf;
+                MaxWithLevel = MaxWithLevel + 1;
+                O = O + sSpace(Ind) + V + " = " + T + ";";
+                Ind = Ind + SpIndent;
+            }
+            else if (tLeft(L, 8) == "End With")
+            {
+                WithLevel = WithLevel - 1;
+                T = Stack(ref WithAssign);
+                U = Stack(ref WithTypes);
+                V = Stack(ref WithVars);
+                if (SubParam(T).Name != "")
+                {
+                    O = O + sSpace(Ind) + T + " = " + V + ";";
+                }
+                Ind = Ind - SpIndent;
+            }
+            else if (IsInStr(L, "On Error ") || IsInStr(L, "Resume "))
+            {
+                O = sSpace(Ind) + "// TODO (not supported): " + L;
+            }
+            else
+            {
+                //If IsInStr(L, "ComputeAgeing dtpArrearControlDate") Then Stop
+                //If IsInStr(L, "RaiseEvent") Then Stop
+                //If IsInStr(L, "Debug.Print") Then Stop
+                //If IsInStr(L, "HasGit") Then Stop
+                O = sSpace(Ind) + ConvertCodeLine(L);
+            }
+
+            O = modConvert.PostConvertCodeLine(O);
+            O = modProjectSpecific.ProjectSpecificPostCodeLineConvert(O);
+
+            O = ReComment(O);
+            Res = Res + ReComment(O) + IIf(O == "", "", vbCrLf);
+        }
+
+        ConvertSub = Res;
+        return ConvertSub;
     }
 }

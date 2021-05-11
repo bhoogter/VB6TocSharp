@@ -1,7 +1,6 @@
 using static Microsoft.VisualBasic.Strings;
 using static modRegEx;
 using static modUtils;
-using static VBExtension;
 
 
 static class modProjectSpecific

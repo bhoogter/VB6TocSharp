@@ -14,7 +14,7 @@ static class modConvertUtils
     private static int nStringCnt = 0;
     private const string DeStringToken_Base1 = "STRING_";
     private const string DeStringToken_Base2 = "TOKEN_";
-    private const string DeStringToken_Base = DeStringToken_Base1 + DeStringToken_Base2;
+    public const string DeStringToken_Base = DeStringToken_Base1 + DeStringToken_Base2;
 
 
     public static string DeComment(string Str, bool Discard = false)

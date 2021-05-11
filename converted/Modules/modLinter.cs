@@ -73,7 +73,7 @@ static class modLinter
     }
 
 
-    private static bool CheckNoLint(string FileName, lintErrorTypes lType = lintErrorTypes.ltUnkn, string vLine = "")
+    private static bool CheckNoLint(string tFileName, lintErrorTypes lType = lintErrorTypes.ltUnkn, string vLine = "")
     {
         bool CheckNoLint = false;
         int I = 0;
@@ -82,7 +82,7 @@ static class modLinter
 
         string CA = "";
         string cP = "";
-        string cB = "";
+        string Cb = "";
 
         CheckNoLint = false;
         if (LintAbbr(lType) == "")
@@ -94,7 +94,7 @@ static class modLinter
 
         CA = lintTag_NoLint;
         cP = lintTag_NoLint + lintTag_Div;
-        cB = lintTag_NoLint + lintTag_Div + UCase(LintAbbr(lType));
+        Cb = lintTag_NoLint + lintTag_Div + UCase(LintAbbr(lType));
 
         if (IsInStr(vLine, Mid(CA, 2)) && !IsInStr(vLine, Mid(cP, 2)))
         {
@@ -102,17 +102,17 @@ static class modLinter
             return CheckNoLint;
 
         }
-        if (IsInStr(vLine, Mid(cB, 2)))
+        if (IsInStr(vLine, Mid(Cb, 2)))
         {
             CheckNoLint = true;
             return CheckNoLint;
 
         }
 
-        A = LintModuleFirstLine(FileName());
+        A = LintModuleFirstLine(tFileName);
         for (I = A; I < A + lintTag_ScanRange; I++)
         {
-            L = UCase(ReadFile(FileName(), I, 1));
+            L = UCase(ReadFile(tFileName, I, 1));
             if (lType == lintErrorTypes.ltUnkn)
             {
                 if (LMatch(L, CA) && !LMatch(L, cP))
@@ -124,7 +124,7 @@ static class modLinter
             }
             else
             {
-                if (LMatch(L, cB))
+                if (LMatch(L, Cb))
                 {
                     CheckNoLint = true;
                     return CheckNoLint;
@@ -235,15 +235,15 @@ static class modLinter
     private static string LintFileShort(string FFile)
     {
         string LintFileShort = "";
-        LintFileShort = AlignString(FileName(FFile), lintFileShort_Len);
+        LintFileShort = AlignString(tFileName(FFile), lintFileShort_Len);
         return LintFileShort;
     }
 
-    private static string AddErrStr(ref string ErrStr, string FileName, string LineNo, string vLine, string Msg, lintErrorTypes lType)
+    private static string AddErrStr(ref string ErrStr, string tFileName, int LineNo, string vLine, string Msg, lintErrorTypes lType)
     {
         string AddErrStr = "";
         Static(ErrCnt(As(Long)));
-        if (CheckNoLint(FileName(), lType, vLine))
+        if (CheckNoLint(tFileName, lType, vLine))
         {
             return AddErrStr;
 
@@ -267,7 +267,7 @@ static class modLinter
         {
             ErrStr = ErrStr + vbCrLf;
         }
-        ErrStr = ErrStr + LintFileShort(FileName()) + " (Line " + LineNo + "): " + LintAbbr(lType) + " - " + Msg;
+        ErrStr = ErrStr + LintFileShort(tFileName) + " (Line " + LineNo + "): " + LintAbbr(lType) + " - " + Msg;
         return AddErrStr;
     }
 
@@ -462,7 +462,7 @@ static class modLinter
         return LintFileList;
     }
 
-    public static bool LintFile(string FileName, ref string ErrStr, bool AutoFix = false)
+    public static bool LintFile(string tFileName, ref string ErrStr, bool AutoFix = false)
     {
         bool LintFile = false;
         bool Alert = false;
@@ -473,30 +473,30 @@ static class modLinter
         ErrStr = "";
         LintFile = true;
 
-        //  FileName = MakePathAbsolute(FileName, DevelopmentFolder)
-        if (!FileExists(FileName[]))
+        //  tFileName = MakePathAbsolute(tFileName, DevelopmentFolder)
+        if (!FileExists(tFileName))
         {
             LintFile = true;
             return LintFile;
 
         }
-        if (CheckNoLint(FileName()))
+        if (CheckNoLint(tFileName))
         {
             LintFile = true;
             return LintFile;
 
         }
 
-        LintFile = LintFile && LintFileOptions(FileName(), ref ErrStr);
-        LintFile = LintFile && LintFileIndent(FileName(), ref ErrStr, AutoFix);
-        LintFile = LintFile && LintFileNaming(FileName(), ErrStr, AutoFix);
-        LintFile = LintFile && LintFileControlNaming(FileName(), ErrStr, AutoFix);
-        LintFile = LintFile && LintFileBadCode(FileName(), ref ErrStr, AutoFix);
+        LintFile = LintFile && LintFileOptions(tFileName, ref ErrStr);
+        LintFile = LintFile && LintFileIndent(tFileName, ref ErrStr, AutoFix);
+        LintFile = LintFile && LintFileNaming(tFileName, ErrStr, AutoFix);
+        LintFile = LintFile && LintFileControlNaming(tFileName, ErrStr, AutoFix);
+        LintFile = LintFile && LintFileBadCode(tFileName, ref ErrStr, AutoFix);
 
         if (AutoFix)
         { // Re-run to test after Auto-fix
             ErrStr = "";
-            LintFile = LintFile[FileName, ErrStr];
+            LintFile = LintFile[tFileName, ErrStr];
         }
 
         if (ErrStr != "")
@@ -517,20 +517,20 @@ static class modLinter
         return LintFile;
     }
 
-    private static int LintModuleFirstLine(string FileName)
+    private static int LintModuleFirstLine(string tFileName)
     {
         int LintModuleFirstLine = 0;
         string S = "";
         int N = 0;
         string K = "";
 
-        S = ReadEntireFile(FileName());
+        S = ReadEntireFile(tFileName);
         S = Left(S, InStr(S, "Attribute VB_Name"));
         LintModuleFirstLine = CountLines(S, false, false);
 
         do
         {
-            K = ReadFile(FileName(), LintModuleFirstLine, 1);
+            K = ReadFile(tFileName, LintModuleFirstLine, 1);
             if (!LMatch(K, "Attribute "))
             {
                 return LintModuleFirstLine;
@@ -546,7 +546,7 @@ static class modLinter
         return LintModuleFirstLine;
     }
 
-    public static bool LintFileOptions(string FileName, ref string ErrStr)
+    public static bool LintFileOptions(string tFileName, ref string ErrStr)
     {
         bool LintFileOptions = false;
         int I = 0;
@@ -559,10 +559,10 @@ static class modLinter
 
         LintFileOptions = true;
 
-        A = LintModuleFirstLine(FileName());
+        A = LintModuleFirstLine(tFileName);
         for (I = A; I < A + lintTag_ScanRange; I++)
         {
-            L = ReadFile(FileName(), I, 1);
+            L = ReadFile(tFileName, I, 1);
             if (LMatch(L, lintFile_Option))
             {
                 F = Mid(L, Len(lintFile_Option) + 1);
@@ -572,7 +572,7 @@ static class modLinter
                 }
                 else
                 {
-                    AddErrStr(ErrStr, FileName(), I - A + 1, L, "Prohibited Flag: Option " + F, lintErrorTypes.ltOptn);
+                    AddErrStr(ErrStr, tFileName, I - A + 1, L, "Prohibited Flag: Option " + F, lintErrorTypes.ltOptn);
                     LintFileOptions = false;
                 }
             }
@@ -580,21 +580,21 @@ static class modLinter
 
         if (!oExplicit)
         {
-            AddErrStr(ErrStr, FileName(), 1, "", "Missing Flag: Option Explicit", lintErrorTypes.ltOptn);
+            AddErrStr(ErrStr, tFileName, 1, "", "Missing Flag: Option Explicit", lintErrorTypes.ltOptn);
             LintFileOptions = false;
         }
         return LintFileOptions;
     }
 
-    private static string AutoFixInit(string FileName)
+    private static string AutoFixInit(string tFileName)
     {
         string AutoFixInit = "";
         int A = 0;
         string FL = "";
 
-        A = LintModuleFirstLine(FileName());
+        A = LintModuleFirstLine(tFileName);
         AutoFixInit = DevelopmentFolder() + "templint.txt";
-        FL = ReadFile(FileName(), 1, A - 1);
+        FL = ReadFile(tFileName, 1, A - 1);
         WriteFile(AutoFixInit, FL, true);
         return AutoFixInit;
     }
@@ -636,7 +636,7 @@ static class modLinter
         return AddLineFixes;
     }
 
-    private static void AutoFixFinalize(string FileName, string FixFile)
+    private static void AutoFixFinalize(string tFileName, string FixFile)
     {
         string Contents = "";
 
@@ -646,10 +646,10 @@ static class modLinter
             Contents = Left(Contents, Len(Contents) - 1);
         }
         Contents = Contents + vbCrLf;
-        WriteFile(FileName(), Contents, true);
+        WriteFile(tFileName, Contents, true);
     }
 
-    public static bool LintFileIndent(string FileName, ref string ErrStr, bool AutoFix = false)
+    public static bool LintFileIndent(string tFileName, ref string ErrStr, bool AutoFix = false)
     {
         bool LintFileIndent = false;
         int A = 0;
@@ -675,7 +675,7 @@ static class modLinter
         string LineFixes = "";
 
 
-        if (!FileExists(FileName[]))
+        if (!FileExists(tFileName))
         {
             LintFileIndent = true;
             return LintFileIndent;
@@ -683,16 +683,16 @@ static class modLinter
         }
         // TODO (not supported): On Error GoTo FailedLint
 
-        N = CountFileLines(FileName());
-        A = LintModuleFirstLine(FileName());
+        N = CountFileLines(tFileName);
+        A = LintModuleFirstLine(tFileName);
         if (AutoFix)
         {
-            FixFile = AutoFixInit(FileName());
+            FixFile = AutoFixInit(tFileName);
         }
 
         for (I = A; I < N; I++)
         {
-            L = ReadFile(FileName(), I, 1);
+            L = ReadFile(tFileName, I, 1);
             OL = L;
             FL = L;
             if (Trim(L) == "")
@@ -713,7 +713,7 @@ static class modLinter
             {
                 if (Blanks == lintLint_MaxBlankLines + 1)
                 {
-                    AddErrStr(ErrStr, FileName(), LNo, OL, "Too many sequential blank lines.", lintErrorTypes.ltWhtS);
+                    AddErrStr(ErrStr, tFileName, LNo, OL, "Too many sequential blank lines.", lintErrorTypes.ltWhtS);
                 }
                 goto SkipLine;
             }
@@ -757,7 +757,7 @@ static class modLinter
             {
                 if (!AddIndent(Idnt, Context, _, true))
                 {
-                    AddErrStr(ErrStr, FileName(), LNo, OL, "Cannot set negative indent.", lintErrorTypes.ltIdnt);
+                    AddErrStr(ErrStr, tFileName, LNo, OL, "Cannot set negative indent.", lintErrorTypes.ltIdnt);
                 }
             }
             else if (LMatch(tL, "Case "))
@@ -769,11 +769,11 @@ static class modLinter
             }
 
             //If LNo >= 383 Then Stop
-            //If InStr(FileName, "Functions") Then Stop
+            //If InStr(tFileName, "Functions") Then Stop
             //If IsInStr(tL, "Property") Then Stop
             if (Idnt != (Len(L) - Len(tL)))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Expected Indent " + Idnt + ", is " + (Len(L) - Len(tL)) + ": " + IndentContext(Context), lintErrorTypes.ltIdnt);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Expected Indent " + Idnt + ", is " + (Len(L) - Len(tL)) + ": " + IndentContext(Context), lintErrorTypes.ltIdnt);
                 FL = Space(Idnt) + LTrim(OL);
             }
 
@@ -783,7 +783,7 @@ static class modLinter
             }
             else if (LMatch(tL, "Function "))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Function should be declared either Public or Private.  Neither specified.", lintErrorTypes.ltDECL);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Function should be declared either Public or Private.  Neither specified.", lintErrorTypes.ltDECL);
                 if (IsNotInStr(DeSpace(L), ": End "))
                 {
                     AddIndent(Idnt, Context, "Function");
@@ -792,7 +792,7 @@ static class modLinter
             }
             else if (LMatch(tL, "Sub "))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Sub should be declared either Public or Private.  Neither specified.", lintErrorTypes.ltDECL);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Sub should be declared either Public or Private.  Neither specified.", lintErrorTypes.ltDECL);
                 if (IsNotInStr(DeSpace(L), ": End "))
                 {
                     AddIndent(Idnt, Context, "Sub");
@@ -801,7 +801,7 @@ static class modLinter
             }
             else if (LMatch(tL, "Property "))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Property should be declared either Public or Private.  Neither specified.", lintErrorTypes.ltDECL);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Property should be declared either Public or Private.  Neither specified.", lintErrorTypes.ltDECL);
                 if (IsNotInStr(DeSpace(L), ": End "))
                 {
                     AddIndent(Idnt, Context, "Property");
@@ -859,7 +859,7 @@ static class modLinter
             }
             else if (LMatch(tL, "With "))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "WITH Deprecated--unsupported in all upgrade paths.", lintErrorTypes.ltWITH);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "WITH Deprecated--unsupported in all upgrade paths.", lintErrorTypes.ltWITH);
                 if (IsNotInStr(L, "End With"))
                 {
                     AddIndent(Idnt, Context, "With Block");
@@ -909,35 +909,35 @@ static class modLinter
 
             if (IsInStr(DeString(tL), "Wend"))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "WEND is deprecated.  Use Do While X ... Loop or Do ... Loop While X", lintErrorTypes.ltDEPR);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "WEND is deprecated.  Use Do While X ... Loop or Do ... Loop While X", lintErrorTypes.ltDEPR);
             }
             else if (IsInStr(" " + DeString(tL), " Next "))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "NEXT no longer needs its operand.  Remove Variable name after Next.", lintErrorTypes.ltDEPR);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "NEXT no longer needs its operand.  Remove Variable name after Next.", lintErrorTypes.ltDEPR);
             }
             else if (IsInStr(" " + DeString(tL), " Call "))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "CALL is no longer required.  Do not use CALL keyword in code.", lintErrorTypes.ltDEPR);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "CALL is no longer required.  Do not use CALL keyword in code.", lintErrorTypes.ltDEPR);
                 LineFixes = AddLineFixes(LineFixes, "Call ", "");
             }
             else if (IsInStr(DeString(tL), "GoSub"))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "GOSUB is deprecated and should not be used.", lintErrorTypes.ltDEPR);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "GOSUB is deprecated and should not be used.", lintErrorTypes.ltDEPR);
             }
             else if (IsInStr(DeString(tL), "$("))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Type-casting functions is deprecated.  Remove $ before (...).", lintErrorTypes.ltDEPR);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Type-casting functions is deprecated.  Remove $ before (...).", lintErrorTypes.ltDEPR);
                 LineFixes = AddLineFixes(LineFixes, "$(", "(");
             }
             else if (tL == "Return")
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "GOSUB / RETURN is deprecated and should not be used.", lintErrorTypes.ltDEPR);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "GOSUB / RETURN is deprecated and should not be used.", lintErrorTypes.ltDEPR);
             }
             else if (IsInStr(DeString(tL), " Stop") && Right(tL, 4) == "Stop")
             {
                 if (!IsInStr(tL, "IsDevelopment"))
                 {
-                    AddErrStr(ErrStr, FileName(), LNo, OL, "Code contains STOP statement.", lintErrorTypes.ltSTOP);
+                    AddErrStr(ErrStr, tFileName, LNo, OL, "Code contains STOP statement.", lintErrorTypes.ltSTOP);
                 }
             }
 
@@ -953,23 +953,23 @@ static class modLinter
 
         if (Idnt != 0)
         {
-            AddErrStr(ErrStr, FileName(), LNo, OL, "Indent did not close. EOF.", lintErrorTypes.ltIdnt);
+            AddErrStr(ErrStr, tFileName, LNo, OL, "Indent did not close. EOF.", lintErrorTypes.ltIdnt);
         }
         if (Blanks > lintLint_MaxBlankLines_AtClose)
         {
-            AddErrStr(ErrStr, FileName(), LNo, OL, "Too many blank lines at end of file.  Max=" + lintLint_MaxBlankLines_AtClose + ".", lintErrorTypes.ltWhtS);
+            AddErrStr(ErrStr, tFileName, LNo, OL, "Too many blank lines at end of file.  Max=" + lintLint_MaxBlankLines_AtClose + ".", lintErrorTypes.ltWhtS);
         }
 
         if (AutoFix)
         {
-            AutoFixFinalize(FileName(), FixFile);
+            AutoFixFinalize(tFileName, FixFile);
         }
 
         return LintFileIndent;
 
 
     FailedLint:;
-        AddErrStr(ErrStr, FileName(), LNo, "", "Lint Error", lintErrorTypes.ltLErr);
+        AddErrStr(ErrStr, tFileName, LNo, "", "Lint Error", lintErrorTypes.ltLErr);
         // TODO (not supported):   Resume Next
         return LintFileIndent;
     }
@@ -1091,10 +1091,10 @@ static class modLinter
         return LintFileIsEvent;
     }
 
-    private static bool LintFileNaming(string FileName, ref string ErrStr, bool AutoFix = false)
+    private static bool LintFileNaming(string tFileName, ref string ErrStr, bool AutoFix = false)
     {
         bool LintFileNaming = false;
-        string LNo = "";
+        int LNo = 0;
 
         int A = 0;
         int N = 0;
@@ -1128,14 +1128,14 @@ static class modLinter
 
         if (AutoFix)
         {
-            FixFile = AutoFixInit(FileName());
+            FixFile = AutoFixInit(tFileName);
         }
 
-        N = CountFileLines(FileName());
-        A = LintModuleFirstLine(FileName());
+        N = CountFileLines(tFileName);
+        A = LintModuleFirstLine(tFileName);
         for (I = A; I < N; I++)
         {
-            OL = ReadFile(FileName(), I, 1);
+            OL = ReadFile(tFileName, I, 1);
             L = DeComment(OL);
             tL = LTrim(L);
             LNo = I - A + 1;
@@ -1166,7 +1166,7 @@ static class modLinter
 
                 if (!LintFileTestName(fName, tE))
                 {
-                    AddErrStr(ErrStr, FileName(), LNo, OL, tE, lintErrorTypes.ltVarN);
+                    AddErrStr(ErrStr, tFileName, LNo, OL, tE, lintErrorTypes.ltVarN);
                     LineFixes = AddLineFixes(LineFixes, " " + tE, " " + LintStandardNaming(tE));
                 }
 
@@ -1179,14 +1179,14 @@ static class modLinter
                         vRetType = Mid(vRetType, 4);
                         if (!LintFileTestType(vRetType, tE))
                         {
-                            AddErrStr(ErrStr, FileName(), LNo, OL, tE, lintErrorTypes.ltType);
+                            AddErrStr(ErrStr, tFileName, LNo, OL, tE, lintErrorTypes.ltType);
                         }
                     }
                     else
                     {
                         if (IsNotInStr(OL, "Sub ") && Right(OL, 1) != "_" && !isLet && !isSet)
                         {
-                            AddErrStr(ErrStr, FileName(), LNo, OL, "No Return Type On Func/Prop", lintErrorTypes.ltNTyp);
+                            AddErrStr(ErrStr, tFileName, LNo, OL, "No Return Type On Func/Prop", lintErrorTypes.ltNTyp);
                         }
                     }
                     vArgs = SplitWord(DeString(tL), 1, ":");
@@ -1215,14 +1215,14 @@ static class modLinter
                             vDef = SplitWord(Decl, 2, " = ");
                             if (vDef == "")
                             {
-                                AddErrStr(ErrStr, FileName(), LNo, OL, "Parameter declared OPTIONAL but no default specified. Must specify default.", lintErrorTypes.ltNOpD);
+                                AddErrStr(ErrStr, tFileName, LNo, OL, "Parameter declared OPTIONAL but no default specified. Must specify default.", lintErrorTypes.ltNOpD);
                             }
                             Decl = Trim(Replace(Decl, "Optional ", ""));
                         }
 
                         if (!LMatch(Decl, "ByVal ") && !LMatch(Decl, "ByRef ") && !LMatch(Decl, "ParamArray "))
                         {
-                            AddErrStr(ErrStr, FileName(), LNo, OL, "Neither ByVal nor ByRef are specified. Must Specify one or other.", lintErrorTypes.ltDECL);
+                            AddErrStr(ErrStr, tFileName, LNo, OL, "Neither ByVal nor ByRef are specified. Must Specify one or other.", lintErrorTypes.ltDECL);
                             LineFixes = AddLineFixes(LineFixes, Replace(Decl, "_", ""), "ByRef " + Replace(Decl, "_", ""));
                         }
                         else
@@ -1236,17 +1236,17 @@ static class modLinter
                         vName = SplitWord(Decl, 1, " As ");
                         if (!LintFileTestArgN(vName, tE))
                         {
-                            AddErrStr(ErrStr, FileName(), LNo, OL, tE, lintErrorTypes.ltArgN);
+                            AddErrStr(ErrStr, tFileName, LNo, OL, tE, lintErrorTypes.ltArgN);
                         }
 
                         vType = SplitWord(Decl, 2, " As ");
                         if (vType == "")
                         {
-                            AddErrStr(ErrStr, FileName(), LNo, OL, "No Param Type on Func/Sub/Prop", lintErrorTypes.ltNTyp);
+                            AddErrStr(ErrStr, tFileName, LNo, OL, "No Param Type on Func/Sub/Prop", lintErrorTypes.ltNTyp);
                         }
                         if (!LintFileTestType(vType, tE))
                         {
-                            AddErrStr(ErrStr, FileName(), LNo, OL, tE, lintErrorTypes.ltType);
+                            AddErrStr(ErrStr, tFileName, LNo, OL, tE, lintErrorTypes.ltType);
                         }
 
                     IgnoreParam:;
@@ -1271,7 +1271,7 @@ static class modLinter
                     vName = Trim(SplitWord(vName, 1, " = "));
                     if (!LintFileTestName(vName, tE))
                     {
-                        AddErrStr(ErrStr, FileName(), LNo, OL, tE, lintErrorTypes.ltArgN);
+                        AddErrStr(ErrStr, tFileName, LNo, OL, tE, lintErrorTypes.ltArgN);
                         LineFixes = AddLineFixes(LineFixes, vName, LintStandardNaming(vName));
                     }
                     if (IsNotInStr(OL, "Enum ") && IsNotInStr(OL, "Type "))
@@ -1281,12 +1281,12 @@ static class modLinter
                         {
                             if (vType == "")
                             {
-                                AddErrStr(ErrStr, FileName(), LNo, OL, "No Type on Decl", lintErrorTypes.ltNTyp);
+                                AddErrStr(ErrStr, tFileName, LNo, OL, "No Type on Decl", lintErrorTypes.ltNTyp);
                             }
                         }
                         if (!LintFileTestType(vType, tE))
                         {
-                            AddErrStr(ErrStr, FileName(), LNo, OL, tE, lintErrorTypes.ltType);
+                            AddErrStr(ErrStr, tFileName, LNo, OL, tE, lintErrorTypes.ltType);
                         }
                     }
                 }
@@ -1302,14 +1302,14 @@ static class modLinter
 
         if (AutoFix)
         {
-            AutoFixFinalize(FileName(), FixFile);
+            AutoFixFinalize(tFileName, FixFile);
         }
 
         LintFileNaming = ErrStr == "";
         return LintFileNaming;
     }
 
-    private static bool LintFileControlNaming(string FileName, ref string ErrStr, bool AutoFix_UNUSED = false)
+    private static bool LintFileControlNaming(string tFileName, ref string ErrStr, bool AutoFix_UNUSED = false)
     {
         bool LintFileControlNaming = false;
         const int MaxCtrl = 128;
@@ -1330,7 +1330,7 @@ static class modLinter
         dynamic Reported = null;
 
 
-        Contents = ReadEntireFile(FileName());
+        Contents = ReadEntireFile(tFileName);
         cUnique = new Collection(); ;
 
         List<dynamic> vTypes = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim vTypes() As Variant
@@ -1358,7 +1358,7 @@ static class modLinter
                     if (CtlName != "" && Reported == "")
                     {
                         ErrMsg = "Default Control Name in use: " + CtlName + ".  Rename Control.";
-                        AddErrStr(ErrStr, FileName(), LNo, "", ErrMsg, lintErrorTypes.ltCtlN);
+                        AddErrStr(ErrStr, tFileName, LNo, "", ErrMsg, lintErrorTypes.ltCtlN);
                     }
                 }
             }
@@ -1368,10 +1368,10 @@ static class modLinter
         return LintFileControlNaming;
     }
 
-    public static bool LintFileBadCode(string FileName, ref string ErrStr, bool AutoFix = false)
+    public static bool LintFileBadCode(string tFileName, ref string ErrStr, bool AutoFix = false)
     {
         bool LintFileBadCode = false;
-        string LNo = "";
+        int LNo = 0;
 
         int A = 0;
         int N = 0;
@@ -1402,14 +1402,14 @@ static class modLinter
 
         if (AutoFix)
         {
-            FixFile = AutoFixInit(FileName());
+            FixFile = AutoFixInit(tFileName);
         }
 
-        N = CountFileLines(FileName());
-        A = LintModuleFirstLine(FileName());
+        N = CountFileLines(tFileName);
+        A = LintModuleFirstLine(tFileName);
         for (I = A; I < N; I++)
         {
-            OL = ReadFile(FileName(), I, 1);
+            OL = ReadFile(tFileName, I, 1);
             L = DeComment(OL);
             tL = LTrim(L);
             LNo = I - A + 1;
@@ -1421,15 +1421,15 @@ static class modLinter
 
             if (RegExTest(tL, "\\.Enabled = [-0-9]"))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Property [Enabled] Should Be Boolean.  Numeric found.", lintErrorTypes.ltType);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Property [Enabled] Should Be Boolean.  Numeric found.", lintErrorTypes.ltType);
             }
             if (RegExTest(tL, "\\.Visible = [-0-9]"))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Property [Visible] Should Be Boolean.  Numeric found.", lintErrorTypes.ltType);
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Property [Visible] Should Be Boolean.  Numeric found.", lintErrorTypes.ltType);
             }
             if (RegExTest(" " + tL, "[^a-zA-Z0-0]Me[.][^ ]"))
             {
-                AddErrStr(ErrStr, FileName(), LNo, OL, "Self Reference [Me.*] is unnecessary.", lintErrorTypes.ltSelf); //@NO-LINT
+                AddErrStr(ErrStr, tFileName, LNo, OL, "Self Reference [Me.*] is unnecessary.", lintErrorTypes.ltSelf); //@NO-LINT
             }
 
         SkipLine:;

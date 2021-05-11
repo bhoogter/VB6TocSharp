@@ -6,6 +6,7 @@ using static Microsoft.VisualBasic.Information;
 using static Microsoft.VisualBasic.Interaction;
 using static Microsoft.VisualBasic.Strings;
 using static modConfig;
+using static modConvertUtils;
 using static modUtils;
 using static modVB6ToCS;
 using static VBExtension;
@@ -201,6 +202,14 @@ static class modConvertForm
         return ConvertFormUi;
     }
 
+    private static string ConvertProperty(string S)
+    {
+        string ConvertProperty = "";
+        S = deQuote(S);
+        S = DeComment(S);
+        ConvertProperty = S;
+        return ConvertProperty;
+    }
 
     private static string StartControl(string L, Collection Props, bool DoEmpty, string Code, out string TagType)
     {

@@ -2,6 +2,7 @@ using System.Collections.Generic;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.Information;
 using static Microsoft.VisualBasic.Strings;
+using static modConvert;
 using static modRegEx;
 using static modUtils;
 using static modVB6ToCS;
@@ -105,15 +106,15 @@ static class modSubTracking
         // TODO (not supported): On Error Resume Next
         N = 0;
         N = UBound(Vars) + 1;
-        List<> Vars_3732_tmp = new List<>();
-        for (int redim_iter_420 = 0; i < 0; redim_iter_420++) { Vars.Add(redim_iter_420 < Vars.Count ? Vars(redim_iter_420) : null); }
-        dynamic _WithVar_8321;
-        _WithVar_8321 = Vars(N);
-        _WithVar_8321.Name = P();
-        _WithVar_8321.asType = asType;
-        _WithVar_8321.Param = isParam;
-        _WithVar_8321.RetVal = isReturn;
-        _WithVar_8321.asArray = asArray;
+        List<> Vars_2615_tmp = new List<>();
+        for (int redim_iter_9304 = 0; i < 0; redim_iter_9304++) { Vars.Add(redim_iter_9304 < Vars.Count ? Vars(redim_iter_9304) : null); }
+        dynamic _WithVar_4549;
+        _WithVar_4549 = Vars(N);
+        _WithVar_4549.Name = P();
+        _WithVar_4549.asType = asType;
+        _WithVar_4549.Param = isParam;
+        _WithVar_4549.RetVal = isReturn;
+        _WithVar_4549.asArray = asArray;
     }
 
     public static void SubParamAssign(string P)
@@ -129,12 +130,12 @@ static class modSubTracking
         K = SubParamIndex(P());
         if (K >= 0)
         {
-            dynamic _WithVar_9588;
-            _WithVar_9588 = Vars(K);
-            _WithVar_9588.Assigned = true;
-            if (!_WithVar_9588.Used)
+            dynamic _WithVar_7266;
+            _WithVar_7266 = Vars(K);
+            _WithVar_7266.Assigned = true;
+            if (!_WithVar_7266.Used)
             {
-                _WithVar_9588.AssignedBeforeUsed = true;
+                _WithVar_7266.AssignedBeforeUsed = true;
             }
         }
     }
@@ -325,8 +326,8 @@ static class modSubTracking
             // TODO (not supported): On Error Resume Next
             X = UBound(Props) + 1;
             // TODO (not supported): On Error GoTo 0
-            List<> Props_3966_tmp = new List<>();
-            for (int redim_iter_6718 = 0; i < 0; redim_iter_6718++) { Props.Add(redim_iter_6718 < Props.Count ? Props(redim_iter_6718) : null); }
+            List<> Props_7668_tmp = new List<>();
+            for (int redim_iter_419 = 0; i < 0; redim_iter_419++) { Props.Add(redim_iter_419 < Props.Count ? Props(redim_iter_419) : null); }
         }
 
         Props(X).Name = pName;
@@ -385,11 +386,11 @@ static class modSubTracking
             {
                 goto NoItems;
             }
-            dynamic _WithVar_5441;
-            _WithVar_5441 = Props(I);
-            if (_WithVar_5441.Name != "" && !(_WithVar_5441.Getter == "" && _WithVar_5441.Setter == ""))
+            dynamic _WithVar_1719;
+            _WithVar_1719 = Props(I);
+            if (_WithVar_1719.Name != "" && !(_WithVar_1719.Getter == "" && _WithVar_1719.Setter == ""))
             {
-                if (_WithVar_5441.asPublic)
+                if (_WithVar_1719.asPublic)
                 {
                     R = R + "public ";
                 }
@@ -399,30 +400,30 @@ static class modSubTracking
                 }
                 //          If .Getter = "" Then R = R & "writeonly "
                 //          If .Setter = "" Then R = R & "readonly "
-                if (_WithVar_5441.asFunc)
+                if (_WithVar_1719.asFunc)
                 {
-                    R = R + " // TODO: Arguments not allowed on properties: " + _WithVar_5441.funcArgs + vbCrLf;
-                    R = R + " //       " + _WithVar_5441.origProto + vbCrLf;
+                    R = R + " // TODO: Arguments not allowed on properties: " + _WithVar_1719.funcArgs + vbCrLf;
+                    R = R + " //       " + _WithVar_1719.origProto + vbCrLf;
                 }
-                R = R + M + _WithVar_5441.asType + " " + _WithVar_5441.Name;
+                R = R + M + _WithVar_1719.asType + " " + _WithVar_1719.Name;
                 R = R + " {";
 
-                if (_WithVar_5441.Getter != "")
+                if (_WithVar_1719.Getter != "")
                 {
                     R = R + N + "  get {";
-                    R = R + N + "    " + _WithVar_5441.asType + " " + _WithVar_5441.Name + ";";
-                    T = _WithVar_5441.Getter;
-                    T = Replace(T, "Exit(Property)", "return " + _WithVar_5441.Name + ";");
+                    R = R + N + "    " + _WithVar_1719.asType + " " + _WithVar_1719.Name + ";";
+                    T = _WithVar_1719.Getter;
+                    T = Replace(T, "Exit(Property)", "return " + _WithVar_1719.Name + ";");
                     R = R + N + "    " + T;
-                    R = R + N + "  return " + _WithVar_5441.Name + ";";
+                    R = R + N + "  return " + _WithVar_1719.Name + ";";
                     R = R + N + "  }";
                 }
-                if (_WithVar_5441.Setter != "")
+                if (_WithVar_1719.Setter != "")
                 {
                     R = R + N + "  set {";
-                    T = _WithVar_5441.Setter;
+                    T = _WithVar_1719.Setter;
                     T = ReplaceToken(T, "value", "valueOrig");
-                    T = Replace(T, _WithVar_5441.origArgName, "value");
+                    T = Replace(T, _WithVar_1719.origArgName, "value");
                     T = Replace(T, "Exit Property", "return;");
                     R = R + N + "    " + T;
                     R = R + N + "  }";

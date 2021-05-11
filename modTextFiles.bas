@@ -41,36 +41,36 @@ End Function
 
 
 
-Public Function ReadEntireFile(ByVal FileName As String) As String
+Public Function ReadEntireFile(ByVal tFileName As String) As String
 '::::ReadEntireFile
 ':::SUMMARY
 ':Read an entire file.
 ':::DESCRIPTION
 ':Reads  the full contents of a file and returns the value as a string (without modification).
 ':::PARAMETERS
-':- FileName - The name of the file to read.
+':- tFileName - The name of the file to read.
 ':::RETURN
 ':  String - The string contents of the file.
 ':::SEE ALSO
 ':  ReadFile, WriteFile, ReadEntireFileAndDelete
 
 On Error Resume Next
-  ReadEntireFile = FSO.OpenTextFile(FileName, 1).ReadAll
+  ReadEntireFile = FSO.OpenTextFile(tFileName, 1).ReadAll
   
-  If FileLen(FileName) / 10 <> Len(ReadEntireFile) / 10 Then
-    MsgBox "ReadEntireFile was short: " & FileLen(FileName) & " vs " & Len(ReadEntireFile)
+  If FileLen(tFileName) / 10 <> Len(ReadEntireFile) / 10 Then
+    MsgBox "ReadEntireFile was short: " & FileLen(tFileName) & " vs " & Len(ReadEntireFile)
   End If
 '
 '  Dim intFile As Long
 '  intFile = FreeFile
 'On Error Resume Next
-'  Open FileName For Input As #intFile
+'  Open tFileName For Input As #intFile
 '  ReadEntireFile = Input$(LOF(intFile), #intFile)  '  LOF returns Length of File
 '  Close #intFile
 End Function
 
 
-Public Function ReadEntireFileAndDelete(ByVal FileName As String) As String
+Public Function ReadEntireFileAndDelete(ByVal tFileName As String) As String
 '::::ReadEntireFileAndDelete
 ':::SUMMARY
 ':Read an entire file and safely delete it..
@@ -79,18 +79,18 @@ Public Function ReadEntireFileAndDelete(ByVal FileName As String) As String
 ':
 ':If the file does not exist, no error is thrown, and an empty string is returned.
 ':::PARAMETERS
-':- FileName - The name of the file to read.
+':- tFileName - The name of the file to read.
 ':::RETURN
 ':  String - The string contents of the file.
 ':::SEE ALSO
 ':  ReadEntireFile
 
 On Error Resume Next
-  ReadEntireFileAndDelete = ReadEntireFile(FileName)
-  Kill FileName
+  ReadEntireFileAndDelete = ReadEntireFile(tFileName)
+  Kill tFileName
 End Function
 
-Public Function ReadFile(ByVal FileName As String, Optional ByVal Startline As Long = 1, Optional ByVal NumLines As Long = 0) As String ', Optional ByRef WasEOF As Boolean = False)
+Public Function ReadFile(ByVal tFileName As String, Optional ByVal Startline As Long = 1, Optional ByVal NumLines As Long = 0) As String ', Optional ByRef WasEOF As Boolean = False)
 '::::ReadFile
 ':::SUMMARY
 ':Random Access Read a given file based on line number.
@@ -99,7 +99,7 @@ Public Function ReadFile(ByVal FileName As String, Optional ByVal Startline As L
 ':
 ':If the file does not exist, no error is thrown, and an empty string is returned.
 ':::PARAMETERS
-':- FileName - The name of the file to read.
+':- tFileName - The name of the file to read.
 ':- StartLine - The line number to begin reading (the first line is 1).  If you try to read beyond the end of the file, an empty string is returned.
 ':- NumLines - If passed, attempts to read the specified number of lines.  Reading beyond the end of the file simply returns as many lines as possible.  Zero means read rest of file.  Default is zero.
 ':- WasEOF - If EOF checking is required, this ByRef parameter can be passed and checked later.  True if the file's EOF was reached.  False otherwise.
@@ -112,19 +112,19 @@ Public Function ReadFile(ByVal FileName As String, Optional ByVal Startline As L
   Static CacheFileDate As String
   Static CacheFileLoad() As String
   
-  If FileName = "" Or Not FileExists(FileName) Then
+  If tFileName = "" Or Not FileExists(tFileName) Then
 '    WasEOF = True
     Exit Function
   End If
   
-  If FileName = CacheFileName Then
-    If FileDateTime(FileName) <> CacheFileDate Then CacheFileName = ""
+  If tFileName = CacheFileName Then
+    If FileDateTime(tFileName) <> CacheFileDate Then CacheFileName = ""
   End If
   
-  If FileName <> CacheFileName Then
-    CacheFileName = FileName
-    CacheFileDate = FileDateTime(FileName)
-    CacheFileLoad = Split(Replace(ReadEntireFile(FileName), vbLf, ""), vbCr)
+  If tFileName <> CacheFileName Then
+    CacheFileName = tFileName
+    CacheFileDate = FileDateTime(tFileName)
+    CacheFileLoad = Split(Replace(ReadEntireFile(tFileName), vbLf, ""), vbCr)
   End If
   
   If Startline = 1 And NumLines = 0 Then
@@ -139,7 +139,7 @@ Public Function ReadFile(ByVal FileName As String, Optional ByVal Startline As L
 '  If Startline < 1 Then Startline = 1
 '  LineNum = 0
 '  FNum = FreeFile
-'  Open FileName For Input As #FNum
+'  Open tFileName For Input As #FNum
 '  Do While Not EOF(FNum)
 '    LineNum = LineNum + 1
 '    Line Input #FNum, Line
@@ -260,7 +260,7 @@ End Function
 
 
 
-Public Function VBFileCountLines(ByVal FileName As String, Optional ByRef Totl As Long, Optional ByRef Code As Long, Optional ByRef Blnk As Long, Optional ByRef Cmnt As Long) As Boolean
+Public Function VBFileCountLines(ByVal tFileName As String, Optional ByRef Totl As Long, Optional ByRef Code As Long, Optional ByRef Blnk As Long, Optional ByRef Cmnt As Long) As Boolean
 '::::VBFileCountLines
 ':::SUMMARY
 ':Count lines in a VB6 file.
@@ -274,7 +274,7 @@ Public Function VBFileCountLines(ByVal FileName As String, Optional ByRef Totl A
 ':
 ':If the file does not exist, no error is thrown, and an empty string is returned.
 ':::PARAMETERS
-':- FileName - The name of the file to read.
+':- tFileName - The name of the file to read.
 ':- [Totl] - ByRef.  Returns total number of lines in file.
 ':- [Code] - ByRef.  Returns total number of code lines in file.
 ':- [Blnk] - ByRef.  Returns total number of blank lines in file.
@@ -290,10 +290,10 @@ Public Function VBFileCountLines(ByVal FileName As String, Optional ByRef Totl A
   Cmnt = 0
   
 On Error Resume Next
-  If Not FileExists(FileName) Then
+  If Not FileExists(tFileName) Then
     Exit Function
   End If
-  S = ReadEntireFile(FileName)
+  S = ReadEntireFile(tFileName)
   Totl = CountLines(S, False, "")
   Code = CountLines(S)
   N = CountLines(S, , "")
@@ -302,7 +302,7 @@ On Error Resume Next
   VBFileCountLines = True
 End Function
 
-Public Sub VBFileCountLines_Stat(ByVal FileName As String)
+Public Sub VBFileCountLines_Stat(ByVal tFileName As String)
 '::::VBFileCountLines_Stat
 ':::SUMMARY
 ':Print line count statistics for a file.
@@ -310,14 +310,14 @@ Public Sub VBFileCountLines_Stat(ByVal FileName As String)
 ':Raises a message box showing the file line count numbers.
 ':
 ':::PARAMETERS
-':- FileName - The name of the file to read.
+':- tFileName - The name of the file to read.
 ':::SEE ALSO
 ':  ReadEntireFile, WriteFile, CountLines, VBFileCountLines
   Dim T As Long, C As Long, B As Long, M As Long
-  If VBFileCountLines(FileName, T, C, B, M) Then
+  If VBFileCountLines(tFileName, T, C, B, M) Then
     MsgBox "File Line Stat: " & vbCrLf & " Totl: " & T & vbCrLf & "Code: " & C & vbCrLf & "Blnk: " & B & vbCrLf & "Cmnt: " & M, vbMsgBoxRtlReading
   Else
-    MsgBox "File Not Found: " & FileName
+    MsgBox "File Not Found: " & tFileName
   End If
 End Sub
 

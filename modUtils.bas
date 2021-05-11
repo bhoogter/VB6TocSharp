@@ -17,8 +17,8 @@ Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: I
 Public Function IsNotInStr(ByVal S As String, ByVal Fnd As String) As Boolean: IsNotInStr = Not IsInStr(S, Fnd): End Function
 Public Function FileExists(ByVal FN As String) As Boolean: FileExists = FN <> "" And Dir(FN) <> "": End Function
 Public Function DirExists(ByVal FN As String) As Boolean: DirExists = FN <> "" And Dir(FN, vbDirectory) <> "": End Function
-Public Function FileName(ByVal FN As String) As String: FileName = Mid(FN, InStrRev(FN, "\") + 1): End Function
-Public Function FileBaseName(ByVal FN As String) As String: FileBaseName = Left(FileName(FN), InStrRev(FileName(FN), ".") - 1): End Function
+Public Function tFileName(ByVal FN As String) As String: tFileName = Mid(FN, InStrRev(FN, "\") + 1): End Function
+Public Function FileBaseName(ByVal FN As String) As String: FileBaseName = Left(tFileName(FN), InStrRev(tFileName(FN), ".") - 1): End Function
 Public Function FilePath(ByVal FN As String) As String: FilePath = Left(FN, InStrRev(FN, "\")): End Function
 Public Function ChgExt(ByVal FN As String, ByVal NewExt As String) As String: ChgExt = Left(FN, InStrRev(FN, ".") - 1) & NewExt: End Function
 Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = Left(Trim(Str), N): End Function

@@ -56,29 +56,29 @@ Public Enum lintErrorTypes
   ltNOpD
 End Enum
 
-Private Function CheckNoLint(ByVal FileName As String, Optional ByVal lType As lintErrorTypes = ltUnkn, Optional ByVal vLine As String) As Boolean
+Private Function CheckNoLint(ByVal tFileName As String, Optional ByVal lType As lintErrorTypes = ltUnkn, Optional ByVal vLine As String) As Boolean
   Dim I As Long, L As String, A As Long
-  Dim CA As String, cP As String, cB As String
+  Dim CA As String, cP As String, Cb As String
   CheckNoLint = False
   If LintAbbr(lType) = "" Then CheckNoLint = True: Exit Function  ' Disable lint type
   
   CA = lintTag_NoLint
   cP = lintTag_NoLint & lintTag_Div
-  cB = lintTag_NoLint & lintTag_Div & UCase(LintAbbr(lType))
+  Cb = lintTag_NoLint & lintTag_Div & UCase(LintAbbr(lType))
   
   If IsInStr(vLine, Mid(CA, 2)) And Not IsInStr(vLine, Mid(cP, 2)) Then CheckNoLint = True: Exit Function
-  If IsInStr(vLine, Mid(cB, 2)) Then CheckNoLint = True: Exit Function
+  If IsInStr(vLine, Mid(Cb, 2)) Then CheckNoLint = True: Exit Function
   
-  A = LintModuleFirstLine(FileName)
+  A = LintModuleFirstLine(tFileName)
   For I = A To A + lintTag_ScanRange
-    L = UCase(ReadFile(FileName, I, 1))
+    L = UCase(ReadFile(tFileName, I, 1))
     If lType = ltUnkn Then
       If LMatch(L, CA) And Not LMatch(L, cP) Then
         CheckNoLint = True
         Exit Function
       End If
     Else
-      If LMatch(L, cB) Then
+      If LMatch(L, Cb) Then
         CheckNoLint = True
         Exit Function
       End If
@@ -115,12 +115,12 @@ Private Function LintAbbr(ByVal lType As lintErrorTypes, Optional ByRef TypeName
 End Function
 Private Function LintName(ByVal lType As lintErrorTypes) As String:   LintAbbr lType, LintName: End Function
 Private Function LintFileShort(ByVal FFile As String) As String
-  LintFileShort = AlignString(FileName(FFile), lintFileShort_Len)
+  LintFileShort = AlignString(tFileName(FFile), lintFileShort_Len)
 End Function
 
-Private Function AddErrStr(ByRef ErrStr As String, ByVal FileName As String, ByVal LineNo As String, ByVal vLine As String, ByVal Msg As String, ByVal lType As lintErrorTypes) As String
+Private Function AddErrStr(ByRef ErrStr As String, ByVal tFileName As String, ByVal LineNo As Long, ByVal vLine As String, ByVal Msg As String, ByVal lType As lintErrorTypes) As String
   Static ErrCnt As Long
-  If CheckNoLint(FileName, lType, vLine) Then Exit Function
+  If CheckNoLint(tFileName, lType, vLine) Then Exit Function
   
   If ErrStr = "" Then ErrCnt = 0
   ErrCnt = ErrCnt + 1
@@ -131,7 +131,7 @@ Private Function AddErrStr(ByRef ErrStr As String, ByVal FileName As String, ByV
     Exit Function
   End If
   If ErrStr <> "" Then ErrStr = ErrStr & vbCrLf
-  ErrStr = ErrStr & LintFileShort(FileName) & " (Line " & LineNo & "): " & LintAbbr(lType) & " - " & Msg
+  ErrStr = ErrStr & LintFileShort(tFileName) & " (Line " & LineNo & "): " & LintAbbr(lType) & " - " & Msg
 End Function
 
 Private Function AddIndent(ByRef Lvl As Long, ByRef Str As String, Optional ByRef Context As String = "", Optional ByVal POP As Boolean = False) As Boolean
@@ -244,26 +244,26 @@ Public Function LintFileList(ByVal List As String, ByVal AutoFix As Boolean) As 
   LintFileList = True
 End Function
 
-Public Function LintFile(ByVal FileName As String, Optional ByRef ErrStr As String = "#", Optional ByVal AutoFix As Boolean = False) As Boolean
+Public Function LintFile(ByVal tFileName As String, Optional ByRef ErrStr As String = "#", Optional ByVal AutoFix As Boolean = False) As Boolean
   Dim Alert As Boolean, aOutput As Boolean
   Alert = ErrStr = "#"
   aOutput = ErrStr = "."
   ErrStr = ""
   LintFile = True
   
-'  FileName = MakePathAbsolute(FileName, DevelopmentFolder)
-  If Not FileExists(FileName) Then LintFile = True: Exit Function
-  If CheckNoLint(FileName) Then LintFile = True: Exit Function
+'  tFileName = MakePathAbsolute(tFileName, DevelopmentFolder)
+  If Not FileExists(tFileName) Then LintFile = True: Exit Function
+  If CheckNoLint(tFileName) Then LintFile = True: Exit Function
   
-  LintFile = LintFile And LintFileOptions(FileName, ErrStr)
-  LintFile = LintFile And LintFileIndent(FileName, ErrStr, AutoFix)
-  LintFile = LintFile And LintFileNaming(FileName, ErrStr, AutoFix)
-  LintFile = LintFile And LintFileControlNaming(FileName, ErrStr, AutoFix)
-  LintFile = LintFile And LintFileBadCode(FileName, ErrStr, AutoFix)
+  LintFile = LintFile And LintFileOptions(tFileName, ErrStr)
+  LintFile = LintFile And LintFileIndent(tFileName, ErrStr, AutoFix)
+  LintFile = LintFile And LintFileNaming(tFileName, ErrStr, AutoFix)
+  LintFile = LintFile And LintFileControlNaming(tFileName, ErrStr, AutoFix)
+  LintFile = LintFile And LintFileBadCode(tFileName, ErrStr, AutoFix)
 
   If AutoFix Then                             ' Re-run to test after Auto-fix
     ErrStr = ""
-    LintFile = LintFile(FileName, ErrStr)
+    LintFile = LintFile(tFileName, ErrStr)
   End If
   
   If ErrStr <> "" Then
@@ -274,51 +274,51 @@ Public Function LintFile(ByVal FileName As String, Optional ByRef ErrStr As Stri
   End If
 End Function
 
-Private Function LintModuleFirstLine(ByVal FileName As String) As Long
+Private Function LintModuleFirstLine(ByVal tFileName As String) As Long
   Dim S As String, N As Long, K As String
-  S = ReadEntireFile(FileName)
+  S = ReadEntireFile(tFileName)
   S = Left(S, InStr(S, "Attribute VB_Name"))
   LintModuleFirstLine = CountLines(S, False, False)
   
   Do
-    K = ReadFile(FileName, LintModuleFirstLine, 1)
+    K = ReadFile(tFileName, LintModuleFirstLine, 1)
     If Not LMatch(K, "Attribute ") Then Exit Function
     If K = "" Then Exit Function
     LintModuleFirstLine = LintModuleFirstLine + 1
   Loop While True
 End Function
 
-Public Function LintFileOptions(ByVal FileName As String, Optional ByRef ErrStr As String) As Boolean
+Public Function LintFileOptions(ByVal tFileName As String, Optional ByRef ErrStr As String) As Boolean
   Dim I As Long, L As String, A As Long, F As String
   Dim oExplicit As Boolean
   
   LintFileOptions = True
   
-  A = LintModuleFirstLine(FileName)
+  A = LintModuleFirstLine(tFileName)
   For I = A To A + lintTag_ScanRange
-    L = ReadFile(FileName, I, 1)
+    L = ReadFile(tFileName, I, 1)
     If LMatch(L, lintFile_Option) Then
       F = Mid(L, Len(lintFile_Option) + 1)
       If F = lintFile_Option_Explicit Then
         oExplicit = True
       Else
-        AddErrStr ErrStr, FileName, I - A + 1, L, "Prohibited Flag: Option " & F, ltOptn
+        AddErrStr ErrStr, tFileName, I - A + 1, L, "Prohibited Flag: Option " & F, ltOptn
         LintFileOptions = False
       End If
     End If
   Next
   
   If Not oExplicit Then
-    AddErrStr ErrStr, FileName, 1, "", "Missing Flag: Option Explicit", ltOptn
+    AddErrStr ErrStr, tFileName, 1, "", "Missing Flag: Option Explicit", ltOptn
     LintFileOptions = False
   End If
 End Function
 
-Private Function AutoFixInit(ByVal FileName As String) As String
+Private Function AutoFixInit(ByVal tFileName As String) As String
   Dim A As Long, FL As String
-  A = LintModuleFirstLine(FileName)
+  A = LintModuleFirstLine(tFileName)
   AutoFixInit = DevelopmentFolder & "templint.txt"
-  FL = ReadFile(FileName, 1, A - 1)
+  FL = ReadFile(tFileName, 1, A - 1)
   WriteFile AutoFixInit, FL, True
 End Function
 Private Function AutoFixLine(ByVal FixFile As String, ByVal Line As String, ByVal LineFixes As String) As String
@@ -340,17 +340,17 @@ Private Function AddLineFixes(ByVal LineFixes As String, ByVal Find As String, B
   AddLineFixes = LineFixes & IIf(Len(LineFixes) = 0, "", lintFixList_Sep) & Find & lintFixList_Div & Repl
 End Function
 
-Private Sub AutoFixFinalize(ByVal FileName As String, ByVal FixFile As String)
+Private Sub AutoFixFinalize(ByVal tFileName As String, ByVal FixFile As String)
   Dim Contents As String
   Contents = ReadEntireFileAndDelete(FixFile)
   Do While Right(Contents, 1) = vbLf Or Right(Contents, 1) = vbCr
     Contents = Left(Contents, Len(Contents) - 1)
   Loop
   Contents = Contents & vbCrLf
-  WriteFile FileName, Contents, True
+  WriteFile tFileName, Contents, True
 End Sub
 
-Public Function LintFileIndent(ByVal FileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Public Function LintFileIndent(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
   Dim A As Long
   Dim N As Long, I As Long
   Dim Continued As Long
@@ -360,15 +360,15 @@ Public Function LintFileIndent(ByVal FileName As String, Optional ByRef ErrStr A
   Dim FixFile As String
   Dim LineFixes As String
   
-  If Not FileExists(FileName) Then LintFileIndent = True: Exit Function
+  If Not FileExists(tFileName) Then LintFileIndent = True: Exit Function
 On Error GoTo FailedLint
   
-  N = CountFileLines(FileName)
-  A = LintModuleFirstLine(FileName)
-  If AutoFix Then FixFile = AutoFixInit(FileName)
+  N = CountFileLines(tFileName)
+  A = LintModuleFirstLine(tFileName)
+  If AutoFix Then FixFile = AutoFixInit(tFileName)
   
   For I = A To N
-    L = ReadFile(FileName, I, 1)
+    L = ReadFile(tFileName, I, 1)
     OL = L
     FL = L
     If Trim(L) = "" Then Blanks = Blanks + 1
@@ -380,7 +380,7 @@ On Error GoTo FailedLint
 '    If IsDevelopment And LNo > 275 Then Stop
     
     If Trim(L) = "" Then
-      If Blanks = lintLint_MaxBlankLines + 1 Then AddErrStr ErrStr, FileName, LNo, OL, "Too many sequential blank lines.", ltWhtS
+      If Blanks = lintLint_MaxBlankLines + 1 Then AddErrStr ErrStr, tFileName, LNo, OL, "Too many sequential blank lines.", ltWhtS
       GoTo SkipLine
     End If
     If Continued Then GoTo SkipLine
@@ -405,32 +405,32 @@ On Error GoTo FailedLint
         IndentContext(Context) = "Do Loop" And LMatch(tL, "Loop") _
         Then
       If Not AddIndent(Idnt, Context, , True) Then
-        AddErrStr ErrStr, FileName, LNo, OL, "Cannot set negative indent.", ltIdnt
+        AddErrStr ErrStr, tFileName, LNo, OL, "Cannot set negative indent.", ltIdnt
       End If
     ElseIf LMatch(tL, "Case ") Then
       If IndentContext(Context) = "Select Case Item" Then AddIndent Idnt, Context, , True
     End If
     
 'If LNo >= 383 Then Stop
-'If InStr(FileName, "Functions") Then Stop
+'If InStr(tFileName, "Functions") Then Stop
 'If IsInStr(tL, "Property") Then Stop
     If Idnt <> (Len(L) - Len(tL)) Then
-      AddErrStr ErrStr, FileName, LNo, OL, "Expected Indent " & Idnt & ", is " & (Len(L) - Len(tL)) & ": " & IndentContext(Context), ltIdnt
+      AddErrStr ErrStr, tFileName, LNo, OL, "Expected Indent " & Idnt & ", is " & (Len(L) - Len(tL)) & ": " & IndentContext(Context), ltIdnt
       FL = Space(Idnt) & LTrim(OL)
     End If
     
     If LMatch(DeString(tL), "Declare ") Then
       ' ignore API declarations for now
     ElseIf LMatch(tL, "Function ") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "Function should be declared either Public or Private.  Neither specified.", ltDECL
+      AddErrStr ErrStr, tFileName, LNo, OL, "Function should be declared either Public or Private.  Neither specified.", ltDECL
       If IsNotInStr(DeSpace(L), ": End ") Then AddIndent Idnt, Context, "Function"
       LineFixes = AddLineFixes(LineFixes, "^", "Public ")
     ElseIf LMatch(tL, "Sub ") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "Sub should be declared either Public or Private.  Neither specified.", ltDECL
+      AddErrStr ErrStr, tFileName, LNo, OL, "Sub should be declared either Public or Private.  Neither specified.", ltDECL
       If IsNotInStr(DeSpace(L), ": End ") Then AddIndent Idnt, Context, "Sub"
       LineFixes = AddLineFixes(LineFixes, "^", "Public ")
     ElseIf LMatch(tL, "Property ") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "Property should be declared either Public or Private.  Neither specified.", ltDECL
+      AddErrStr ErrStr, tFileName, LNo, OL, "Property should be declared either Public or Private.  Neither specified.", ltDECL
       If IsNotInStr(DeSpace(L), ": End ") Then AddIndent Idnt, Context, "Property"
       LineFixes = AddLineFixes(LineFixes, "^", "Public ")
     ElseIf LMatch(tL, "Private Function ") Or LMatch(tL, "Private Sub ") Or LMatch(tL, "Private Property ") _
@@ -451,7 +451,7 @@ On Error GoTo FailedLint
     ElseIf LMatch(tL, "Do Until ") Then
       If IsNotInStr(DeSpace(L), ": Loop") Then AddIndent Idnt, Context, "Do Until Loop"
     ElseIf LMatch(tL, "With ") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "WITH Deprecated--unsupported in all upgrade paths.", ltWITH
+      AddErrStr ErrStr, tFileName, LNo, OL, "WITH Deprecated--unsupported in all upgrade paths.", ltWITH
       If IsNotInStr(L, "End With") Then AddIndent Idnt, Context, "With Block"
     ElseIf LMatch(tL, "Select Case ") Then
       AddIndent Idnt, Context, "Select Block"
@@ -471,22 +471,22 @@ On Error GoTo FailedLint
     End If
     
     If IsInStr(DeString(tL), "Wend") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "WEND is deprecated.  Use Do While X ... Loop or Do ... Loop While X", ltDEPR
+      AddErrStr ErrStr, tFileName, LNo, OL, "WEND is deprecated.  Use Do While X ... Loop or Do ... Loop While X", ltDEPR
     ElseIf IsInStr(" " & DeString(tL), " Next ") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "NEXT no longer needs its operand.  Remove Variable name after Next.", ltDEPR
+      AddErrStr ErrStr, tFileName, LNo, OL, "NEXT no longer needs its operand.  Remove Variable name after Next.", ltDEPR
     ElseIf IsInStr(" " & DeString(tL), " Call ") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "CALL is no longer required.  Do not use CALL keyword in code.", ltDEPR
+      AddErrStr ErrStr, tFileName, LNo, OL, "CALL is no longer required.  Do not use CALL keyword in code.", ltDEPR
       LineFixes = AddLineFixes(LineFixes, "Call ", "")
     ElseIf IsInStr(DeString(tL), "GoSub") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "GOSUB is deprecated and should not be used.", ltDEPR
+      AddErrStr ErrStr, tFileName, LNo, OL, "GOSUB is deprecated and should not be used.", ltDEPR
     ElseIf IsInStr(DeString(tL), "$(") Then
-      AddErrStr ErrStr, FileName, LNo, OL, "Type-casting functions is deprecated.  Remove $ before (...).", ltDEPR
+      AddErrStr ErrStr, tFileName, LNo, OL, "Type-casting functions is deprecated.  Remove $ before (...).", ltDEPR
       LineFixes = AddLineFixes(LineFixes, "$(", "(")
     ElseIf tL = "Return" Then
-      AddErrStr ErrStr, FileName, LNo, OL, "GOSUB / RETURN is deprecated and should not be used.", ltDEPR
+      AddErrStr ErrStr, tFileName, LNo, OL, "GOSUB / RETURN is deprecated and should not be used.", ltDEPR
     ElseIf IsInStr(DeString(tL), " Stop") And Right(tL, 4) = "Stop" Then
       If Not IsInStr(tL, "IsDevelopment") Then
-        AddErrStr ErrStr, FileName, LNo, OL, "Code contains STOP statement.", ltSTOP
+        AddErrStr ErrStr, tFileName, LNo, OL, "Code contains STOP statement.", ltSTOP
       End If
     End If
   
@@ -498,18 +498,18 @@ NotRealLine:
   Next
   
   If Idnt <> 0 Then
-    AddErrStr ErrStr, FileName, LNo, OL, "Indent did not close. EOF.", ltIdnt
+    AddErrStr ErrStr, tFileName, LNo, OL, "Indent did not close. EOF.", ltIdnt
   End If
   If Blanks > lintLint_MaxBlankLines_AtClose Then
-    AddErrStr ErrStr, FileName, LNo, OL, "Too many blank lines at end of file.  Max=" & lintLint_MaxBlankLines_AtClose & ".", ltWhtS
+    AddErrStr ErrStr, tFileName, LNo, OL, "Too many blank lines at end of file.  Max=" & lintLint_MaxBlankLines_AtClose & ".", ltWhtS
   End If
   
-  If AutoFix Then AutoFixFinalize FileName, FixFile
+  If AutoFix Then AutoFixFinalize tFileName, FixFile
   
   Exit Function
   
 FailedLint:
-  AddErrStr ErrStr, FileName, LNo, "", "Lint Error", ltLErr
+  AddErrStr ErrStr, tFileName, LNo, "", "Lint Error", ltLErr
   Resume Next
 End Function
 
@@ -596,8 +596,8 @@ Private Function LintFileIsEvent(ByVal fName As String, ByVal tL As String) As B
   LintFileIsEvent = LintFileIsEvent Or IsInStr(fName, "_ZipThreadDone")
 End Function
 
-Private Function LintFileNaming(ByVal FileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
-  Dim LNo As String
+Private Function LintFileNaming(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+  Dim LNo As Long
   Dim A As Long, N As Long, I As Long, tE As String
   Dim OL As String, L As String, tL As String
   Dim fName As String, vArgs As String, AName As String, vDef As String
@@ -608,12 +608,12 @@ Private Function LintFileNaming(ByVal FileName As String, Optional ByRef ErrStr 
   Dim Decl As Variant
   Dim FixFile As String, LineFixes As String
   
-  If AutoFix Then FixFile = AutoFixInit(FileName)
+  If AutoFix Then FixFile = AutoFixInit(tFileName)
   
-  N = CountFileLines(FileName)
-  A = LintModuleFirstLine(FileName)
+  N = CountFileLines(tFileName)
+  A = LintModuleFirstLine(tFileName)
   For I = A To N
-    OL = ReadFile(FileName, I, 1)
+    OL = ReadFile(tFileName, I, 1)
     L = DeComment(OL)
     tL = LTrim(L)
     LNo = I - A + 1
@@ -652,7 +652,7 @@ Private Function LintFileNaming(ByVal FileName As String, Optional ByRef ErrStr 
       fName = Replace(fName, "Set ", "")
       
       If Not LintFileTestName(fName, tE) Then
-        AddErrStr ErrStr, FileName, LNo, OL, tE, ltVarN
+        AddErrStr ErrStr, tFileName, LNo, OL, tE, ltVarN
         LineFixes = AddLineFixes(LineFixes, " " & tE, " " & LintStandardNaming(tE))
       End If
       
@@ -662,11 +662,11 @@ Private Function LintFileNaming(ByVal FileName As String, Optional ByRef ErrStr 
         If Left(vRetType, 3) = "As " Then
           vRetType = Mid(vRetType, 4)
           If Not LintFileTestType(vRetType, tE) Then
-            AddErrStr ErrStr, FileName, LNo, OL, tE, ltType
+            AddErrStr ErrStr, tFileName, LNo, OL, tE, ltType
           End If
         Else
           If IsNotInStr(OL, "Sub ") And Right(OL, 1) <> "_" And Not isLet And Not isSet Then
-            AddErrStr ErrStr, FileName, LNo, OL, "No Return Type On Func/Prop", ltNTyp
+            AddErrStr ErrStr, tFileName, LNo, OL, "No Return Type On Func/Prop", ltNTyp
           End If
         End If
         vArgs = SplitWord(DeString(tL), 1, ":")
@@ -683,13 +683,13 @@ Private Function LintFileNaming(ByVal FileName As String, Optional ByRef ErrStr 
           If LMatch(Decl, "Optional ") Then
             vDef = SplitWord(Decl, 2, " = ")
             If vDef = "" Then
-              AddErrStr ErrStr, FileName, LNo, OL, "Parameter declared OPTIONAL but no default specified. Must specify default.", ltNOpD
+              AddErrStr ErrStr, tFileName, LNo, OL, "Parameter declared OPTIONAL but no default specified. Must specify default.", ltNOpD
             End If
             Decl = Trim(Replace(Decl, "Optional ", ""))
           End If
           
           If Not LMatch(Decl, "ByVal ") And Not LMatch(Decl, "ByRef ") And Not LMatch(Decl, "ParamArray ") Then
-            AddErrStr ErrStr, FileName, LNo, OL, "Neither ByVal nor ByRef are specified. Must Specify one or other.", ltDECL
+            AddErrStr ErrStr, tFileName, LNo, OL, "Neither ByVal nor ByRef are specified. Must Specify one or other.", ltDECL
             LineFixes = AddLineFixes(LineFixes, Replace(Decl, "_", ""), "ByRef " & Replace(Decl, "_", ""))
           Else
             Decl = Replace(Decl, "ByRef ", "")
@@ -700,15 +700,15 @@ Private Function LintFileNaming(ByVal FileName As String, Optional ByRef ErrStr 
           
           vName = SplitWord(Decl, 1, " As ")
           If Not LintFileTestArgN(vName, tE) Then
-            AddErrStr ErrStr, FileName, LNo, OL, tE, ltArgN
+            AddErrStr ErrStr, tFileName, LNo, OL, tE, ltArgN
           End If
           
           vType = SplitWord(Decl, 2, " As ")
           If vType = "" Then
-            AddErrStr ErrStr, FileName, LNo, OL, "No Param Type on Func/Sub/Prop", ltNTyp
+            AddErrStr ErrStr, tFileName, LNo, OL, "No Param Type on Func/Sub/Prop", ltNTyp
           End If
           If Not LintFileTestType(vType, tE) Then
-            AddErrStr ErrStr, FileName, LNo, OL, tE, ltType
+            AddErrStr ErrStr, tFileName, LNo, OL, tE, ltType
           End If
           
 IgnoreParam:
@@ -732,16 +732,16 @@ IgnoreParam:
         vName = Trim(SplitWord(Decl, 1, " As "))
         vName = Trim(SplitWord(vName, 1, " = "))
         If Not LintFileTestName(vName, tE) Then
-          AddErrStr ErrStr, FileName, LNo, OL, tE, ltArgN
+          AddErrStr ErrStr, tFileName, LNo, OL, tE, ltArgN
           LineFixes = AddLineFixes(LineFixes, vName, LintStandardNaming(vName))
         End If
         If IsNotInStr(OL, "Enum ") And IsNotInStr(OL, "Type ") Then
           vType = Trim(SplitWord(Decl, 2, " As "))
           If Not LMatch(vName, "Event ") Then
-            If vType = "" Then AddErrStr ErrStr, FileName, LNo, OL, "No Type on Decl", ltNTyp
+            If vType = "" Then AddErrStr ErrStr, tFileName, LNo, OL, "No Type on Decl", ltNTyp
           End If
           If Not LintFileTestType(vType, tE) Then
-            AddErrStr ErrStr, FileName, LNo, OL, tE, ltType
+            AddErrStr ErrStr, tFileName, LNo, OL, tE, ltType
           End If
         End If
       Next
@@ -752,12 +752,12 @@ SkipLine:
     If AutoFix Then AutoFixLine FixFile, OL, LineFixes
   Next
   
-  If AutoFix Then AutoFixFinalize FileName, FixFile
+  If AutoFix Then AutoFixFinalize tFileName, FixFile
   
   LintFileNaming = ErrStr = ""
 End Function
 
-Private Function LintFileControlNaming(ByVal FileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Private Function LintFileControlNaming(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
   Const MaxCtrl As Long = 128
   Dim LNo As Long
   Dim Contents As String, I As Long
@@ -766,7 +766,7 @@ Private Function LintFileControlNaming(ByVal FileName As String, Optional ByRef 
   Dim CtlName As String, ErrMsg As String
   Dim cUnique As Collection, Reported As Variant
   
-  Contents = ReadEntireFile(FileName)
+  Contents = ReadEntireFile(tFileName)
   Set cUnique = New Collection
   
   Dim vTypes() As Variant
@@ -789,7 +789,7 @@ Private Function LintFileControlNaming(ByVal FileName As String, Optional ByRef 
       
         If CtlName <> "" And Reported = "" Then
           ErrMsg = "Default Control Name in use: " & CtlName & ".  Rename Control."
-          AddErrStr ErrStr, FileName, LNo, "", ErrMsg, ltCtlN
+          AddErrStr ErrStr, tFileName, LNo, "", ErrMsg, ltCtlN
         End If
       Next
     End If
@@ -798,8 +798,8 @@ Private Function LintFileControlNaming(ByVal FileName As String, Optional ByRef 
   LintFileControlNaming = ErrStr = ""
 End Function
 
-Public Function LintFileBadCode(ByVal FileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
-  Dim LNo As String
+Public Function LintFileBadCode(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+  Dim LNo As Long
   Dim A As Long, N As Long, I As Long, tE As String
   Dim OL As String, L As String, tL As String
   Dim fName As String, vArgs As String, AName As String, vDef As String
@@ -809,21 +809,21 @@ Public Function LintFileBadCode(ByVal FileName As String, Optional ByRef ErrStr 
   Dim Decl As Variant
   Dim FixFile As String, LineFixes As String
   
-  If AutoFix Then FixFile = AutoFixInit(FileName)
+  If AutoFix Then FixFile = AutoFixInit(tFileName)
   
-  N = CountFileLines(FileName)
-  A = LintModuleFirstLine(FileName)
+  N = CountFileLines(tFileName)
+  A = LintModuleFirstLine(tFileName)
   For I = A To N
-    OL = ReadFile(FileName, I, 1)
+    OL = ReadFile(tFileName, I, 1)
     L = DeComment(OL)
     tL = LTrim(L)
     LNo = I - A + 1
     LineFixes = ""
     If Continued Then GoTo SkipLine
     
-    If RegExTest(tL, "\.Enabled = [-0-9]") Then AddErrStr ErrStr, FileName, LNo, OL, "Property [Enabled] Should Be Boolean.  Numeric found.", ltType
-    If RegExTest(tL, "\.Visible = [-0-9]") Then AddErrStr ErrStr, FileName, LNo, OL, "Property [Visible] Should Be Boolean.  Numeric found.", ltType
-    If RegExTest(" " & tL, "[^a-zA-Z0-0]Me[.][^ ]") Then AddErrStr ErrStr, FileName, LNo, OL, "Self Reference [Me.*] is unnecessary.", ltSelf '@NO-LINT
+    If RegExTest(tL, "\.Enabled = [-0-9]") Then AddErrStr ErrStr, tFileName, LNo, OL, "Property [Enabled] Should Be Boolean.  Numeric found.", ltType
+    If RegExTest(tL, "\.Visible = [-0-9]") Then AddErrStr ErrStr, tFileName, LNo, OL, "Property [Visible] Should Be Boolean.  Numeric found.", ltType
+    If RegExTest(" " & tL, "[^a-zA-Z0-0]Me[.][^ ]") Then AddErrStr ErrStr, tFileName, LNo, OL, "Self Reference [Me.*] is unnecessary.", ltSelf '@NO-LINT
   
 SkipLine:
     Continued = (Right(L, 2) = " _")

@@ -7,7 +7,6 @@ using static modProjectFiles;
 using static modRegEx;
 using static modSubTracking;
 using static modUtils;
-using static VBExtension;
 
 
 static class modVB6ToCS

@@ -19,7 +19,7 @@ On Error Resume Next
   INIRead = Left(sRet, GetPrivateProfileString(sSection, ByVal sKeyName, "", sRet, Len(sRet), sINIFileName))
 End Function
 
-Public Function INISections(ByVal FileName As String) As String()
+Public Function INISections(ByVal tFileName As String) As String()
 On Error Resume Next
   Dim strBuffer As String, intLen As Long
 
@@ -30,7 +30,7 @@ On Error Resume Next
       strBuffer = String(Len(strBuffer) * 2, 0)
     End If
     
-    intLen = GetPrivateProfileSectionNames(strBuffer, Len(strBuffer), FileName)
+    intLen = GetPrivateProfileSectionNames(strBuffer, Len(strBuffer), tFileName)
   Loop
   
   strBuffer = Left(strBuffer, intLen)
@@ -38,7 +38,7 @@ On Error Resume Next
   ReDim Preserve INISections(UBound(INISections) - 1) As String
 End Function
 
-Public Function INISectionKeys(ByVal FileName As String, ByVal Section As String) As String()
+Public Function INISectionKeys(ByVal tFileName As String, ByVal Section As String) As String()
 On Error Resume Next
   Dim strBuffer As String, intLen As Long
   Dim I As Long, N As Long
@@ -51,7 +51,7 @@ On Error Resume Next
       strBuffer = String(Len(strBuffer) * 2, 0)
     End If
     
-    intLen = GetPrivateProfileSection(Section, strBuffer, Len(strBuffer), FileName)
+    intLen = GetPrivateProfileSection(Section, strBuffer, Len(strBuffer), tFileName)
     If intLen = 0 Then Exit Function
   Loop
   
@@ -63,7 +63,7 @@ On Error Resume Next
     If N > 0 Then
       RET(I) = Left(RET(I), N - 1)
     Else
-      Debug.Print "modINI.INISectionKeys - No '=' character found in line.  Section=" & Section & ", Line=" & RET(I) & ", file=" & FileName
+      Debug.Print "modINI.INISectionKeys - No '=' character found in line.  Section=" & Section & ", Line=" & RET(I) & ", file=" & tFileName
     End If
   Next
   INISectionKeys = RET
