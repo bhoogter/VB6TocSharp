@@ -33,6 +33,7 @@ Module=modGit; modGit.bas
 Module=modDirStack; modDirStack.bas
 Module=modShell; modShell.bas
 Module=modTestCases; modTestCases.bas
+UserControl=ctlTestCase.ctl
 IconForm="frm"
 Startup="frm"
 HelpFile=""

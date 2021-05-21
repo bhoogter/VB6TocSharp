@@ -46,7 +46,7 @@ Public Function ConvertFile(ByVal someFile As String, Optional ByVal UIOnly As B
     Case ".bas": ConvertFile = ConvertModule(someFile)
     Case ".cls": ConvertFile = ConvertClass(someFile)
     Case ".frm": FormName = FileBaseName(someFile): ConvertFile = ConvertForm(someFile, UIOnly)
-'      Case ".ctl": ConvertModule  someFile
+    Case ".ctl": ConvertFile = ConvertUserControl(someFile)
     Case Else: MsgBox "UNKNOWN VB TYPE: " & someFile: Exit Function
   End Select
   FormName = ""
@@ -136,6 +136,38 @@ Public Function ConvertModule(ByVal basFile As String)
   X = deWS(X)
   
   WriteOut F, X, basFile
+End Function
+
+Public Function ConvertUserControl(ByVal ctlFile As String)
+  Dim S As String, J As Long, Code As String, Globals As String, Functions As String
+  Dim F As String, X As String, fName As String
+  If Not FileExists(ctlFile) Then
+    MsgBox "File not found in ConvertModule: " & ctlFile
+    Exit Function
+  End If
+  S = ReadEntireFile(ctlFile)
+  fName = ModuleName(S)
+  CurrentModule = fName
+  F = fName & ".cs"
+  If IsConverted(F, ctlFile) Then Debug.Print "Module Already Converted: " & F: Exit Function
+  
+  fName = ModuleName(S)
+  Code = Mid(S, CodeSectionLoc(S))
+  
+  J = CodeSectionGlobalEndLoc(Code)
+  Globals = ConvertGlobals(Left(Code, J - 1), True)
+  Functions = ConvertCodeSegment(Mid(Code, J), True)
+  
+  X = ""
+  X = X & UsingEverything(fName) & vbCrLf
+  X = X & vbCrLf
+  X = X & "static class " & fName & " {" & vbCrLf
+  X = X & nlTrim(Globals & vbCrLf & vbCrLf & Functions)
+  X = X & vbCrLf & "}"
+  
+  X = deWS(X)
+  
+  WriteOut F, X, ctlFile
 End Function
 
 Public Function ConvertClass(ByVal clsFile As String)
