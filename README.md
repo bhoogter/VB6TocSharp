@@ -8,7 +8,7 @@ Free to use.  Free to fork.  Free to contribute.  Free to ask about.  Free to se
 
 ## Quick Start
 
-1. Open the file `prj.vbp`, start the program.
+1. Open the file `prj.vbp`, start the program (Requires the VB6 IDE).
 1. Enter some config values into the `Config` form via the button.
 1. Now that you have selected your project, click the `SCAN` button.  This helps the converted know the difference between Methods without parenthesis and variables/constants.  It also builds a full list of imports (which can be cleaned up in the VS 2019 IDE via ^K^E).
 1. If you want, click `SUPPORT` to generate the basic project support structure.
