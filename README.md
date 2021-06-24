@@ -27,6 +27,8 @@ Whether you use this converter or not, we give our solution to commonly encounte
 
 ## Requirements
 
+- The converter runs in the VB6 IDE.  You know, the IDE of the program you're trying to convert.
+
 - Visual Studio supporting some relatively modern version of C#.  Or alternate.
 - [Visual Basic Power Packs 2005 (v3.0)](https://www.microsoft.com/en-us/download/details.aspx?id=25169)
     - Allows use of Standard VB functions like `Mid`, `Trim`, `Abs`, `DateDiff`, etc, directly in C# code.
