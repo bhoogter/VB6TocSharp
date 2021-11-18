@@ -26,7 +26,7 @@ Public Function CreateProjectSupportFiles() As Boolean
   GeneratePropertiesFiles
 End Function
 
-Public Function GeneratePropertiesFiles()
+Public Function GeneratePropertiesFiles() As Boolean
   Dim S As String
   S = OutputFolder()
   S = S & "Properties\"
@@ -39,7 +39,7 @@ Public Function GeneratePropertiesFiles()
   WriteOut "Properties\Resources.resx", ResourcesResxFile, "Properties"
   WriteOut "Properties\Resources.Designer.cs", ResourcesDesignerCsFile, "Properties"
 
-ResourcesResxFile
+  ResourcesResxFile
 End Function
 
 Public Function ApplicationXAML() As String
@@ -60,9 +60,9 @@ End Function
 
 
 
-Public Function CreateProjectFile(ByVal vbpFile As String)
+Public Function CreateProjectFile(ByVal vbpFile As String) As String
   Dim S As String, M As String, N As String
-  Dim L
+  Dim L As Variant
   S = ""
   M = ""
   N = vbCrLf
@@ -137,15 +137,15 @@ Public Function CreateProjectFile(ByVal vbpFile As String)
   S = S & N & "    </Compile>"
   
   For Each L In Split(VBPForms(vbpFile), vbCrLf)
-  If L = "" Then GoTo SkipForm
-  S = S & N & "    <Page Include=""" & OutputSubFolder(L) & ChgExt(L, ".xaml") & """>"
-  S = S & N & "      <SubType>Designer</SubType>"
-  S = S & N & "      <Generator>MSBuild:Compile</Generator>"
-  S = S & N & "    </Page>"
-  S = S & N & "    <Compile Include=""" & OutputSubFolder(L) & ChgExt(L, ".xaml.cs") & """>"
-  S = S & N & "      <DependentUpon>" & ChgExt(L, ".xaml") & "</DependentUpon>"
-  S = S & N & "      <SubType>Code</SubType>"
-  S = S & N & "    </Compile>"
+    If L = "" Then GoTo SkipForm
+    S = S & N & "    <Page Include=""" & OutputSubFolder(L) & ChgExt(L, ".xaml") & """>"
+    S = S & N & "      <SubType>Designer</SubType>"
+    S = S & N & "      <Generator>MSBuild:Compile</Generator>"
+    S = S & N & "    </Page>"
+    S = S & N & "    <Compile Include=""" & OutputSubFolder(L) & ChgExt(L, ".xaml.cs") & """>"
+    S = S & N & "      <DependentUpon>" & ChgExt(L, ".xaml") & "</DependentUpon>"
+    S = S & N & "      <SubType>Code</SubType>"
+    S = S & N & "    </Compile>"
 SkipForm:
   Next
 
@@ -153,8 +153,8 @@ SkipForm:
   S = S & N & "    <Compile Include=""VBExtension.cs"" />"
   S = S & N & "    <Compile Include=""VBConstants.cs"" />"
   For Each L In Split(VBPClasses(vbpFile) & vbCrLf & VBPModules(vbpFile), vbCrLf)
-If L = "" Then GoTo SkipClass
-  S = S & N & "    <Compile Include=""" & OutputSubFolder(L) & ChgExt(L, ".cs") & """ />"
+    If L = "" Then GoTo SkipClass
+    S = S & N & "    <Compile Include=""" & OutputSubFolder(L) & ChgExt(L, ".cs") & """ />"
 SkipClass:
   Next
   
@@ -227,7 +227,7 @@ Public Function AppConfigFile() As String
 End Function
 
 Public Function AppXamlCsFile() As String
- Dim R As String, M As String, N As String
+  Dim R As String, M As String, N As String
   R = "": M = "": N = vbCrLf
   
   R = R & M & "using System;"
@@ -301,7 +301,7 @@ Public Function SettingsDesignerCsFile() As String
   SettingsDesignerCsFile = R
 End Function
 
-Public Function AssemblyInfoFile()
+Public Function AssemblyInfoFile() As String
   Dim R As String, M As String, N As String
   R = "": M = "": N = vbCrLf
   
@@ -364,7 +364,7 @@ Public Function AssemblyInfoFile()
   AssemblyInfoFile = R
 End Function
 
-Public Function ResourcesResxFile()
+Public Function ResourcesResxFile() As String
   Dim R As String, M As String, N As String
   R = "": M = "": N = vbCrLf
   
@@ -490,7 +490,7 @@ Public Function ResourcesResxFile()
   ResourcesResxFile = R
 End Function
 
-Public Function ResourcesDesignerCsFile()
+Public Function ResourcesDesignerCsFile() As String
   Dim R As String, M As String, N As String
   R = "": M = "": N = vbCrLf
   

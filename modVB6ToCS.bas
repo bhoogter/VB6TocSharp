@@ -3,8 +3,7 @@ Option Explicit
 
 Public Function ConvertDefaultDefault(ByVal DType As String) As String
   Select Case DType
-    Case "Integer", "Long", "Double", "Currency", "Byte", "Single"
-                      ConvertDefaultDefault = 0
+    Case "Integer", "Long", "Double", "Currency", "Byte", "Single": ConvertDefaultDefault = 0
     Case "Date":      ConvertDefaultDefault = "DateTime.MinValue"
     Case "String":    ConvertDefaultDefault = """"""
     Case "Boolean":   ConvertDefaultDefault = "false"
@@ -14,8 +13,7 @@ End Function
 
 Public Function ConvertDataType(ByVal S As String) As String
   Select Case S
-    Case "Object", "Any", "Variant", "Variant()":
-                                  ConvertDataType = DefaultDataType
+    Case "Object", "Any", "Variant", "Variant()": ConvertDataType = DefaultDataType
     Case "Form", "Control":       ConvertDataType = "Window"
     Case "String":                ConvertDataType = "string"
     Case "String()":              ConvertDataType = "List<string>"
@@ -33,13 +31,9 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "FindResults":           ConvertDataType = "FindResults"
     Case "Pushpin":               ConvertDataType = "Pushpin"
     Case "Map":                   ConvertDataType = "Map"
-    
     Case "Node":                  ConvertDataType = "TreeViewItem"
-    
-    Case "Recordset", "ADODB.Recordset":
-                                  ConvertDataType = "Recordset"
-    Case "Connection", "ADODB.Connection":
-                                  ConvertDataType = "Connection"
+    Case "Recordset", "ADODB.Recordset": ConvertDataType = "Recordset"
+    Case "Connection", "ADODB.Connection": ConvertDataType = "Connection"
     Case "ADODB.Error":           ConvertDataType = "ADODB.Error"
     Case "ADODB.EventStatusEnum": ConvertDataType = "ADODB.EventStatusEnum"
     Case "SpeechLib.SpeechEngineConfidence", "SpeechLib.SpeechRecognitionType", "SpeechLib.ISpeechRecoResult", _
@@ -50,13 +44,13 @@ Public Function ConvertDataType(ByVal S As String) As String
     Case "VbMsgBoxResult", "VbCompareMethod", "AlignConstants", _
          "stdole.IUnknown", "olelib.UUID", "olelib.STGMEDIUM", "olelib.FORMATETC", "olelib.BSCF", "olelib.IBinding", _
          "olelib.BINDINFO", "olelib.BINDF", "olelib.BINDSTATUS"
-                                  ConvertDataType = S
+      ConvertDataType = S
     Case "XCTransaction2.XChargeTransaction", "PINPad"
-                                  ConvertDataType = S
+      ConvertDataType = S
     Case "PictureBox", "Textbox", "Command", "ListBox", "ComboBox"
-                                  ConvertDataType = S
+      ConvertDataType = S
     Case "MSCommLib.MSComm"
-                                  ConvertDataType = S
+      ConvertDataType = S
             
     Case Else
       If IsInStr(VBPClasses(ClassNames:=True), S) Then
@@ -68,7 +62,7 @@ Public Function ConvertDataType(ByVal S As String) As String
   End Select
 End Function
 
-Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef Cont As Boolean, ByRef Def As String, ByRef Features As String)
+Public Sub ControlData(ByVal cType As String, ByRef Name As String, ByRef Cont As Boolean, ByRef Def As String, ByRef Features As String)
   Cont = False
   Def = "Caption"
   Select Case cType
@@ -144,10 +138,10 @@ Public Function ControlData(ByVal cType As String, ByRef Name As String, ByRef C
       Debug.Print "Unknown Control Type: " & cType
       Name = "Label"
   End Select
-End Function
+End Sub
 
  
-Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As Boolean)
+Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As Boolean = False) As String
   Dim W As String, R As String
   
   Select Case Trim(S)
@@ -179,11 +173,11 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "vbAlignTop":    S = "AlignConstants.vbAlignTop"
     Case "vbAlignBottom": S = "AlignConstants.vbAlignBottom"
     Case "RaiseEvent":
-                          Complete = True
-                          W = RegExNMatch(R, patToken)
-                          R = Mid(R, Len(W) + 1)
-                          If R = "" Then R = "()"
-                          S = "event" & W & "?.Invoke" & R & ";"
+      Complete = True
+      W = RegExNMatch(R, patToken)
+      R = Mid(R, Len(W) + 1)
+      If R = "" Then R = "()"
+      S = "event" & W & "?.Invoke" & R & ";"
     Case "ReDim":
       Complete = True
       Dim RedimPres As Boolean, RedimVar As String, RedimTyp As String, RedimTmp As String, RedimMax As String, RedimIter As String
@@ -234,10 +228,10 @@ Public Function ConvertVb6Syntax(ByVal S As String) As String
     Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"
     Case "New":           S = "new " & R & "()"
     Case "RaiseEvent":
-                          W = RegExNMatch(R, patToken)
-                          R = Mid(R, Len(W) + 1)
-                          If R = "" Then R = "()"
-                          S = "event" & W & "?.Invoke" & R
+      W = RegExNMatch(R, patToken)
+      R = Mid(R, Len(W) + 1)
+      If R = "" Then R = "()"
+      S = "event" & W & "?.Invoke" & R
   End Select
   
   ConvertVb6Syntax = S

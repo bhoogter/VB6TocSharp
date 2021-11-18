@@ -111,19 +111,19 @@ Private Sub cmdOK_Click()
   Unload Me
 End Sub
 
-Private Sub txtOutput_Validate(Cancel As Boolean)
+Private Sub txtOutput_Validate(ByRef Cancel As Boolean)
   If Dir(txtOutput, vbDirectory) = "" Then
     MsgBox "Output folder does not exist.  Please create to prevent errors."
   End If
 End Sub
 
-Private Sub txtVBPFile_Validate(Cancel As Boolean)
+Private Sub txtVBPFile_Validate(ByRef Cancel As Boolean)
   If Dir(txtVBPFile) = "" Then
     MsgBox "Project file does not exist.  Please give a valid project to prevent errors."
   End If
 End Sub
 
-Private Sub txtAssemblyName_Validate(Cancel As Boolean)
+Private Sub txtAssemblyName_Validate(ByRef Cancel As Boolean)
   If txtAssemblyName = "" Then
     MsgBox "Please enter something for an assembly name."
   End If

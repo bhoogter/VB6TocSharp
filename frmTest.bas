@@ -38,35 +38,35 @@ Public Function TestCase() As String
   TestCase = A
 End Function
 
-Public Function TestCase2()
+Public Function TestCase2() As String
   Dim A As String, N As String, M As String
   A = "": M = "": N = vbCrLf
   
-A = A & N & "Public Function DescribeColor(ByVal RGB As Long) As String"
-A = A & N & "  Dim R As Long, G As Long, B As Long"
-A = A & N & "  Select Case RGB"
-A = A & N & "    Case vbBlack:     DescribeColor = ""BLACK"""
-A = A & N & "    Case vbBlue:      DescribeColor = ""BLUE"""
-A = A & N & "    Case vbCyan:      DescribeColor = ""CYAN"""
-A = A & N & "    Case vbGreen:     DescribeColor = ""GREEN"""
-A = A & N & "    Case vbMagenta:   DescribeColor = ""MAGENTA"""
-A = A & N & "    Case vbRed:       DescribeColor = ""RED"""
-A = A & N & "    Case vbWhite:     DescribeColor = ""WHITE"""
-A = A & N & "    Case vbYellow:    DescribeColor = ""YELLOW"""
-A = A & N & ""
-A = A & N & "    Case Else"
-A = A & N & "      DescribeColor = ""OTHER"""
-A = A & N & "      R = RGB And 255"
-A = A & N & "      G = (RGB And 65280) / 256"
-A = A & N & "      B = (RGB And 16711680) / 65536"
-A = A & N & "      DescribeColor = DescribeColor & "" (R:"" & R & "",G:"" & G & "",:"" & B & "")"""
-A = A & N & "  End Select"
-A = A & N & ""
-A = A & N & " ' If SingleLineIf Then DoSomeStuff: AndMore()"
-A = A & N & ""
-A = A & N & "GotoLabel:"
-A = A & N & "  SomeFunction()"
-A = A & N & "End Function"
+  A = A & N & "Public Function DescribeColor(ByVal RGB As Long) As String"
+  A = A & N & "  Dim R As Long, G As Long, B As Long"
+  A = A & N & "  Select Case RGB"
+  A = A & N & "    Case vbBlack:     DescribeColor = ""BLACK"""
+  A = A & N & "    Case vbBlue:      DescribeColor = ""BLUE"""
+  A = A & N & "    Case vbCyan:      DescribeColor = ""CYAN"""
+  A = A & N & "    Case vbGreen:     DescribeColor = ""GREEN"""
+  A = A & N & "    Case vbMagenta:   DescribeColor = ""MAGENTA"""
+  A = A & N & "    Case vbRed:       DescribeColor = ""RED"""
+  A = A & N & "    Case vbWhite:     DescribeColor = ""WHITE"""
+  A = A & N & "    Case vbYellow:    DescribeColor = ""YELLOW"""
+  A = A & N & ""
+  A = A & N & "    Case Else"
+  A = A & N & "      DescribeColor = ""OTHER"""
+  A = A & N & "      R = RGB And 255"
+  A = A & N & "      G = (RGB And 65280) / 256"
+  A = A & N & "      B = (RGB And 16711680) / 65536"
+  A = A & N & "      DescribeColor = DescribeColor & "" (R:"" & R & "",G:"" & G & "",:"" & B & "")"""
+  A = A & N & "  End Select"
+  A = A & N & ""
+  A = A & N & " ' If SingleLineIf Then DoSomeStuff: AndMore()"
+  A = A & N & ""
+  A = A & N & "GotoLabel:"
+  A = A & N & "  SomeFunction()"
+  A = A & N & "End Function"
   
   TestCase2 = SanitizeCode(A)
 End Function
@@ -136,7 +136,7 @@ Public Function TestCaseFrm2() As String
   Dim S As String, N As String, M As String
   S = "": N = vbCrLf: M = ""
   S = ""
-    S = S & N & "VERSION 5.00"
+  S = S & N & "VERSION 5.00"
   S = S & N & "Object = ""{86CF1D34-0C5F-11D2-A9FC-0000F8754DA1}#2.0#0""; ""Mscomct2.ocx"""
   S = S & N & "Begin VB.Form ARPaySetUp "
   S = S & N & "   BorderStyle     =   1  'Fixed Single"

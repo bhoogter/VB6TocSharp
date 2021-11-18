@@ -22,7 +22,7 @@ On Error Resume Next
 End Function
 
 Public Function ScanRefs() As Long
-  Dim L, T As String, LL As String
+  Dim L As Variant, T As String, LL As String
 On Error Resume Next
   OutRes = ""
   ScanRefs = 0
@@ -59,7 +59,7 @@ End Function
 
 Private Function ScanRefsFile(ByVal FN As String) As Long
   Dim M As String
-  Dim S As String, L As String, LL
+  Dim S As String, L As String, LL As Variant
   Dim F As String, G As String
   Dim Cont As Boolean, DoCont As Boolean
   Dim CurrEnum As String
@@ -153,7 +153,7 @@ End Function
 
 
 Private Sub InitFuncs()
-  Dim S As String, L
+  Dim S As String, L As Variant
   If Dir(RefList) = "" Then ScanRefs
   If Not (Funcs Is Nothing) Then Exit Sub
   S = ReadEntireFile(RefList)
@@ -165,7 +165,7 @@ On Error Resume Next
   InitLocalFuncs
 End Sub
 
-Public Sub InitLocalFuncs(Optional ByVal S As String)
+Public Sub InitLocalFuncs(Optional ByVal S As String = "")
 On Error Resume Next
   Dim L As Variant
   Set LocalFuncs = New Collection
@@ -206,9 +206,9 @@ Public Function IsFuncRef(ByVal fName As String) As Boolean
 End Function
 
 Public Function IsPrivateFuncRef(ByVal Module As String, ByVal fName As String) As Boolean
-  Dim tName As String
-  tName = Trim(Module) & "." & Trim(fName)
-  IsPrivateFuncRef = FuncRef(tName) <> "" And FuncRefEntity(tName) = "Private Function"
+  Dim TName As String
+  TName = Trim(Module) & "." & Trim(fName)
+  IsPrivateFuncRef = FuncRef(TName) <> "" And FuncRefEntity(TName) = "Private Function"
 End Function
 
 Public Function IsEnumRef(ByVal fName As String) As Boolean
@@ -227,7 +227,7 @@ Public Function IsModuleRef(ByVal fName As String) As Boolean
   IsModuleRef = FuncRef(T) <> "" And FuncRefEntity(T) = "Module"
 End Function
 
-Public Function IsControlRef(ByVal Src As String, Optional ByVal FormName As String) As Boolean
+Public Function IsControlRef(ByVal Src As String, Optional ByVal FormName As String = "") As Boolean
   Dim Tok As String, Tok2 As String
   Dim FTok As String, TTok As String
   Tok = RegExNMatch(Src, patToken)
@@ -308,7 +308,7 @@ Public Function FormRefRepl(ByVal fName As String) As String
   FormRefRepl = Replace(fName, T, U)
 End Function
 
-Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As String) As String
+Public Function FormControlRepl(ByVal Src As String, Optional ByVal FormName As String = "") As String
   Dim Tok As String, Tok2 As String, Tok3 As String
   Dim F As String, V As String
   Tok = RegExNMatch(Src, patToken)

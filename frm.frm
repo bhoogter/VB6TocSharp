@@ -237,7 +237,7 @@ Private Function ConfigValid() As Boolean
   ConfigValid = True
 End Function
 
-Private Sub IsWorking(Optional ByVal Done As Boolean)
+Private Sub IsWorking(Optional ByVal Done As Boolean = False)
   txtFile.Enabled = Done
   cmdConfig.Enabled = Done
   cmdLint.Enabled = Done
@@ -253,7 +253,7 @@ Private Sub IsWorking(Optional ByVal Done As Boolean)
   MousePointer = IIf(Done, vbDefault, vbHourglass)
 End Sub
 
-Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#")
+Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#") As String
 On Error Resume Next
   If Max >= 0 Then pMax = Max
   lblPrg = IIf(Prg = "#", "", Cap)
@@ -264,7 +264,7 @@ End Function
 
 Private Sub cmdLint_Click()
   If Not ConfigValid Then Exit Sub
-  LintFolder
+  frmLinter.Show vbModal
 End Sub
 
 Private Sub cmdScan_Click()

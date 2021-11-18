@@ -172,7 +172,7 @@ Public Function nextByP(ByVal Src As String, Optional ByVal Del As String = """"
   End If
 End Function
 
-Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String) As String
+Public Function NextByOp(ByVal Src As String, Optional ByVal Ind As Long = 1, Optional ByRef Op As String = "") As String
   Dim A As String, S As String, D As String, M As String, C As String, E As String, I As String
   Dim cNE As String, cLT As String, cGT As String, cLE As String, cGE As String, cEQ As String
   Dim lA As String, lO As String, lM As String, LL As String
@@ -260,7 +260,7 @@ Public Function SplitWord(ByVal Source As String, Optional ByVal N As Long = 1, 
 ':  String
 ':::SEE ALSO
 ': Split, CountWords
-  Dim S, I As Long
+  Dim S() As String, I As Long
   N = N - 1
   If Source = "" Then Exit Function
   S = Split(Source, Space)
@@ -292,7 +292,7 @@ Public Function CountWords(ByVal Source As String, Optional ByVal Space As Strin
 ':  String
 ':::SEE ALSO
 ': SplitWord
-  Dim L
+  Dim L As Variant
 ' Count actual words.  Blank spaces don't count, before, after, or in the middle.
 ' Only a simple split and loop--there may be faster ways...
   For Each L In Split(Source, Space)
@@ -300,9 +300,9 @@ Public Function CountWords(ByVal Source As String, Optional ByVal Space As Strin
   Next
 End Function
 
-Public Function ArrSlice(ByRef sourceArray, ByVal fromIndex As Long, ByVal toIndex As Long)
+Public Function ArrSlice(ByRef sourceArray As Variant, ByVal fromIndex As Long, ByVal toIndex As Long) As Variant
   Dim Idx As Long
-  Dim tempList()
+  Dim tempList() As Variant
   
   If Not IsArray(sourceArray) Then Exit Function
   
@@ -316,7 +316,7 @@ Public Function ArrSlice(ByRef sourceArray, ByVal fromIndex As Long, ByVal toInd
   ArrSlice = tempList
 End Function
 
-Public Sub ArrAdd(ByRef Arr(), ByRef Item)
+Public Sub ArrAdd(ByRef Arr() As Variant, ByRef Item As Variant)
   Dim X As Long
   Err.Clear
 On Error Resume Next
@@ -328,11 +328,11 @@ On Error Resume Next
   ReDim Preserve Arr(UBound(Arr) + 1)
   Arr(UBound(Arr)) = Item
 End Sub
-Public Function SubArr(ByVal sourceArray, ByVal fromIndex As Long, ByVal copyLength As Long)
+Public Function SubArr(ByVal sourceArray As Variant, ByVal fromIndex As Long, ByVal copyLength As Long) As Variant
   SubArr = ArrSlice(sourceArray, fromIndex, fromIndex + copyLength - 1)
 End Function
 
-Public Function InRange(ByVal LBnd, ByVal CHK, ByVal UBnd, Optional ByVal IncludeBounds As Boolean = True) As Boolean
+Public Function InRange(ByVal LBnd As Variant, ByVal CHK As Variant, ByVal UBnd As Variant, Optional ByVal IncludeBounds As Boolean = True) As Boolean
 On Error Resume Next  ' because we're doing this as variants..
   If IncludeBounds Then
     InRange = (CHK >= LBnd) And (CHK <= UBnd)
@@ -341,7 +341,7 @@ On Error Resume Next  ' because we're doing this as variants..
   End If
 End Function
 
-Public Function FitRange(ByVal LBnd, ByVal CHK, ByVal UBnd)
+Public Function FitRange(ByVal LBnd As Variant, ByVal CHK As Variant, ByVal UBnd As Variant) As Variant
 On Error Resume Next
   If CHK < LBnd Then
     FitRange = LBnd
@@ -366,7 +366,7 @@ Public Function CodeSectionLoc(ByVal S As String) As Long
   CodeSectionLoc = N
 End Function
 
-Public Function CodeSectionGlobalEndLoc(ByVal S As String)
+Public Function CodeSectionGlobalEndLoc(ByVal S As String) As Long
   Do
     CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc + RegExNPos(Mid(S, CodeSectionGlobalEndLoc + 1), "([^a-zA-Z0-9_]Function |[^a-zA-Z0-9_]Sub |[^a-zA-Z0-9_]Property )") + 1
     If CodeSectionGlobalEndLoc = 1 Then CodeSectionGlobalEndLoc = Len(S): Exit Function
@@ -388,7 +388,7 @@ Public Function isOperator(ByVal S As String) As Boolean
   End Select
 End Function
 
-Public Sub Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap = "#")
+Public Sub Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#")
   frm.Prg Val, Max, Cap
 End Sub
 
@@ -398,7 +398,7 @@ Public Function cVal(ByRef Coll As Collection, ByVal Key As String, Optional ByV
   cVal = Coll.Item(LCase(Key))
 End Function
 
-Public Function cValP(Coll As Collection, ByVal Key As String, Optional ByVal Def As String = "") As String
+Public Function cValP(ByRef Coll As Collection, ByVal Key As String, Optional ByVal Def As String = "") As String
   cValP = P(deQuote(cVal(Coll, Key, Def)))
 End Function
 
@@ -417,7 +417,7 @@ Public Function ModuleName(ByVal S As String) As String
   ModuleName = Mid(S, J, K)
 End Function
 
-Public Function IsInCode(ByVal Src As String, ByVal N As Long)
+Public Function IsInCode(ByVal Src As String, ByVal N As Long) As Boolean
   Dim I As Long, C As String
   Dim Qu As Boolean
   IsInCode = False
@@ -470,8 +470,10 @@ Public Function QuoteXML(ByVal S As String) As String
   QuoteXML = Quote(QuoteXML)
 End Function
 
-
-Public Function ReduceString(ByVal Src As String, Optional ByVal Allowed As String, Optional ByVal Subst As String = "-", Optional ByVal MaxLen As Long = 0, Optional ByVal bLCase As Boolean = True) As String
+Public Function ReduceString( _
+  ByVal Src As String, Optional ByVal Allowed As String = "", Optional ByVal Subst As String = "-", _
+  Optional ByVal MaxLen As Long = 0, Optional ByVal bLCase As Boolean = True _
+  ) As String
 '::::ReduceString
 ':::SUMMARY
 ': Reduces a string by removing non-allowed characters, optionally replacing them with a substitute.
