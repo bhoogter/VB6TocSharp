@@ -253,7 +253,7 @@ Private Sub IsWorking(Optional ByVal Done As Boolean)
   MousePointer = IIf(Done, vbDefault, vbHourglass)
 End Sub
 
-Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#")
+Public Function Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#") As String
 On Error Resume Next
   If Max >= 0 Then pMax = Max
   lblPrg = IIf(Prg = "#", "", Cap)

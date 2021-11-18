@@ -54,14 +54,14 @@ On Error Resume Next
   Set oAl = CreateObject("System.Collections.ArrayList")
   
   Do
-      Set oMatches = oRe.Execute(szStr)
-      If oMatches.Count > 0 Then
-          oAl.Add oMatches(0).SubMatches(2)
-          szStr = oMatches(0).SubMatches(0)
-      Else
-          oAl.Add szStr
-          Exit Do
-      End If
+    Set oMatches = oRe.Execute(szStr)
+    If oMatches.Count > 0 Then
+      oAl.Add oMatches(0).SubMatches(2)
+      szStr = oMatches(0).SubMatches(0)
+    Else
+      oAl.Add szStr
+      Exit Do
+    End If
   Loop
   oAl.Reverse
   RegExSplit = oAl.ToArray

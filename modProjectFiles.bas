@@ -1,6 +1,10 @@
 Attribute VB_Name = "modProjectFiles"
 Option Explicit
 
+Public Function VBPCode(Optional ByVal ProjectFile As String) As String
+  VBPCode = VBPModules & vbCrLf & VBPForms & vbCrLf & VBPClasses & vbCrLf & VBPUserControls
+End Function
+
 Public Function VBPModules(Optional ByVal ProjectFile As String) As String
   Dim S As String, L
   Dim T As String
@@ -78,5 +82,3 @@ Public Function VBPUserControls(Optional ByVal ProjectFile As String) As String
 NextItem:
   Next
 End Function
-
-

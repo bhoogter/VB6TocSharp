@@ -33,6 +33,7 @@ Module=modGit; modGit.bas
 Module=modDirStack; modDirStack.bas
 Module=modShell; modShell.bas
 Module=modTestCases; modTestCases.bas
+Module=modQuickLint; modQuickLint.bas
 IconForm="frm"
 Startup="frm"
 HelpFile=""
