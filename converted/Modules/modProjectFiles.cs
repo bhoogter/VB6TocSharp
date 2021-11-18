@@ -12,6 +12,13 @@ static class modProjectFiles
     // Option Explicit
 
 
+    public static string VBPCode(string ProjectFile_UNUSED = "")
+    {
+        string VBPCode = "";
+        VBPCode = VBPModules() + vbCrLf + VBPForms() + vbCrLf + VBPClasses() + vbCrLf + VBPUserControls();
+        return VBPCode;
+    }
+
     public static string VBPModules(string ProjectFile = "")
     {
         string VBPModules = "";

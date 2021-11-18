@@ -21,9 +21,9 @@ static class modConvertForm
     public static string Frm2Xml(string F)
     {
         string Frm2Xml = "";
-        dynamic Sp = null;
-        dynamic L = null;
-        int I = 0;
+        List<string> Sp = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, I As Long
+        List<dynamic> L = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, I As Long
+        List<int> I = new List<int> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, I As Long
 
         string R = "";
 
@@ -60,12 +60,12 @@ static class modConvertForm
         return Frm2Xml;
     }
 
-    public static dynamic FormControls(string Src, string F, bool asLocal = true)
+    public static string FormControls(string Src, string F, bool asLocal = true)
     {
-        dynamic FormControls = null;
-        dynamic Sp = null;
-        dynamic L = null;
-        int I = 0;
+        string FormControls = "";
+        List<string> Sp = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, I As Long
+        List<dynamic> L = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, I As Long
+        List<int> I = new List<int> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, I As Long
 
         string R = "";
         string T = "";
@@ -109,14 +109,14 @@ static class modConvertForm
     public static string ConvertFormUi(string F, string CodeSection)
     {
         string ConvertFormUi = "";
-        List<dynamic> Stck = new List<dynamic>(new dynamic[1]);
+        List<string> Stck = new List<string>(new string[1]);
 
-        dynamic Sp = null;
-        dynamic L = null;
-        int J = 0;
-        int K = 0;
-        int I = 0;
-        string Tag = "";
+        List<string> Sp = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, J As Long, K As Long, I As Long, Tag As String
+        List<dynamic> L = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, J As Long, K As Long, I As Long, Tag As String
+        List<int> J = new List<int> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, J As Long, K As Long, I As Long, Tag As String
+        List<int> K = new List<int> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, J As Long, K As Long, I As Long, Tag As String
+        List<int> I = new List<int> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, J As Long, K As Long, I As Long, Tag As String
+        List<string> Tag = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, J As Long, K As Long, I As Long, Tag As String
 
         string M = "";
 
@@ -134,7 +134,7 @@ static class modConvertForm
 
         for (K = LBound(Sp); K < UBound(Sp); K++)
         {
-            L = Trim(Sp(K));
+            L = Trim(Sp[K]);
             if (L == "")
             {
                 goto NextLine;
@@ -150,7 +150,7 @@ static class modConvertForm
                 do
                 {
                     J = J + 1;
-                    M = Trim(Sp(K + J));
+                    M = Trim(Sp[K + J]);
                     if (LMatch(M, "Begin ") || M == "End")
                     {
                         break;
@@ -481,7 +481,7 @@ static class modConvertForm
         return IsEvent;
     }
 
-    public static string EventStub(string FName)
+    public static string EventStub(string fName)
     {
         string EventStub = "";
         string S = "";
@@ -489,18 +489,18 @@ static class modConvertForm
         string K = "";
 
 
-        C = SplitWord(FName, 1, "_");
-        K = SplitWord(FName, 2, "_");
+        C = SplitWord(fName, 1, "_");
+        K = SplitWord(fName, 2, "_");
         switch (K)
         {
             case "Click":
-                S = "private void " + FName + "(object sender, RoutedEventArgs e) { " + FName + "(); }" + vbCrLf;
+                S = "private void " + fName + "(object sender, RoutedEventArgs e) { " + fName + "(); }" + vbCrLf;
                 break;
             case "Change":
-                S = "private void " + C + "_Change(object sender, System.Windows.Controls.TextChangedEventArgs e) { " + FName + "(); }" + vbCrLf;
+                S = "private void " + C + "_Change(object sender, System.Windows.Controls.TextChangedEventArgs e) { " + fName + "(); }" + vbCrLf;
                 break;
             case "QueryUnload":
-                S = "private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { int c = 0, u = 0 ;  " + FName + "(out c, ref u); e.Cancel = c != 0;  }" + vbCrLf;
+                S = "private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e) { int c = 0, u = 0 ;  " + fName + "(out c, ref u); e.Cancel = c != 0;  }" + vbCrLf;
                 //      V = " long doCancel; long UnloadMode; " & FName & "(ref doCancel, ref UnloadMode);"
                 break;
             case "Validate":

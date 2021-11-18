@@ -18,14 +18,14 @@ static class frmTest
         M = "";
         N = vbCrLf;
 
-        A = A + M + "Public Function ReadEntireFile(ByVal FileName As String) As String";
+        A = A + M + "Public Function ReadEntireFile(ByVal tFileName As String) As String";
         A = A + N + "'::::ReadEntireFile";
         A = A + N + "':::SUMMARY";
         A = A + N + "':Read an entire file.";
         A = A + N + "':::DESCRIPTION";
         A = A + N + "':Reads  the full contents of a file and returns the value as a string (without modification).";
         A = A + N + "':::PARAMETERS";
-        A = A + N + "':- FileName - The name of the file to read.";
+        A = A + N + "':- tFileName - The name of the file to read.";
         A = A + N + "':::RETURN";
         A = A + N + "':  String - The string contents of the file.";
         A = A + N + "':::SEE ALSO";
@@ -33,17 +33,17 @@ static class frmTest
         A = A + N + "";
         A = A + N + "On Error Resume Next";
         A = A + N + "  With CreateObject(\"Scripting.FileSystemObject\")";
-        A = A + N + "    ReadEntireFile = .OpenTextFile(FileName, 1).ReadAll";
+        A = A + N + "    ReadEntireFile = .OpenTextFile(tFileName, 1).ReadAll";
         A = A + N + "  End With";
         A = A + N + "  ";
-        A = A + N + "  If FileLen(FileName) / 10 <> Len(ReadEntireFile) / 10 Then";
-        A = A + N + "    MsgBox \"ReadEntireFile was short: \" & FileLen(FileName) & \" vs \" & Len(ReadEntireFile)";
+        A = A + N + "  If FileLen(tFileName) / 10 <> Len(ReadEntireFile) / 10 Then";
+        A = A + N + "    MsgBox \"ReadEntireFile was short: \" & FileLen(tFileName) & \" vs \" & Len(ReadEntireFile)";
         A = A + N + "  End If";
         A = A + N + "'";
         A = A + N + "'  Dim intFile As Long";
         A = A + N + "'  intFile = FreeFile";
         A = A + N + "'On Error Resume Next";
-        A = A + N + "'  Open FileName For Input As #intFile";
+        A = A + N + "'  Open tFileName For Input As #intFile";
         A = A + N + "'  ReadEntireFile = Input$(LOF(intFile), #intFile)  '  LOF returns Length of File";
         A = A + N + "'  Close #intFile";
         A = A + N + "End Function";
@@ -51,9 +51,9 @@ static class frmTest
         return TestCase;
     }
 
-    public static dynamic TestCase2()
+    public static string TestCase2()
     {
-        dynamic TestCase2 = null;
+        string TestCase2 = "";
         string A = "";
         string N = "";
         string M = "";

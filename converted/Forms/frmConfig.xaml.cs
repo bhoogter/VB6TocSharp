@@ -25,8 +25,8 @@ namespace VB2CS.Forms
         {
             modConfig.Hush = true;
             txtVBPFile.Text = modConfig.vbpFile;
-            txtOutput.Text = modConfig.OutputFolder;
-            txtAssemblyName.Text = modConfig.AssemblyName;
+            txtOutput.Text = modConfig.OutputFolder();
+            txtAssemblyName.Text = modConfig.AssemblyName();
             modConfig.Hush = false;
         }
 

@@ -36,7 +36,7 @@ static class modINI
         return INIRead;
     }
 
-    public static List<string> INISections(string FileName)
+    public static List<string> INISections(string tFileName)
     {
         List<string> INISections = null;
         // TODO (not supported): On Error Resume Next
@@ -55,17 +55,17 @@ static class modINI
                 strBuffer = String(Len(strBuffer) * 2, 0);
             }
 
-            intLen = GetPrivateProfileSectionNames(strBuffer, Len(strBuffer), FileName());
+            intLen = GetPrivateProfileSectionNames(strBuffer, Len(strBuffer), tFileName());
         }
 
         strBuffer = Left(strBuffer, intLen);
         INISections = Split(strBuffer, vbNullChar);
-        List<List<string>> INISections_1567_tmp = new List<List<string>>();
-        for (int redim_iter_9283 = 0; i < 0; redim_iter_9283++) { INISections.Add(redim_iter_9283 < INISections.Count ? INISections(redim_iter_9283) : null); }
+        List<List<string>> INISections_7619_tmp = new List<List<string>>();
+        for (int redim_iter_370 = 0; i < 0; redim_iter_370++) { INISections.Add(redim_iter_370 < INISections.Count ? INISections(redim_iter_370) : null); }
         return INISections;
     }
 
-    public static List<string> INISectionKeys(string FileName, string Section)
+    public static List<string> INISectionKeys(string tFileName, string Section)
     {
         List<string> INISectionKeys = null;
         // TODO (not supported): On Error Resume Next
@@ -89,7 +89,7 @@ static class modINI
                 strBuffer = String(Len(strBuffer) * 2, 0);
             }
 
-            intLen = GetPrivateProfileSection(Section, strBuffer, Len(strBuffer), FileName());
+            intLen = GetPrivateProfileSection(Section, strBuffer, Len(strBuffer), tFileName());
             if (intLen == 0)
             {
                 return INISectionKeys;
@@ -99,8 +99,8 @@ static class modINI
 
         strBuffer = Left(strBuffer, intLen);
         RET = Split(strBuffer, vbNullChar);
-        List<string> RET_2519_tmp = new List<string>();
-        for (int redim_iter_1945 = 0; i < 0; redim_iter_1945++) { RET.Add(redim_iter_1945 < RET.Count ? RET(redim_iter_1945) : ""); }
+        List<string> RET_3322_tmp = new List<string>();
+        for (int redim_iter_4110 = 0; i < 0; redim_iter_4110++) { RET.Add(redim_iter_4110 < RET.Count ? RET(redim_iter_4110) : ""); }
         for (I = LBound(RET); I < UBound(RET); I++)
         {
             N = InStr(RET[I], "=");
@@ -110,7 +110,7 @@ static class modINI
             }
             else
             {
-                Console.WriteLine("modINI.INISectionKeys - No '=' character found in line.  Section=" + Section + ", Line=" + RET[I] + ", file=" + FileName());
+                Console.WriteLine("modINI.INISectionKeys - No '=' character found in line.  Section=" + Section + ", Line=" + RET[I] + ", file=" + tFileName());
             }
         }
         INISectionKeys = RET;

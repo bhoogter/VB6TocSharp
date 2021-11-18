@@ -12,7 +12,6 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using static Microsoft.VisualBasic.Constants;
-using static modUtils;
 
 public static class VBExtension
 {
@@ -413,7 +412,7 @@ public static class VBExtension
         return SanitizeNls(s, vbLf);
     }
 
-    //    public static bool IsInStr(string src, string find) { return Strings.InStr(src, find) != 0; }
+    public static bool IsInStr(string src, string find) { return Strings.InStr(src, find) != 0; }
 
     public static string SanitizeNls(string s, string desired)
     {

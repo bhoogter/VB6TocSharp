@@ -81,6 +81,14 @@
       <DependentUpon>frmConfig.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="Forms\frmLinter.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Compile Include="Forms\frmLinter.xaml.cs">
+      <DependentUpon>frmLinter.xaml</DependentUpon>
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="VBExtension.cs" />
     <Compile Include="VBConstants.cs" />
     <Compile Include="Modules\modUtils.cs" />
@@ -100,11 +108,11 @@
     <Compile Include="Modules\modControlProperties.cs" />
     <Compile Include="Modules\modProjectSpecific.cs" />
     <Compile Include="Modules\modINI.cs" />
-    <Compile Include="Modules\modLinter.cs" />
     <Compile Include="Modules\modGit.cs" />
     <Compile Include="Modules\modDirStack.cs" />
     <Compile Include="Modules\modShell.cs" />
     <Compile Include="Modules\modTestCases.cs" />
+    <Compile Include="Modules\modQuickLint.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">

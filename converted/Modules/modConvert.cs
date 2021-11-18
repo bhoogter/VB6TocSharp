@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.Conversion;
 using static Microsoft.VisualBasic.Information;
@@ -33,16 +34,14 @@ static class modConvert
     private static string CurrSub = "";
 
 
-    public static dynamic ConvertProject(string vbpFile)
+    public static void ConvertProject(string vbpFile)
     {
-        dynamic ConvertProject = null;
         Prg(0, 1, "Preparing...");
         ScanRefs();
         CreateProjectFile(vbpFile);
         CreateProjectSupportFiles();
         ConvertFileList(FilePath(vbpFile), VBPModules(vbpFile) + vbCrLf + VBPClasses(vbpFile) + vbCrLf + VBPForms(vbpFile)); //& vbCrLf & VBPUserControls(vbpFile)
         MsgBox("Complete.");
-        return ConvertProject;
     }
 
     public static bool ConvertFileList(string Path, string List, string Sep = vbCrLf)
@@ -185,9 +184,9 @@ static class modConvert
         return ConvertForm;
     }
 
-    public static dynamic ConvertModule(string basFile)
+    public static bool ConvertModule(string basFile)
     {
-        dynamic ConvertModule = null;
+        bool ConvertModule = false;
         string S = "";
         int J = 0;
         string Code = "";
@@ -235,9 +234,9 @@ static class modConvert
         return ConvertModule;
     }
 
-    public static dynamic ConvertClass(string clsFile)
+    public static bool ConvertClass(string clsFile)
     {
-        dynamic ConvertClass = null;
+        bool ConvertClass = false;
         string S = "";
         int J = 0;
         string Code = "";
@@ -303,13 +302,13 @@ static class modConvert
         return GetMultiLineSpace;
     }
 
-    public static dynamic SanitizeCode(string Str)
+    public static string SanitizeCode(string Str)
     {
-        dynamic SanitizeCode = null;
+        string SanitizeCode = "";
         const string NamedParamSrc = ":=";
         const string NamedParamTok = "###NAMED-PARAMETER###";
-        dynamic Sp = null;
-        dynamic L = null;
+        List<string> Sp = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant
+        List<dynamic> L = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant
 
         string F = "";
 
@@ -513,9 +512,9 @@ static class modConvert
     public static string ConvertDeclare(string S, int Ind, bool isGlobal = false, bool asModule = false)
     {
         string ConvertDeclare = "";
-        dynamic Sp = null;
-        dynamic L = null;
-        string SS = "";
+        List<string> Sp = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, SS As String
+        List<dynamic> L = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, SS As String
+        List<string> SS = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim Sp() As String, L As Variant, SS As String
 
         bool asPrivate = false;
 
@@ -672,7 +671,7 @@ static class modConvert
         string aReturn = "";
 
         string tArg = "";
-        bool has = false;
+        bool Has = false;
 
         if (tLeft(S, 8) == "Private ")
         {
@@ -765,8 +764,8 @@ static class modConvert
             }
             tArg = Trim(nextBy(aArgs, ","));
             aArgs = tMid(aArgs, Len(tArg) + 2);
-            S = S + IIf(has, ", ", "") + ConvertParameter(tArg, true);
-            has = true;
+            S = S + IIf(Has, ", ", "") + ConvertParameter(tArg, true);
+            Has = true;
         } while (!(true));
         S = S + ");";
 
@@ -920,14 +919,14 @@ static class modConvert
         return ConvertEvent;
     }
 
-    public static dynamic ConvertEnum(string S)
+    public static string ConvertEnum(string S)
     {
-        dynamic ConvertEnum = null;
+        string ConvertEnum = "";
         bool isPrivate = false;
         string EName = "";
 
         string Res = "";
-        bool has = false;
+        bool Has = false;
 
         if (tLeft(S, 7) == "Public ")
         {
@@ -950,8 +949,8 @@ static class modConvert
         while (tLeft(S, 8) != "End Enum" && S != "")
         {
             EName = RegExNMatch(S, patToken, 0);
-            Res = Res + IIf(has, ",", "") + vbCrLf + sSpace(SpIndent) + EName;
-            has = true;
+            Res = Res + IIf(Has, ",", "") + vbCrLf + sSpace(SpIndent) + EName;
+            Has = true;
 
             S = nlTrim(tMid(S, Len(EName) + 1));
             if (tLeft(S, 1) == "=")
@@ -975,9 +974,9 @@ static class modConvert
         return ConvertEnum;
     }
 
-    public static dynamic ConvertType(string S)
+    public static string ConvertType(string S)
     {
-        dynamic ConvertType = null;
+        string ConvertType = "";
         bool isPrivate = false;
         string EName = "";
         string eArr = "";
@@ -1057,9 +1056,9 @@ static class modConvert
     public static string ConvertParameter(string S, bool NeverUnused = false)
     {
         string ConvertParameter = "";
-        bool isOptional = false;
+        bool IsOptional = false;
 
-        bool isByRef = false;
+        bool IsByRef = false;
         bool asOut = false;
 
         string Res = "";
@@ -1074,22 +1073,22 @@ static class modConvert
         S = Trim(S);
         if (tLeft(S, 9) == "Optional ")
         {
-            isOptional = true;
+            IsOptional = true;
             S = Mid(S, 10);
         }
-        isByRef = true;
+        IsByRef = true;
         if (tLeft(S, 6) == "ByVal ")
         {
-            isByRef = false;
+            IsByRef = false;
             S = Mid(S, 7);
         }
         if (tLeft(S, 6) == "ByRef ")
         {
-            isByRef = true;
+            IsByRef = true;
             S = Mid(S, 7);
         }
         pName = SplitWord(S, 1);
-        if (isByRef && SubParam(pName).AssignedBeforeUsed)
+        if (IsByRef && SubParam(pName).AssignedBeforeUsed)
         {
             asOut = true;
         }
@@ -1115,7 +1114,7 @@ static class modConvert
         }
 
         Res = "";
-        if (isByRef)
+        if (IsByRef)
         {
             Res = Res + IIf(asOut, "out ", "ref ");
         }
@@ -1134,7 +1133,7 @@ static class modConvert
             }
         }
         Res = Res + TName;
-        if (isOptional && !isByRef)
+        if (IsOptional && !IsByRef)
         {
             Res = Res + "= " + pDef;
         }
@@ -1703,9 +1702,9 @@ static class modConvert
         string ConvertGlobals = "";
         string Res = "";
 
-        dynamic S = null;
-        dynamic L = null;
-        string O = "";
+        List<string> S = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String
+        List<dynamic> L = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String
+        List<string> O = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String
 
         int Ind = 0;
 
@@ -2029,19 +2028,19 @@ static class modConvert
         return PostConvertCodeLine;
     }
 
-    public static dynamic ConvertSub(string Str, bool asModule = false, vbTriState ScanFirst = vbTriState.vbUseDefault)
+    public static string ConvertSub(string Str, bool asModule = false, vbTriState ScanFirst = vbTriState.vbUseDefault)
     {
-        dynamic ConvertSub = null;
+        string ConvertSub = "";
         string oStr = "";
 
         string Res = "";
 
-        dynamic S = null;
-        dynamic L = null;
-        string O = "";
-        string T = "";
-        string U = "";
-        string V = "";
+        List<string> S = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String, T As String, U As String, V As String
+        List<dynamic> L = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String, T As String, U As String, V As String
+        List<string> O = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String, T As String, U As String, V As String
+        List<string> T = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String, T As String, U As String, V As String
+        List<string> U = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String, T As String, U As String, V As String
+        List<string> V = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, L As Variant, O As String, T As String, U As String, V As String
 
         int CM = 0;
         int cN = 0;

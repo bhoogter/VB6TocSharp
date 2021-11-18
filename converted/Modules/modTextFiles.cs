@@ -74,7 +74,7 @@ static class modTextFiles
         return DeleteFileIfExists;
     }
 
-    public static string ReadEntireFile(string FileName)
+    public static string ReadEntireFile(string tFileName)
     {
         string ReadEntireFile = "";
         //::::ReadEntireFile
@@ -83,30 +83,30 @@ static class modTextFiles
         //:::DESCRIPTION
         //:Reads  the full contents of a file and returns the value as a string (without modification).
         //:::PARAMETERS
-        //:- FileName - The name of the file to read.
+        //:- tFileName - The name of the file to read.
         //:::RETURN
         //:  String - The string contents of the file.
         //:::SEE ALSO
         //:  ReadFile, WriteFile, ReadEntireFileAndDelete
 
         // TODO (not supported): On Error Resume Next
-        ReadEntireFile = FSO.OpenTextFile(FileName, 1).ReadAll;
+        ReadEntireFile = FSO.OpenTextFile(tFileName, 1).ReadAll;
 
-        if (FileLen(FileName()) / 10 != Len(ReadEntireFile) / 10)
+        if (FileLen(tFileName()) / 10 != Len(ReadEntireFile) / 10)
         {
-            MsgBox("ReadEntireFile was short: " + FileLen(FileName()) + " vs " + Len(ReadEntireFile));
+            MsgBox("ReadEntireFile was short: " + FileLen(tFileName()) + " vs " + Len(ReadEntireFile));
         }
 
         //  Dim intFile As Long
         //  intFile = FreeFile
         //On Error Resume Next
-        //  Open FileName For Input As #intFile
+        //  Open tFileName For Input As #intFile
         //  ReadEntireFile = Input$(LOF(intFile), #intFile)  '  LOF returns Length of File
         //  Close #intFile
         return ReadEntireFile;
     }
 
-    public static string ReadEntireFileAndDelete(string FileName)
+    public static string ReadEntireFileAndDelete(string tFileName)
     {
         string ReadEntireFileAndDelete = "";
         //::::ReadEntireFileAndDelete
@@ -117,19 +117,19 @@ static class modTextFiles
         //:
         //:If the file does not exist, no error is thrown, and an empty string is returned.
         //:::PARAMETERS
-        //:- FileName - The name of the file to read.
+        //:- tFileName - The name of the file to read.
         //:::RETURN
         //:  String - The string contents of the file.
         //:::SEE ALSO
         //:  ReadEntireFile
 
         // TODO (not supported): On Error Resume Next
-        ReadEntireFileAndDelete = ReadEntireFile(FileName());
-        File.Delete(FileName); ();
+        ReadEntireFileAndDelete = ReadEntireFile(tFileName());
+        File.Delete(tFileName); ();
         return ReadEntireFileAndDelete;
     }
 
-    public static string ReadFile(string FileName, int Startline = 1, int NumLines = 0)
+    public static string ReadFile(string tFileName, int Startline = 1, int NumLines = 0)
     {//, Optional ByRef WasEOF As Boolean = False)
         string ReadFile = "";
         //::::ReadFile
@@ -140,7 +140,7 @@ static class modTextFiles
         //:
         //:If the file does not exist, no error is thrown, and an empty string is returned.
         //:::PARAMETERS
-        //:- FileName - The name of the file to read.
+        //:- tFileName - The name of the file to read.
         //:- StartLine - The line number to begin reading (the first line is 1).  If you try to read beyond the end of the file, an empty string is returned.
         //:- NumLines - If passed, attempts to read the specified number of lines.  Reading beyond the end of the file simply returns as many lines as possible.  Zero means read rest of file.  Default is zero.
         //:- WasEOF - If EOF checking is required, this ByRef parameter can be passed and checked later.  True if the file's EOF was reached.  False otherwise.
@@ -157,26 +157,26 @@ static class modTextFiles
         Static(CacheFileDate(As(String)));
         Static(CacheFileLoad() As String);
 
-        if (FileName() == "" || !FileExists(FileName[]))
+        if (tFileName() == "" || !FileExists(tFileName[]))
         {
             //    WasEOF = True
             return ReadFile;
 
         }
 
-        if (FileName() == CacheFileName)
+        if (tFileName() == CacheFileName)
         {
-            if (FileDateTime(FileName()) != CacheFileDate)
+            if (FileDateTime(tFileName()) != CacheFileDate)
             {
                 CacheFileName = "";
             }
         }
 
-        if (FileName() != CacheFileName)
+        if (tFileName() != CacheFileName)
         {
-            CacheFileName = FileName();
-            CacheFileDate = FileDateTime(FileName());
-            CacheFileLoad = Split(Replace(ReadEntireFile(FileName()), vbLf, ""), vbCr);
+            CacheFileName = tFileName();
+            CacheFileDate = FileDateTime(tFileName());
+            CacheFileLoad = Split(Replace(ReadEntireFile(tFileName()), vbLf, ""), vbCr);
         }
 
         if (Startline == 1 && NumLines == 0)
@@ -195,7 +195,7 @@ static class modTextFiles
         //  If Startline < 1 Then Startline = 1
         //  LineNum = 0
         //  FNum = FreeFile
-        //  Open FileName For Input As #FNum
+        //  Open tFileName For Input As #FNum
         //  Do While Not EOF(FNum)
         //    LineNum = LineNum + 1
         //    Line Input #FNum, Line
@@ -353,7 +353,7 @@ static class modTextFiles
         return LineByNumber;
     }
 
-    public static bool VBFileCountLines(string FileName, out int Totl, out int Code, out int Blnk, out int Cmnt)
+    public static bool VBFileCountLines(string tFileName, out int Totl, out int Code, out int Blnk, out int Cmnt)
     {
         bool VBFileCountLines = false;
         //::::VBFileCountLines
@@ -369,7 +369,7 @@ static class modTextFiles
         //:
         //:If the file does not exist, no error is thrown, and an empty string is returned.
         //:::PARAMETERS
-        //:- FileName - The name of the file to read.
+        //:- tFileName - The name of the file to read.
         //:- [Totl] - ByRef.  Returns total number of lines in file.
         //:- [Code] - ByRef.  Returns total number of code lines in file.
         //:- [Blnk] - ByRef.  Returns total number of blank lines in file.
@@ -387,12 +387,12 @@ static class modTextFiles
         Cmnt = 0;
 
         // TODO (not supported): On Error Resume Next
-        if (!FileExists(FileName[]))
+        if (!FileExists(tFileName[]))
         {
             return VBFileCountLines;
 
         }
-        S = ReadEntireFile(FileName());
+        S = ReadEntireFile(tFileName());
         Totl = CountLines(S, false, "");
         Code = CountLines(S);
         N = CountLines(S, true, "");
@@ -402,7 +402,7 @@ static class modTextFiles
         return VBFileCountLines;
     }
 
-    public static void VBFileCountLines_Stat(string FileName)
+    public static void VBFileCountLines_Stat(string tFileName)
     {
         //::::VBFileCountLines_Stat
         //:::SUMMARY
@@ -411,7 +411,7 @@ static class modTextFiles
         //:Raises a message box showing the file line count numbers.
         //:
         //:::PARAMETERS
-        //:- FileName - The name of the file to read.
+        //:- tFileName - The name of the file to read.
         //:::SEE ALSO
         //:  ReadEntireFile, WriteFile, CountLines, VBFileCountLines
         int T = 0;
@@ -419,13 +419,13 @@ static class modTextFiles
         int B = 0;
         int M = 0;
 
-        if (VBFileCountLines(FileName(), ref T, ref C, ref B, ref M))
+        if (VBFileCountLines(tFileName(), ref T, ref C, ref B, ref M))
         {
             MsgBox("File Line Stat: " + vbCrLf + " Totl: " + T + vbCrLf + "Code: " + C + vbCrLf + "Blnk: " + B + vbCrLf + "Cmnt: " + M, vbMsgBoxRtlReading);
         }
         else
         {
-            MsgBox("File Not Found: " + FileName());
+            MsgBox("File Not Found: " + tFileName());
         }
     }
 

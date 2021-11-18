@@ -7,6 +7,7 @@ using static modProjectFiles;
 using static modRegEx;
 using static modSubTracking;
 using static modUtils;
+using static VBExtension;
 
 
 static class modVB6ToCS
@@ -96,11 +97,9 @@ static class modVB6ToCS
                 break;
             case "Map":
                 ConvertDataType = "Map";
-
                 break;
             case "Node":
                 ConvertDataType = "TreeViewItem";
-
                 break;
             case "Recordset":
                 ConvertDataType = "Recordset";
@@ -149,9 +148,8 @@ static class modVB6ToCS
         return ConvertDataType;
     }
 
-    public static dynamic ControlData(string cType, out string Name, out bool Cont, out string Def, out string Features)
+    public static void ControlData(string cType, out string Name, out bool Cont, out string Def, out string Features)
     {
-        dynamic ControlData = null;
         Cont = false;
         Def = "Caption";
         switch (cType)
@@ -381,12 +379,11 @@ static class modVB6ToCS
                 Name = "Label";
                 break;
         }
-        return ControlData;
     }
 
-    public static dynamic ConvertVb6Specific(string S, out bool Complete)
+    public static string ConvertVb6Specific(string S, out bool Complete)
     {
-        dynamic ConvertVb6Specific = null;
+        string ConvertVb6Specific = "";
         string W = "";
         string R = "";
 

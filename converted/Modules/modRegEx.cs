@@ -32,7 +32,7 @@ static class modRegEx
         bool RegExTest = false;
         // TODO (not supported): On Error Resume Next
         RegEx.Pattern = Find;
-        RegExTest = RegEx.Test(Src);
+        RegExTest = RegEx.test(Src);
         return RegExTest;
     }
 
@@ -126,7 +126,7 @@ static class modRegEx
     {
         int RegExSplitCount = 0;
         // TODO (not supported): On Error Resume Next
-        List<dynamic> T = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim T()
+        List<dynamic> T = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim T() As Variant
 
         T = RegExSplit(szStr, szPattern);
         RegExSplitCount = UBound(T) - LBound(T) + 1;

@@ -11,7 +11,7 @@ static class modGit
 {
     // Option Explicit
     public const string Status = "status ";
-    public const string ST = "status ";
+    public const string St = "status ";
     public const string Commit = "commit -m ";
     public const string Push = "push ";
     public const string Pull = "pull ";
@@ -78,12 +78,11 @@ static class modGit
         return Git;
     }
 
-    public static dynamic GitConf(string vName = "", string vEMail = "", bool Clear = false)
+    public static void GitConf(string vName = "", string vEMail = "", bool Clear = false)
     {
-        dynamic GitConf = null;
         if (!IsIDE())
         {
-            return GitConf;
+            return;
 
         }
 
@@ -106,7 +105,6 @@ static class modGit
             GitCmd("git config --global user.name " + vName);
             GitCmd("git config --global user.email " + vEMail);
         }
-        return GitConf;
     }
 
     public static bool GitPull(bool withReset = true)
@@ -243,20 +241,18 @@ static class modGit
         return GitPush;
     }
 
-    public static dynamic GitLog(int CharLimit = 3000)
+    public static void GitLog(int CharLimit = 3000)
     {
-        dynamic GitLog = null;
         string Res = "";
 
         if (!IsIDE())
         {
-            return GitLog;
+            return;
 
         }
         Res = GitCmd("git log", true);
         Res = Left(Res, CharLimit);
         Console.WriteLine(Res);
-        return GitLog;
     }
 
     public static bool GitCommits()

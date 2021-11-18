@@ -11,6 +11,7 @@ using static modRegEx;
 using static modTextFiles;
 using static modUtils;
 using static modVB6ToCS;
+using static VBExtension;
 
 
 static class modRefScan
@@ -361,17 +362,17 @@ static class modRefScan
     public static bool IsPrivateFuncRef(string Module, string fName)
     {
         bool IsPrivateFuncRef = false;
-        string tName = "";
+        string TName = "";
 
-        tName = Trim(Module) + "." + Trim(fName);
-        IsPrivateFuncRef = FuncRef(tName) != "" && FuncRefEntity(tName) == "Private Function";
+        TName = Trim(Module) + "." + Trim(fName);
+        IsPrivateFuncRef = FuncRef(TName) != "" && FuncRefEntity(TName) == "Private Function";
         return IsPrivateFuncRef;
     }
 
     public static bool IsEnumRef(string fName)
     {
         bool IsEnumRef = false;
-        IsEnumRef = FuncRef(fName) != "" & FuncRefEntity(fName) == "Enum";
+        IsEnumRef = FuncRef(fName) != "" && FuncRefEntity(fName) == "Enum";
         return IsEnumRef;
     }
 
@@ -409,7 +410,7 @@ static class modRefScan
         TTok = Tok + "." + Tok2;
         FTok = FormName + "." + Tok;
         //If IsInStr(Src, "SetFocus") Then Stop
-        if (FuncRef(TTok) != "" & FuncRefEntity(TTok) == "Control" || FuncRef(FTok) != "" && FuncRefEntity(FTok) == "Control")
+        if (FuncRef(TTok) != "" && FuncRefEntity(TTok) == "Control" || FuncRef(FTok) != "" && FuncRefEntity(FTok) == "Control")
         {
             IsControlRef = true;
         }

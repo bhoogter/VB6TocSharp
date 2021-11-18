@@ -4,7 +4,6 @@ using static Microsoft.VisualBasic.FileSystem;
 using static Microsoft.VisualBasic.Interaction;
 using static modConfig;
 using static modConvert;
-using static modLinter;
 using static modProjectFiles;
 using static modRefScan;
 using static modSupportFiles;
@@ -31,7 +30,7 @@ namespace VB2CS.Forms
         private void cmdAll_Click(object sender, RoutedEventArgs e) { cmdAll_Click(); }
         private void cmdAll_Click()
         {
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 
@@ -44,7 +43,7 @@ namespace VB2CS.Forms
         private void cmdClasses_Click(object sender, RoutedEventArgs e) { cmdClasses_Click(); }
         private void cmdClasses_Click()
         {
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 
@@ -78,7 +77,7 @@ namespace VB2CS.Forms
                 return;
 
             }
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 
@@ -95,7 +94,7 @@ namespace VB2CS.Forms
         private void cmdForms_Click(object sender, RoutedEventArgs e) { cmdForms_Click(); }
         private void cmdForms_Click()
         {
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 
@@ -108,7 +107,7 @@ namespace VB2CS.Forms
         private void cmdModules_Click(object sender, RoutedEventArgs e) { cmdModules_Click(); }
         private void cmdModules_Click()
         {
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 
@@ -129,13 +128,13 @@ namespace VB2CS.Forms
                 return ConfigValid;
 
             }
-            if (Dir(modConfig.OutputFolder, vbDirectory) == "")
+            if (Dir(modConfig.OutputFolder(), vbDirectory) == "")
             {
                 MsgBox("Ouptut Folder not found.  Perhaps do config first?", vbExclamation, "Directory Not Found");
                 return ConfigValid;
 
             }
-            if (modConfig.AssemblyName == "")
+            if (modConfig.AssemblyName() == "")
             {
                 MsgBox("Assembly name not set.  Perhaps do config first?", vbExclamation, "Setting Not Found");
                 return ConfigValid;
@@ -162,9 +161,9 @@ namespace VB2CS.Forms
             MousePointer = IIf(Done, vbDefault, vbHourglass);
         }
 
-        public dynamic Prg(int Val = -1, int Max = -1, string Cap = "#")
+        public string Prg(int Val = -1, int Max = -1, string Cap = "#")
         {
-            dynamic Prg = null;
+            string Prg = "";
             // TODO (not supported): On Error Resume Next
             if (Max >= 0)
             {
@@ -180,18 +179,18 @@ namespace VB2CS.Forms
         private void cmdLint_Click(object sender, RoutedEventArgs e) { cmdLint_Click(); }
         private void cmdLint_Click()
         {
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 
             }
-            LintFolder();
+            frmLinter.Show(vbModal);
         }
 
         private void cmdScan_Click(object sender, RoutedEventArgs e) { cmdScan_Click(); }
         private void cmdScan_Click()
         {
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 
@@ -204,7 +203,7 @@ namespace VB2CS.Forms
         private void cmdSupport_Click(object sender, RoutedEventArgs e) { cmdSupport_Click(); }
         private void cmdSupport_Click()
         {
-            if (!ConfigValid)
+            if (!ConfigValid())
             {
                 return;
 

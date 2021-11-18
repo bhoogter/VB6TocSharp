@@ -57,17 +57,17 @@ static class modUtils
         return DirExists;
     }
 
-    public static string FileName(string FN)
+    public static string tFileName(string FN)
     {
-        string FileName = "";
-        FileName = Mid(FN, InStrRev(FN, "\\") + 1);
-        return FileName;
+        string tFileName = "";
+        tFileName = Mid(FN, InStrRev(FN, "\\") + 1);
+        return tFileName;
     }
 
     public static string FileBaseName(string FN)
     {
         string FileBaseName = "";
-        FileBaseName = Left(FileName(FN), InStrRev(FileName(FN), ".") - 1);
+        FileBaseName = Left(tFileName(FN), InStrRev(tFileName(FN), ".") - 1);
         return FileBaseName;
     }
 
@@ -602,8 +602,8 @@ static class modUtils
         //:  String
         //:::SEE ALSO
         //: Split, CountWords
-        dynamic S = null;
-        int I = 0;
+        List<string> S = new List<string> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, I As Long
+        List<int> I = new List<int> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim S() As String, I As Long
 
         N = N - 1;
         if (Source == "")
@@ -623,13 +623,13 @@ static class modUtils
         }
         if (!IncludeRest)
         {
-            SplitWord = S(N);
+            SplitWord = S[N];
         }
         else
         {
             for (I = N; I < UBound(S); I++)
             {
-                SplitWord = SplitWord + IIf(Len(SplitWord) > 0, Space, "") + S(I);
+                SplitWord = SplitWord + IIf(Len(SplitWord) > 0, Space, "") + S[I];
             }
         }
         if (TrimResult)
@@ -677,7 +677,7 @@ static class modUtils
         dynamic ArrSlice = null;
         int Idx = 0;
 
-        List<dynamic> tempList = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim tempList()
+        List<dynamic> tempList = new List<dynamic> { }; // TODO - Specified Minimum Array Boundary Not Supported:   Dim tempList() As Variant
 
 
         if (!IsArray(sourceArray))
@@ -711,8 +711,8 @@ static class modUtils
             return;
 
         }
-        List<dynamic> Arr_7840_tmp = new List<dynamic>();
-        for (int redim_iter_1792 = 0; i < 0; redim_iter_1792++) { Arr.Add(redim_iter_1792 < Arr.Count ? Arr(redim_iter_1792) : null); }
+        List<dynamic> Arr_3596_tmp = new List<dynamic>();
+        for (int redim_iter_7548 = 0; i < 0; redim_iter_7548++) { Arr.Add(redim_iter_7548 < Arr.Count ? Arr(redim_iter_7548) : null); }
         Arr[UBound(Arr)] = Item;
     }
 
@@ -785,9 +785,9 @@ static class modUtils
         return CodeSectionLoc;
     }
 
-    public static dynamic CodeSectionGlobalEndLoc(string S)
+    public static int CodeSectionGlobalEndLoc(string S)
     {
-        dynamic CodeSectionGlobalEndLoc = null;
+        int CodeSectionGlobalEndLoc = 0;
         do
         {
             CodeSectionGlobalEndLoc = CodeSectionGlobalEndLoc + RegExNPos(Mid(S, CodeSectionGlobalEndLoc + 1), "([^a-zA-Z0-9_]Function |[^a-zA-Z0-9_]Sub |[^a-zA-Z0-9_]Property )") + 1;
@@ -832,7 +832,7 @@ static class modUtils
         return isOperator;
     }
 
-    public static void Prg(int Val = -1, int Max = -1, dynamic Cap = "#")
+    public static void Prg(int Val = -1, int Max = -1, string Cap = "#")
     {
         frm.Prg(Val, Max, Cap);
     }
@@ -876,9 +876,9 @@ static class modUtils
         return ModuleName;
     }
 
-    public static dynamic IsInCode(string Src, int N_UNUSED)
+    public static bool IsInCode(string Src, int N_UNUSED)
     {
-        dynamic IsInCode = null;
+        bool IsInCode = false;
         int I = 0;
         string C = "";
 

@@ -10,11 +10,11 @@ none
 false
 DEBUG;TRACE
 C:\WinCDS.NET\cnv\converted\Application.xaml
-21194668416
+3-1123181135
 
-31-770543401
+32-814255502
 19-215377884
-Forms\frm.xaml;Forms\frmConfig.xaml;
+Forms\frm.xaml;Forms\frmConfig.xaml;Forms\frmLinter.xaml;
 
-False
+True
 

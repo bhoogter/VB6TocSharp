@@ -57,9 +57,9 @@ static class modConvertUtils
         return DeComment;
     }
 
-    public static dynamic ReComment(string Str, bool KeepVBComments = false)
+    public static string ReComment(string Str, bool KeepVBComments = false)
     {
-        dynamic ReComment = null;
+        string ReComment = "";
         string C = "";
 
         string Pr = "";
@@ -171,9 +171,9 @@ static class modConvertUtils
         return ReString;
     }
 
-    private static dynamic InternalConvertString(string S)
+    private static string InternalConvertString(string S)
     {
-        dynamic InternalConvertString = null;
+        string InternalConvertString = "";
         S = Replace(S, "\\", "\\\\");
         S = Replace(S, "\"\"", "\\\"");
         InternalConvertString = S;

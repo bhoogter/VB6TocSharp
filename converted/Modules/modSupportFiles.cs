@@ -44,9 +44,9 @@ static class modSupportFiles
         return CreateProjectSupportFiles;
     }
 
-    public static dynamic GeneratePropertiesFiles()
+    public static bool GeneratePropertiesFiles()
     {
-        dynamic GeneratePropertiesFiles = null;
+        bool GeneratePropertiesFiles = false;
         string S = "";
 
         S = OutputFolder();
@@ -91,9 +91,9 @@ static class modSupportFiles
         return ApplicationXAML;
     }
 
-    public static dynamic CreateProjectFile(string vbpFile)
+    public static string CreateProjectFile(string vbpFile)
     {
-        dynamic CreateProjectFile = null;
+        string CreateProjectFile = "";
         string S = "";
         string M = "";
         string N = "";
@@ -248,7 +248,7 @@ static class modSupportFiles
 
         CreateProjectFile = S;
 
-        WriteOut(ChgExt(FileName(vbpFile), ".csproj"), S);
+        WriteOut(ChgExt(tFileName(vbpFile), ".csproj"), S);
         return CreateProjectFile;
     }
 
@@ -387,9 +387,9 @@ static class modSupportFiles
         return SettingsDesignerCsFile;
     }
 
-    public static dynamic AssemblyInfoFile()
+    public static string AssemblyInfoFile()
     {
-        dynamic AssemblyInfoFile = null;
+        string AssemblyInfoFile = "";
         string R = "";
         string M = "";
         string N = "";
@@ -458,9 +458,9 @@ static class modSupportFiles
         return AssemblyInfoFile;
     }
 
-    public static dynamic ResourcesResxFile()
+    public static string ResourcesResxFile()
     {
-        dynamic ResourcesResxFile = null;
+        string ResourcesResxFile = "";
         string R = "";
         string M = "";
         string N = "";
@@ -592,9 +592,9 @@ static class modSupportFiles
         return ResourcesResxFile;
     }
 
-    public static dynamic ResourcesDesignerCsFile()
+    public static string ResourcesDesignerCsFile()
     {
-        dynamic ResourcesDesignerCsFile = null;
+        string ResourcesDesignerCsFile = "";
         string R = "";
         string M = "";
         string N = "";
