@@ -2,15 +2,19 @@ Attribute VB_Name = "modQuickLint"
 Option Explicit
  
 Private Const Idnt As Long = 2
-Private Const MAX_ERRORS As Long = 10
+Private Const MAX_ERRORS As Long = 50
 Private Const Attr As String = "Attribute"
 Private Const Q As String = """"
 Private Const A As String = "'"
 Private Const S As String = " "
+Private Const LintKey As String = "'@NO-LINT"
+
+Private Const TY_ALLTY As String = "AllTy"
 
 Private Const TY_ERROR As String = "Error"
 Private Const TY_INDNT As String = "Indnt"
 Private Const TY_ARGNA As String = "ArgNa"
+Private Const TY_ARGTY As String = "ArgTy"
 Private Const TY_FSPNA As String = "FSPNa"
 Private Const TY_DEPRE As String = "Depre"
 Private Const TY_MIGRA As String = "Migra"
@@ -30,6 +34,11 @@ Private Const TY_OPDEF As String = "OpDef"
 Private Const TY_DFCTL As String = "DfCtl"
 
 Public ErrorPrefix As String
+Public ErrorIgnore As String
+
+Public Function ErrorTypes() As Variant()
+  ErrorTypes = Array(TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_DFCTL)
+End Function
 
 Public Function Lint(Optional ByVal FileName As String = "", Optional ByVal Alert As Boolean = True) As String
   Dim FileList As String
@@ -43,7 +52,7 @@ End Function
 Public Function QuickLintFiles(ByVal List As String) As String
   Const lintDotsPerRow As Long = 50
   Dim L As Variant
-  Dim X As Long
+  Dim x As Long
   Dim StartTime As Date
   StartTime = Now
   
@@ -59,8 +68,8 @@ Public Function QuickLintFiles(ByVal List As String) As String
     Else
       Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) = "cls", "x", True, ".");
     End If
-    X = X + 1
-    If X >= lintDotsPerRow Then X = 0: Debug.Print
+    x = x + 1
+    If x >= lintDotsPerRow Then x = 0: Debug.Print
     DoEvents
   Next
   Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s)."
@@ -72,7 +81,7 @@ Public Function QuickLintFile(ByVal File As String) As String
   Dim FName As String, Contents As String, GivenName As String, CheckName As String
   FName = Mid(File, InStrRev(File, "\") + 1)
   CheckName = Replace(Replace(Replace(FName, ".bas", ""), ".cls", ""), ".frm", "")
-  ErrorPrefix = Right(Space(15) & FName, 15) & " "
+  ErrorPrefix = Right(Space(18) & FName, 18) & " "
   Contents = ReadEntireFile(File)
   GivenName = RegExNMatch(Contents, "Attribute VB_Name = ""([^""]+)""", 0)
   GivenName = Replace(Replace(GivenName, "Attribute VB_Name = ", ""), """", "")
@@ -86,6 +95,7 @@ End Function
 Public Function QuickLintContents(ByVal Contents As String) As String
   Dim Lines() As String, LL As Variant, L As String
 On Error GoTo LintError
+  ErrorIgnore = ""
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
   
   Dim InAttributes As Boolean, InBody As Boolean
@@ -95,6 +105,7 @@ On Error GoTo LintError
   Dim Errors As String, ErrorCount As Long
   Dim BlankLineCount As Long
   Dim Options As New Collection
+
   Indent = 0
   
   TestDefaultControlNames Errors, ErrorCount, 0, Contents
@@ -111,11 +122,12 @@ On Error GoTo LintError
       LineN = LineN + 1
       GoTo NextLine
     ElseIf MultiLine <> "" Then
-      LL = MultiLine & LL
+      LL = MultiLine & Trim(LL)
       MultiLine = ""
     End If
     
     TestBlankLines Errors, ErrorCount, LineN, LL, BlankLineCount
+    TestLintControl LL
     L = CleanLine(LL)
     
     If Not InBody Then
@@ -233,27 +245,33 @@ On Error Resume Next
 End Function
 
 Public Function CleanLine(ByVal Line As String) As String
-  Dim X As Long, Y As Long
+  Dim x As Long, Y As Long
   Do While True
-    X = InStr(Line, Q)
-    If X = 0 Then Exit Do
+    x = InStr(Line, Q)
+    If x = 0 Then Exit Do
     
-    Y = InStr(X + 1, Line, Q)
+    Y = InStr(x + 1, Line, Q)
     Do While Mid(Line, Y + 1, 1) = Q
       Y = InStr(Y + 2, Line, Q)
     Loop
     
-    Line = Left(Line, X - 1) & String(Y - X + 1, "S") & Mid(Line, Y + 1)
+    If Y = 0 Then Exit Do
+    Line = Left(Line, x - 1) & String(Y - x + 1, "S") & Mid(Line, Y + 1)
   Loop
   
-  X = InStr(Line, A)
-  If X > 0 Then Line = RTrim(Left(Line, X - 1))
+  x = InStr(Line, A)
+  If x > 0 Then Line = RTrim(Left(Line, x - 1))
   
   CleanLine = Line
 End Function
   
 Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Typ As String, ByVal LineN As Long, ByVal Error As String)
+  If InStr(ErrorIgnore, UCase(Typ)) > 0 Or InStr(ErrorIgnore, TY_ALLTY) > 0 Then Exit Sub
+
   If Len(Errors) <> 0 Then Errors = Errors & vbCrLf
+  If InStr(Join(ErrorTypes, ","), Typ) = 0 Then
+    Errors = Errors & ErrorPrefix & "[" & TY_ERROR & "] Line " & Right(Space(5) & LineN, 5) & ": Unknown error type in linter (add to ErrorTypes): " & Typ
+  End If
   Errors = Errors & ErrorPrefix & "[" & Right(Space(5) & Typ, 5) & "] Line " & Right(Space(5) & LineN, 5) & ": " & Error
   ErrorCount = ErrorCount + 1
 End Sub
@@ -283,6 +301,15 @@ Public Sub TestBlankLines(ByRef Errors As String, ByRef ErrorCount As Long, ByVa
   If BlankLineCount > 3 Then RecordError Errors, ErrorCount, TY_BLANK, LineN, "Too many blank lines."
 End Sub
 
+Public Sub TestLintControl(ByVal L As String)
+  Dim LL As Variant
+  If InStr(L, LintKey) = 0 Then Exit Sub
+  Dim Match As String, Typ As String
+  Match = RegExNMatch(L, LintKey & "(-.....)?", 0)
+  Typ = IIf(Match = LintKey, TY_ALLTY, Replace(Match, LintKey & "-", ""))
+  ErrorIgnore = ErrorIgnore & "," & Typ
+End Sub
+
 Public Sub TestModuleOptions(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Options As Collection)
 On Error Resume Next
   Dim Value As String
@@ -300,7 +327,7 @@ Public Sub TestArgName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal L
   Dim LL As String
   LL = Trim(Name)
   
-  If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_ARGNA, LineN, "Identifier name declared as all lower-case"
+  If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_ARGNA, LineN, "Identifier name declared as all lower-case: " & LL
   
   If RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*%$") Then ' % Integer Dim L%
     RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Integer deprecated: " & LL
@@ -321,7 +348,7 @@ Public Sub TestSignatureName(ByRef Errors As String, ByRef ErrorCount As Long, B
   Dim LL As String
   LL = Trim(Name)
   
-  If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_FSPNA, LineN, "Func/Sub/Prop name declared as all lower-case: " & Name
+  If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_FSPNA, LineN, "Func/Sub/Prop name declared as all lower-case: " & LL
 End Sub
 
 Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String, ByVal InSignature As Boolean)
@@ -371,14 +398,24 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
       If IsParamArray Then
         If Right(LL, 2) <> "()" Then RecordError Errors, ErrorCount, TY_STYLE, LineN, "ParamArray variable not declared as an Array.  Add '()': " & LL
       Else
-        If Not IsByVal And Not IsByRef Then RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on praameter [" & LL & "] -- specify one or the other"
+        If Not IsByVal And Not IsByRef Then RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on parameter [" & LL & "] -- specify one or the other"
       End If
       If IsOptional And ArgDefault = "" Then RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & LL
     End If
     
     TestArgName Errors, ErrorCount, LineN, LL
+    
+    TestArgType Errors, ErrorCount, LineN, LL, ArgType
   Next
 End Sub
+
+Public Sub TestArgType(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String, ByVal Typ As String)
+  If Typ = "Integer" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long"
+  If Typ = "Short" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long"
+  If Typ = "Byte" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long"
+  If Typ = "Float" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Double"
+End Sub
+
 
 Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal LL As String)
   If Not RegExTest(LL, "^[ ]*(Private|Public|Friend) ") Then RecordError Errors, ErrorCount, TY_PRIPU, LineN, "Either Private or Public should be specified, but neither was."
