@@ -1,7 +1,7 @@
 Attribute VB_Name = "modConvert"
 Option Explicit
 
-Const WithMark = "_WithVar_"
+Const WithMark As String = "_WithVar_"
 
 Dim WithLevel As Long, MaxWithLevel As Long
 Dim WithVars As String, WithTypes As String, WithAssign As String
@@ -11,17 +11,17 @@ Dim CurrentModule As String
 
 Dim CurrSub As String
 
-Public Function ConvertProject(ByVal vbpFile As String)
+Public Sub ConvertProject(ByVal vbpFile As String)
   Prg 0, 1, "Preparing..."
   ScanRefs
   CreateProjectFile vbpFile
   CreateProjectSupportFiles
   ConvertFileList FilePath(vbpFile), VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(vbpFile) '& vbCrLf & VBPUserControls(vbpFile)
   MsgBox "Complete."
-End Function
+End Sub
 
 Public Function ConvertFileList(ByVal Path As String, ByVal List As String, Optional ByVal Sep As String = vbCrLf) As Boolean
-  Dim L, V As Long, N As Long
+  Dim L As Variant, V As Long, N As Long
   V = StrCnt(List, Sep) + 1
   Prg 0, V, N & "/" & V & "..."
   For Each L In Split(List, Sep)
@@ -105,8 +105,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   WriteOut F, X, frmFile
 End Function
 
-
-Public Function ConvertModule(ByVal basFile As String)
+Public Function ConvertModule(ByVal basFile As String) As Boolean
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
   Dim F As String, X As String, fName As String
   If Not FileExists(basFile) Then
@@ -138,7 +137,7 @@ Public Function ConvertModule(ByVal basFile As String)
   WriteOut F, X, basFile
 End Function
 
-Public Function ConvertClass(ByVal clsFile As String)
+Public Function ConvertClass(ByVal clsFile As String) As Boolean
   Dim S As String, J As Long, Code As String, Globals As String, Functions As String
   Dim F As String, X As String, fName As String
   Dim cName As String
@@ -179,10 +178,10 @@ Public Function GetMultiLineSpace(ByVal Prv As String, ByVal Nxt As String) As S
   If nC = "(" Then GetMultiLineSpace = ""
 End Function
 
-Public Function SanitizeCode(ByVal Str As String)
-  Const NamedParamSrc = ":="
-  Const NamedParamTok = "###NAMED-PARAMETER###"
-  Dim Sp, L
+Public Function SanitizeCode(ByVal Str As String) As String
+  Const NamedParamSrc As String = ":="
+  Const NamedParamTok As String = "###NAMED-PARAMETER###"
+  Dim Sp() As String, L As Variant
   Dim F As String
   Dim R As String, N As String
   Dim Building As String
@@ -292,7 +291,7 @@ Public Function ConvertCodeSegment(ByVal S As String, Optional ByVal asModule As
       E = E + 1
     Loop
     Body = nlTrim(Mid(S, T, E - T))
-      
+
     S = nlTrim(Mid(S, E + 1))
     
     R = R & CommentBlock(Pre) & ConvertSub(Body, asModule) & vbCrLf
@@ -315,8 +314,8 @@ Public Function CommentBlock(ByVal Str As String) As String
   CommentBlock = S
 End Function
 
-Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional ByVal isGlobal As Boolean, Optional ByVal asModule As Boolean = False) As String
-  Dim Sp, L, SS As String
+Public Function ConvertDeclare(ByVal S As String, ByVal Ind As Long, Optional ByVal isGlobal As Boolean = False, Optional ByVal asModule As Boolean = False) As String
+  Dim Sp() As String, L As Variant, SS As String
   Dim asPrivate As Boolean
   Dim pName As String, pType As String, pWithEvents As Boolean
   Dim Res As String
@@ -407,7 +406,7 @@ Public Function ConvertAPIDef(ByVal S As String) As String
   Dim aAlias As String
   Dim aArgs As String
   Dim aReturn As String
-  Dim tArg As String, has As Boolean
+  Dim tArg As String, Has As Boolean
   If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
   If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
   If tLeft(S, 8) = "Declare " Then S = tMid(S, 9)
@@ -455,8 +454,8 @@ Public Function ConvertAPIDef(ByVal S As String) As String
     If aArgs = "" Then Exit Do
     tArg = Trim(nextBy(aArgs, ","))
     aArgs = tMid(aArgs, Len(tArg) + 2)
-    S = S & IIf(has, ", ", "") & ConvertParameter(tArg, True)
-    has = True
+    S = S & IIf(Has, ", ", "") & ConvertParameter(tArg, True)
+    Has = True
   Loop While True
   S = S & ");"
   
@@ -536,9 +535,9 @@ Public Function ConvertEvent(ByVal S As String) As String
 End Function
 
 
-Public Function ConvertEnum(ByVal S As String)
+Public Function ConvertEnum(ByVal S As String) As String
   Dim isPrivate As Boolean, EName As String
-  Dim Res As String, has As Boolean
+  Dim Res As String, Has As Boolean
   If tLeft(S, 7) = "Public " Then S = tMid(S, 8)
   If tLeft(S, 8) = "Private " Then S = tMid(S, 9): isPrivate = True
   If tLeft(S, 5) = "Enum " Then S = tMid(S, 6)
@@ -549,8 +548,8 @@ Public Function ConvertEnum(ByVal S As String)
   
   Do While tLeft(S, 8) <> "End Enum" And S <> ""
     EName = RegExNMatch(S, patToken, 0)
-    Res = Res & IIf(has, ",", "") & vbCrLf & sSpace(SpIndent) & EName
-    has = True
+    Res = Res & IIf(Has, ",", "") & vbCrLf & sSpace(SpIndent) & EName
+    Has = True
 
     S = nlTrim(tMid(S, Len(EName) + 1))
     If tLeft(S, 1) = "=" Then
@@ -569,7 +568,7 @@ Public Function ConvertEnum(ByVal S As String)
   ConvertEnum = Res
 End Function
 
-Public Function ConvertType(ByVal S As String)
+Public Function ConvertType(ByVal S As String) As String
   Dim isPrivate As Boolean, EName As String, eArr As String, eType As String
   Dim Res As String
   Dim N As String
@@ -621,19 +620,19 @@ Public Function ConvertType(ByVal S As String)
 End Function
 
 Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused As Boolean = False) As String
-  Dim isOptional As Boolean
-  Dim isByRef As Boolean, asOut As Boolean
+  Dim IsOptional As Boolean
+  Dim IsByRef As Boolean, asOut As Boolean
   Dim Res As String
   Dim pName As String, pType As String, pDef As String
   Dim TName As String
   
   S = Trim(S)
-  If tLeft(S, 9) = "Optional " Then isOptional = True: S = Mid(S, 10)
-  isByRef = True
-  If tLeft(S, 6) = "ByVal " Then isByRef = False: S = Mid(S, 7)
-  If tLeft(S, 6) = "ByRef " Then isByRef = True: S = Mid(S, 7)
+  If tLeft(S, 9) = "Optional " Then IsOptional = True: S = Mid(S, 10)
+  IsByRef = True
+  If tLeft(S, 6) = "ByVal " Then IsByRef = False: S = Mid(S, 7)
+  If tLeft(S, 6) = "ByRef " Then IsByRef = True: S = Mid(S, 7)
   pName = SplitWord(S, 1)
-  If isByRef And SubParam(pName).AssignedBeforeUsed Then asOut = True
+  If IsByRef And SubParam(pName).AssignedBeforeUsed Then asOut = True
   S = Trim(Mid(S, Len(pName) + 1))
   If tLeft(S, 2) = "As" Then
     S = tMid(S, 4)
@@ -650,7 +649,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   End If
   
   Res = ""
-  If isByRef Then Res = Res & IIf(asOut, "out ", "ref ")
+  If IsByRef Then Res = Res & IIf(asOut, "out ", "ref ")
   Res = Res & ConvertDataType(pType) & " "
   If IsInStr(pName, "()") Then Res = Res & "[] ": pName = Replace(pName, "()", "")
   TName = pName
@@ -660,7 +659,7 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
     End If
   End If
   Res = Res & TName
-  If isOptional And Not isByRef Then
+  If IsOptional And Not IsByRef Then
     Res = Res & "= " & pDef
   End If
   
@@ -668,8 +667,8 @@ Public Function ConvertParameter(ByVal S As String, Optional ByVal NeverUnused A
   ConvertParameter = Trim(Res)
 End Function
 
-Public Function ConvertPrototype(ByVal SS As String, Optional ByRef returnVariable As String, Optional ByVal asModule As Boolean = False, Optional ByRef asName As String) As String
-  Const retToken = "#RET#"
+Public Function ConvertPrototype(ByVal SS As String, Optional ByRef returnVariable As String = "", Optional ByVal asModule As Boolean = False, Optional ByRef asName As String = "") As String
+  Const retToken As String = "#RET#"
   Dim Res As String
   Dim fName As String, fArgs As String, retType As String, T As String
   Dim tArg As String
@@ -774,7 +773,7 @@ Public Function ConvertElement(ByVal S As String) As String
     vMax = vMax + 1
     If vMax > 10 Then Exit Do
   Loop
- 
+  
 'If IsInStr(S, "RS!") Then Stop
 'If IsInStr(S, ".SetValueDisplay Row") Then Stop
 'If IsInStr(S, "cmdSaleTotals.Move") Then Stop
@@ -839,7 +838,6 @@ Public Function ConvertElement(ByVal S As String) As String
   End If
   
 
-  
   FirstToken = RegExNMatch(S, patTokenDot, 0)
   FirstWord = SplitWord(S, 1)
   If FirstWord = "Not" Then
@@ -859,7 +857,7 @@ ManageFunctions:
 'If IsInStr(ConvertElement, "New_CDbTypeAhead") Then Stop
   If RegExTest(ConvertElement, "(\!)?[a-zA-Z0-9_.]+[ ]*\(.*\)$") Then
     If (Left(ConvertElement, 1) = "!") Then
-        ConvertElement = "!" & ConvertFunctionCall(Mid(ConvertElement, 2))
+      ConvertElement = "!" & ConvertFunctionCall(Mid(ConvertElement, 2))
     Else
       ConvertElement = ConvertFunctionCall(ConvertElement)
     End If
@@ -1007,7 +1005,7 @@ End Function
 
 Public Function ConvertGlobals(ByVal Str As String, Optional ByVal asModule As Boolean = False) As String
   Dim Res As String
-  Dim S, L, O As String
+  Dim S() As String, L As Variant, O As String
   Dim Ind As Long
   Dim Building As String
   Dim inCase As Long
@@ -1110,7 +1108,7 @@ Public Function ConvertCodeLine(ByVal S As String) As String
           Case Else
             If Left(A, 1) = "." Then A = Stack(WithVars, , True) & A
             ConvertCodeLine = A
-      End Select
+        End Select
       End If
     Else
       If Left(A, 1) = "." Then A = Stack(WithVars, , True) & A
@@ -1208,10 +1206,10 @@ Public Function PostConvertCodeLine(ByVal Str As String) As String
   PostConvertCodeLine = S
 End Function
 
-Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault)
+Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boolean = False, Optional ByVal ScanFirst As VbTriState = vbUseDefault) As String
   Dim oStr As String
   Dim Res As String
-  Dim S, L, O As String, T As String, U As String, V As String
+  Dim S() As String, L As Variant, O As String, T As String, U As String, V As String
   Dim CM As Long, cN As Long
   Dim K As Long
   Dim Ind As Long
@@ -1224,11 +1222,12 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
 
   
   Select Case ScanFirst
-    Case vbUseDefault:  oStr = Str
-                        ConvertSub oStr, asModule, vbTrue
+    Case vbUseDefault:
+      oStr = Str
+      ConvertSub oStr, asModule, vbTrue
 '                          If IsInStr(Str, "StoreStockToolTipText") Then Stop
-                        ConvertSub = ConvertSub(oStr, asModule, vbFalse)
-                        Exit Function
+      ConvertSub = ConvertSub(oStr, asModule, vbFalse)
+      Exit Function
     Case vbTrue:        SubBegin
     Case vbFalse:       SubBegin True
   End Select
@@ -1348,7 +1347,7 @@ Public Function ConvertSub(ByVal Str As String, Optional ByVal asModule As Boole
           O = O & "case " & K & ": "
         Next
       Else
-        Dim TT, LL
+        Dim TT As Variant, LL As Variant
 '          O = O & sSpace(Ind) & "case " & ConvertValue(T) & ":"
         O = O & Space(Ind)
         For Each LL In Split(T, ",")

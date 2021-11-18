@@ -68,13 +68,11 @@ On Error Resume Next
   N = 0
   N = UBound(Vars) + 1
   ReDim Preserve Vars(N)
-  With Vars(N)
-    .Name = P
-    .asType = asType
-    .Param = isParam
-    .RetVal = isReturn
-    .asArray = asArray
-  End With
+  Vars(N).Name = P
+  Vars(N).asType = asType
+  Vars(N).Param = isParam
+  Vars(N).RetVal = isReturn
+  Vars(N).asArray = asArray
 End Sub
 
 Public Sub SubParamAssign(ByVal P As String)
@@ -83,10 +81,8 @@ Public Sub SubParamAssign(ByVal P As String)
   Dim K As Long
   K = SubParamIndex(P)
   If K >= 0 Then
-    With Vars(K)
-      .Assigned = True
-      If Not .Used Then .AssignedBeforeUsed = True
-    End With
+    Vars(K).Assigned = True
+    If Not Vars(K).Used Then Vars(K).AssignedBeforeUsed = True
   End If
 End Sub
 
@@ -103,7 +99,7 @@ Public Sub SubParamUsed(ByVal P As String)
 End Sub
 
 Public Sub SubParamUsedList(ByVal S As String)
-  Dim Sp, L
+  Dim Sp() As String, L As Variant
   If Lockout Then Exit Sub
   
   Sp = Split(S, ",")
@@ -180,7 +176,7 @@ Public Sub AddProperty(ByVal S As String)
 On Error Resume Next
     X = UBound(Props) + 1
 On Error GoTo 0
-  ReDim Preserve Props(X)
+    ReDim Preserve Props(X)
   End If
   
   Props(X).Name = pName
@@ -188,15 +184,16 @@ On Error GoTo 0
   If asPublic Then Props(X).asPublic = True  ' if one is public, both are...
   Select Case GSL
     Case "get"
-                        Props(X).Getter = ConvertSub(S, , vbFalse)
-                        Props(X).asType = ConvertDataType(pType)
-                        Props(X).asFunc = asFunc
-                        Props(X).funcArgs = pArgs
-    Case "set", "let":  Props(X).Setter = ConvertSub(S, , vbFalse)
-                        Props(X).origArgName = pArgName
-                        If pType <> "" Then Props(X).asType = ConvertDataType(pType)
-                        If asFunc Then Props(X).asFunc = True
-                        If pArgs <> "" Then Props(X).funcArgs = pArgs
+      Props(X).Getter = ConvertSub(S, , vbFalse)
+      Props(X).asType = ConvertDataType(pType)
+      Props(X).asFunc = asFunc
+      Props(X).funcArgs = pArgs
+    Case "set", "let":
+      Props(X).Setter = ConvertSub(S, , vbFalse)
+      Props(X).origArgName = pArgName
+      If pType <> "" Then Props(X).asType = ConvertDataType(pType)
+      If asFunc Then Props(X).asFunc = True
+      If pArgs <> "" Then Props(X).funcArgs = pArgs
   End Select
 End Sub
 
@@ -211,41 +208,39 @@ On Error Resume Next
   I = -1
   For I = LBound(Props) To UBound(Props)
     If I = -1 Then GoTo NoItems
-    With Props(I)
-      If .Name <> "" And Not (.Getter = "" And .Setter = "") Then
-        If .asPublic Then R = R & "public "
-        If asModule Then R = R & "static "
+    If Props(I).Name <> "" And Not (Props(I).Getter = "" And Props(I).Setter = "") Then
+      If Props(I).asPublic Then R = R & "public "
+      If asModule Then R = R & "static "
 '          If .Getter = "" Then R = R & "writeonly "
 '          If .Setter = "" Then R = R & "readonly "
-        If .asFunc Then
-          R = R & " // TODO: Arguments not allowed on properties: " & .funcArgs & vbCrLf
-          R = R & " //       " + .origProto & vbCrLf
-        End If
-        R = R & M & .asType & " " & .Name
-        R = R & " {"
-        
-        If .Getter <> "" Then
-          R = R & N & "  get {"
-          R = R & N & "    " & .asType & " " & .Name & ";"
-          T = .Getter
-          T = Replace(T, "Exit(Property)", "return " & .Name & ";")
-          R = R & N & "    " & T
-          R = R & N & "  return " & .Name & ";"
-          R = R & N & "  }"
-        End If
-        If .Setter <> "" Then
-          R = R & N & "  set {"
-          T = .Setter
-          T = ReplaceToken(T, "value", "valueOrig")
-          T = Replace(T, .origArgName, "value")
-          T = Replace(T, "Exit Property", "return;")
-          R = R & N & "    " & T
-          R = R & N & "  }"
-        End If
-        R = R & N & "}"
-        R = R & N
+      If Props(I).asFunc Then
+        R = R & " // TODO: Arguments not allowed on properties: " & Props(I).funcArgs & vbCrLf
+        R = R & " //       " + Props(I).origProto & vbCrLf
       End If
-    End With
+      R = R & M & Props(I).asType & " " & Props(I).Name
+      R = R & " {"
+      
+      If Props(I).Getter <> "" Then
+        R = R & N & "  get {"
+        R = R & N & "    " & Props(I).asType & " " & Props(I).Name & ";"
+        T = Props(I).Getter
+        T = Replace(T, "Exit(Property)", "return " & Props(I).Name & ";")
+        R = R & N & "    " & T
+        R = R & N & "  return " & Props(I).Name & ";"
+        R = R & N & "  }"
+      End If
+      If Props(I).Setter <> "" Then
+        R = R & N & "  set {"
+        T = Props(I).Setter
+        T = ReplaceToken(T, "value", "valueOrig")
+        T = Replace(T, Props(I).origArgName, "value")
+        T = Replace(T, "Exit Property", "return;")
+        R = R & N & "    " & T
+        R = R & N & "  }"
+      End If
+      R = R & N & "}"
+      R = R & N
+    End If
   Next
 NoItems:
 

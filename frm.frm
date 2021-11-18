@@ -237,7 +237,7 @@ Private Function ConfigValid() As Boolean
   ConfigValid = True
 End Function
 
-Private Sub IsWorking(Optional ByVal Done As Boolean)
+Private Sub IsWorking(Optional ByVal Done As Boolean = False)
   txtFile.Enabled = Done
   cmdConfig.Enabled = Done
   cmdLint.Enabled = Done

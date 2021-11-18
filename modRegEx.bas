@@ -10,7 +10,7 @@ End Property
 Public Function RegExTest(ByVal Src As String, ByVal Find As String) As Boolean
 On Error Resume Next
   RegEx.Pattern = Find
-  RegExTest = RegEx.Test(Src)
+  RegExTest = RegEx.test(Src)
 End Function
 
 Public Function RegExCount(ByVal Src As String, ByVal Find As String) As Long
@@ -44,9 +44,9 @@ On Error Resume Next
   RegExReplace = RegEx.Replace(Src, Repl)
 End Function
 
-Public Function RegExSplit(ByVal szStr As String, ByVal szPattern As String)
+Public Function RegExSplit(ByVal szStr As String, ByVal szPattern As String) As Variant
 On Error Resume Next
-  Dim oAl, oRe, oMatches
+  Dim oAl As Variant, oRe As Variant, oMatches As Variant
   Set oRe = RegEx
   oRe.Pattern = "^(.*)(" & szPattern & ")(.*)$"
   oRe.IgnoreCase = True
@@ -69,7 +69,7 @@ End Function
 
 Public Function RegExSplitCount(ByVal szStr As String, ByVal szPattern As String) As Long
 On Error Resume Next
-  Dim T()
+  Dim T() As Variant
   T = RegExSplit(szStr, szPattern)
   RegExSplitCount = UBound(T) - LBound(T) + 1
 End Function

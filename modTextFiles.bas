@@ -260,7 +260,7 @@ End Function
 
 
 
-Public Function VBFileCountLines(ByVal tFileName As String, Optional ByRef Totl As Long, Optional ByRef Code As Long, Optional ByRef Blnk As Long, Optional ByRef Cmnt As Long) As Boolean
+Public Function VBFileCountLines(ByVal tFileName As String, Optional ByRef Totl As Long = 0, Optional ByRef Code As Long = 0, Optional ByRef Blnk As Long = 0, Optional ByRef Cmnt As Long = 0) As Boolean
 '::::VBFileCountLines
 ':::SUMMARY
 ':Count lines in a VB6 file.

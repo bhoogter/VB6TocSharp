@@ -28,7 +28,7 @@ Public Function DeComment(ByVal Str As String, Optional ByVal Discard As Boolean
   DeComment = RTrim(Left(Str, A - 1))
 End Function
 
-Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As Boolean = False)
+Public Function ReComment(ByVal Str As String, Optional ByVal KeepVBComments As Boolean = False) As String
   Dim C As String
   Dim Pr As String
   Pr = IIf(KeepVBComments, "'", "//")
@@ -99,7 +99,7 @@ Public Function ReString(ByVal Str As String, Optional ByVal doConvertString As 
 End Function
 
 
-Private Function InternalConvertString(ByVal S As String)
+Private Function InternalConvertString(ByVal S As String) As String
   S = Replace(S, "\", "\\")
   S = Replace(S, """""", "\""")
   InternalConvertString = S

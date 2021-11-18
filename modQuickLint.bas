@@ -1,7 +1,7 @@
 Attribute VB_Name = "modQuickLint"
 Option Explicit
  
-Private Const IDNT As Long = 2
+Private Const Idnt As Long = 2
 Private Const MAX_ERRORS As Long = 5
 Private Const Attr As String = "Attribute"
 Private Const Q As String = """"
@@ -26,11 +26,13 @@ Private Const TY_GOSUB As String = "GoSub"
 Private Const TY_CSTOP As String = "CStop"
 Private Const TY_OPDEF As String = "OpDef"
 
-Public Function QuickLint(ByVal Vbp As String) As Boolean
+Public Function Lint(Optional ByVal FileName As String = "") As Boolean
   Dim FileList As String
-  If InStr(Vbp, "\") = 0 Then Vbp = App.Path & "\" & Vbp
-  FileList = VBPCode(Vbp)
-  QuickLint = QuickLintFiles(FileList)
+  If FileName = "" Then FileName = "prj.vbp"
+  If InStr(FileName, "\") = 0 Then FileName = App.Path & "\" & FileName
+  FileList = IIf(Right(FileName, 4) = ".vbp", VBPCode(FileName), FileName)
+  
+  Lint = QuickLintFiles(FileList)
 End Function
 
 Public Function QuickLintFiles(ByVal List As String) As Boolean
@@ -41,15 +43,15 @@ Public Function QuickLintFiles(ByVal List As String) As Boolean
   StartTime = Now
   
   For Each L In Split(List, vbCrLf)
-    Dim Contents As String, Result As String
-    Contents = ReadEntireFile(App.Path & "\" & L)
-    Result = QuickLintFile(Contents)
+    Dim Result As String
+    Result = QuickLintFile(L)
     If Not Result = "" Then
       Dim S As String
+      Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s).  To re-run for failing file, hit enter on the line below:"
       S = "LINT FAILED: " & L & vbCrLf & Result
       Debug.Print S
       MsgBox S, , "Lint Folder"
-      Debug.Print "?LintFile(""" & L & """)"
+      Debug.Print "?Lint(""" & L & """)"
       Exit Function
     Else
       Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) = "cls", "x", True, ".");
@@ -58,16 +60,22 @@ Public Function QuickLintFiles(ByVal List As String) As Boolean
     If X >= lintDotsPerRow Then X = 0: Debug.Print
     DoEvents
   Next
-  Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "secs)."
+  Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s)."
   QuickLintFiles = True
 End Function
 
-Public Function QuickLintFile(ByVal Contents As String) As String
+Public Function QuickLintFile(ByVal File As String) As String
+  If InStr(File, "\") = 0 Then File = App.Path & "\" & File
+  QuickLintFile = QuickLintContents(ReadEntireFile(File))
+End Function
+
+Public Function QuickLintContents(ByVal Contents As String) As String
   Dim Lines() As String, LL As Variant, L As String
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
   
   Dim InAttributes As Boolean, InBody As Boolean
   
+  Dim MultiLine As String
   Dim Indent As Long, LineN As Long
   Dim Errors As String, ErrorCount As Long
   Dim BlankLineCount As Long
@@ -75,8 +83,22 @@ Public Function QuickLintFile(ByVal Contents As String) As String
   Indent = 0
   For Each LL In Lines
     If ErrorCount >= MAX_ERRORS Then Exit For
+    
+    If Right(LL, 2) = " _" Then
+      Dim Portion As String
+      Portion = Left(LL, Len(LL) - 2)
+      If MultiLine <> "" Then Portion = Trim(Portion)
+      MultiLine = MultiLine + Portion
+      LineN = LineN + 1
+      GoTo NextLine
+    ElseIf MultiLine <> "" Then
+      LL = MultiLine & LL
+      MultiLine = ""
+    End If
+    
+    TestBlankLines Errors, ErrorCount, LineN, LL, BlankLineCount
     L = CleanLine(LL)
-  
+    
     If Not InBody Then
       Dim IsAttribute As Boolean
       IsAttribute = Left(L, 10) = "Attribute "
@@ -93,66 +115,87 @@ Public Function QuickLintFile(ByVal Contents As String) As String
     End If
     
     LineN = LineN + 1
-    'If LineN = 55 Then Stop
+    'If LineN = 15 Then Stop
     
-    If RegExTest(L, "^[ ]*(End (If|Function|Sub|Property)|Next|Wend|Loop|Loop .*|Enum|Type)$") Then
-      Indent = Indent - IDNT
+    Dim UnindentedAlready As Boolean
+    If RegExTest(L, "^Option ") Then
+      Options.Add "true", Replace(L, "Options ", "")
+    ElseIf RegExTest(L, "^[ ]*(Else|ElseIf .* Then)$") Then
+      Indent = Indent - Idnt
+    ElseIf RegExTest(L, "^[ ]*End Select$") Then
+      Indent = Indent - Idnt - Idnt
+    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*))$") Then
+      Indent = Indent - Idnt
+      UnindentedAlready = True
+    Else
+      UnindentedAlready = False
     End If
     
     Dim LineIndent As Long
     LineIndent = 0
-    Do While Mid(L, LineIndent + 1, 1) = S: LineIndent = LineIndent + 1: Loop
-    TestIndent Errors, ErrorCount, LineN, L, LineIndent, Indent
-    TestBlankLines Errors, ErrorCount, LineN, L, BlankLineCount
+    Do While Mid(RTrim(L), LineIndent + 1, 1) = S: LineIndent = LineIndent + 1: Loop
+    TestIndent Errors, ErrorCount, LineN, L, LineIndent, IIf(Not RegExTest(L, "^[ ]*Case "), Indent, Indent - Idnt)
     
-    If RegExTest(L, "^Option ") Then
-      Options.Add "true", Replace(L, "Options ", "")
-    ElseIf RegExTest(L, "^[ ]*If ") Then
-      If Not RegExTest(L, "Then ") Then Indent = Indent + IDNT
-    ElseIf RegExTest(L, "^[ ]*For ") Then
-      If Not RegExTest(L, " Next") Then Indent = Indent + IDNT
-    ElseIf RegExTest(L, "^[ ]*Next") Then
-      If Not RegExTest(L, "^[ ]*Next$") Then RecordError Errors, ErrorCount, TY_STYLE, LineN, "Remove variable from NEXT statement"
-      Indent = Indent - IDNT
-    ElseIf RegExTest(L, "^[ ]*While ") Then
-      RecordError Errors, ErrorCount, TY_STYLE, LineN, "Use Do While...Loop in place of While...Wend"
-      If Not RegExTest(L, " Wend$") Then Indent = Indent + IDNT
-    ElseIf RegExTest(L, "^[ ]*Do While") Then
-      If Not RegExTest(L, ": Loop") Then Indent = Indent + IDNT
-    ElseIf RegExTest(L, "^[ ]*Loop$") Then
-    ElseIf RegExTest(L, "^[ ]*Do$") Then
-      Indent = Indent + IDNT
-    ElseIf RegExTest(L, "^[ ]*Loop While") Then
-      Indent = Indent - IDNT
-    ElseIf RegExTest(L, "^[ ]*With") Then
-      RecordError Errors, ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists."
-    ElseIf RegExTest(L, "^[ ]*(Private |Public )?Declare (Function |Sub )") Then
-      ' External Api
-    ElseIf RegExTest(L, "^((Private|Public|Friend) )?Function ") Then
-      If Not RegExTest(L, ": End Function") Then Indent = Indent + IDNT
-      TestSignature Errors, ErrorCount, LineN, L
-    ElseIf RegExTest(L, "^((Private|Public|Friend) )?Sub ") Then
-      If Not RegExTest(L, ": End Sub") Then Indent = Indent + IDNT
-      TestSignature Errors, ErrorCount, LineN, L
-    ElseIf RegExTest(L, "^((Private|Public|Friend) )?Property (Get|Let|Set) ") Then
-      If Not RegExTest(L, ": End Property") Then Indent = Indent + IDNT
-      TestSignature Errors, ErrorCount, LineN, L
-    ElseIf RegExTest(L, "^[ ]*(Public |Private )?(Enum | Type )") Then
-      Indent = Indent + IDNT
-    ElseIf RegExTest(L, "^[ ]*(Public |Private )?Declare ") Then
-      Indent = Indent + IDNT
-    ElseIf RegExTest(L, "^[ ]*(Dim|Private|Public|Const|Global) ") Then
-      TestDeclaration Errors, ErrorCount, LineN, L, False
-    Else
-      TestCodeLine Errors, ErrorCount, LineN, L
-    End If
-
+    Dim Statements() As String, SS As Variant, St As String
+    Statements = Split(L, ": ")
+    For Each SS In Statements
+      St = SS
+      
+      If RegExTest(L, "^[ ]*(Else|ElseIf .* Then)$") Then
+        Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*(End (If|Function|Sub|Property)|Next|Wend|Loop|Loop .*|Enum|Type|Select)$") Then
+        If Not UnindentedAlready Then Indent = Indent - Idnt
+      ElseIf RegExTest(St, "^[ ]*If ") Then
+        If Not RegExTest(St, "Then ") Then Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*For ") Then
+        If Not RegExTest(St, " Next") Then Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*Next$") Then
+        Indent = Indent - Idnt
+      ElseIf RegExTest(St, "^[ ]*Next [a-zA-Z_][a-zA-Z0-9_]*$") Then
+        RecordError Errors, ErrorCount, TY_STYLE, LineN, "Remove variable from NEXT statement"
+        Indent = Indent - Idnt
+      ElseIf RegExTest(St, "^[ ]*While ") Then
+        RecordError Errors, ErrorCount, TY_STYLE, LineN, "Use Do While/Until...Loop in place of While...Wend"
+        If Not RegExTest(St, " Wend$") Then Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*Do (While|Until)") Then
+        If Not RegExTest(St, ": Loop") Then Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*Loop$") Then
+      ElseIf RegExTest(St, "^[ ]*Do$") Then
+        Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*Loop While") Then
+        Indent = Indent - Idnt
+      ElseIf RegExTest(St, "^[ ]*Select Case ") Then
+        Indent = Indent + Idnt + Idnt
+      ElseIf RegExTest(St, "^[ ]*With ") Then
+        RecordError Errors, ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists."
+      ElseIf RegExTest(St, "^[ ]*(Private |Public )?Declare (Function |Sub )") Then
+        ' External Api
+      ElseIf RegExTest(St, "^((Private|Public|Friend) )?Function ") Then
+        If Not RegExTest(St, ": End Function") Then Indent = Indent + Idnt
+        TestSignature Errors, ErrorCount, LineN, St
+      ElseIf RegExTest(St, "^((Private|Public|Friend) )?Sub ") Then
+        If Not RegExTest(St, ": End Sub") Then Indent = Indent + Idnt
+        TestSignature Errors, ErrorCount, LineN, St
+      ElseIf RegExTest(St, "^((Private|Public|Friend) )?Property (Get|Let|Set) ") Then
+        If Not RegExTest(St, ": End Property") Then Indent = Indent + Idnt
+        TestSignature Errors, ErrorCount, LineN, St
+      ElseIf RegExTest(St, "^[ ]*(Public |Private )?(Enum |Type )") Then
+        Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*(Public |Private )?Declare ") Then
+        Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*(Dim|Private|Public|Const|Global) ") Then
+        TestDeclaration Errors, ErrorCount, LineN, St, False
+      Else
+        TestCodeLine Errors, ErrorCount, LineN, St
+      End If
+NextStatement:
+    Next
 NextLine:
   Next
   
   TestModuleOptions Errors, ErrorCount, Options
   
-  QuickLintFile = Errors
+  QuickLintContents = Errors
 End Function
 
 Private Function ReadEntireFile(ByVal tFileName As String) As String
@@ -201,7 +244,7 @@ Public Function StripLeft(ByVal L As String, ByVal Find As String) As String
 End Function
 
 Public Sub TestIndent(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String, ByVal LineIndent As Long, ByVal ExpectedIndent As Long)
-  If L = "" Then Exit Sub
+  If RTrim(L) = "" Then Exit Sub
   If RegExTest(L, "^On Error ") Then Exit Sub
   If RegExTest(L, "^[a-zA-Z][a-zA-Z0-9]*:$") Then Exit Sub
     
@@ -226,47 +269,58 @@ On Error Resume Next
 End Sub
 
 Public Sub TestArgName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String)
-    Dim LL As String
-    LL = Trim(Name)
-    
-    If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_ARGNA, LineN, "Identifier name declared as all lower-case"
-    
-    If RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*%$") Then ' % Integer Dim L%
-      RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Integer deprecated: " & LL
-    ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*&$") Then ' & Long  Dim M&
-      RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Long deprecated: " & LL
-    ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*@$") Then ' @ Decimal Const W@ = 37.5
-      RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Decimal deprecated: " & LL
-    ElseIf RegExTest(LL, "^[a-zA-Z_][a-TY_TYPEC-Z0-9_]*!$") Then ' ! Single  Dim Q!
-      RecordError Errors, ErrorCount, TY_DEPRE, LineN, "Use of Type Character For Single deprecated: " & LL
-    ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*#$") Then ' # Double  Dim X#
-      RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Double deprecated: " & LL
-    ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*\$$") Then ' $ String  Dim V$ = "Secret"
-      RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For String deprecated: " & LL
-    End If
+  Dim LL As String
+  LL = Trim(Name)
+  
+  If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_ARGNA, LineN, "Identifier name declared as all lower-case"
+  
+  If RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*%$") Then ' % Integer Dim L%
+    RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Integer deprecated: " & LL
+  ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*&$") Then ' & Long  Dim M&
+    RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Long deprecated: " & LL
+  ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*@$") Then ' @ Decimal Const W@ = 37.5
+    RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Decimal deprecated: " & LL
+  ElseIf RegExTest(LL, "^[a-zA-Z_][a-TY_TYPEC-Z0-9_]*!$") Then ' ! Single  Dim Q!
+    RecordError Errors, ErrorCount, TY_DEPRE, LineN, "Use of Type Character For Single deprecated: " & LL
+  ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*#$") Then ' # Double  Dim X#
+    RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Double deprecated: " & LL
+  ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*\$$") Then ' $ String  Dim V$ = "Secret"
+    RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For String deprecated: " & LL
+  End If
 End Sub
 
 Public Sub TestSignatureName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String)
-    Dim LL As String
-    LL = Trim(Name)
-    
-    If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_FSPNA, LineN, "Func/Sub/Prop name declared as all lower-case: " & Name
+  Dim LL As String
+  LL = Trim(Name)
+  
+  If RegExTest(LL, "^[a-z][a-z0-9_]*$") Then RecordError Errors, ErrorCount, TY_FSPNA, LineN, "Func/Sub/Prop name declared as all lower-case: " & Name
 End Sub
 
 Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String, ByVal InSignature As Boolean)
-  Dim IsOptional As Boolean, IsByVal As Boolean, IsByRef As Boolean
+  Dim IsOptional As Boolean, IsByVal As Boolean, IsByRef As Boolean, IsParamArray As Boolean
+  L = Trim(L)
   L = StripLeft(L, "Dim ")
   L = StripLeft(L, "Private ")
   L = StripLeft(L, "Public ")
   L = StripLeft(L, "Const ")
   L = StripLeft(L, "Global ")
-  If StartsWith(L, "Optional ") Then IsOptional = True: L = StripLeft(L, "Optional ")
-  If StartsWith(L, "ByVal ") Then IsByVal = True: L = StripLeft(L, "ByVal ")
-  If StartsWith(L, "ByRef ") Then IsByRef = True: L = StripLeft(L, "ByRef ")
   
   Dim LL As Variant
   For Each LL In Split(L, ", ")
     Dim Ix As Long, ArgName As String, ArgType As String, ArgDefault As String
+    
+    IsOptional = StartsWith(LL, "Optional ")
+    LL = StripLeft(LL, "Optional ")
+    
+    IsByVal = StartsWith(LL, "ByVal ")
+    LL = StripLeft(LL, "ByVal ")
+    
+    IsByRef = StartsWith(LL, "ByRef ")
+    LL = StripLeft(LL, "ByRef ")
+    
+    IsParamArray = StartsWith(LL, "ParamArray ")
+    LL = StripLeft(LL, "ParamArray ")
+    
     Ix = InStr(LL, " = ")
     If Ix > 0 Then
       ArgDefault = Trim(Mid(LL, Ix + 3))
@@ -283,9 +337,16 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
       ArgType = ""
     End If
     
+'    If IsParamArray Then Stop
     If ArgType = "" Then RecordError Errors, ErrorCount, TY_NOTYP, LineN, "Local Parameter Missing Type: [" & LL & "]"
-    If InSignature And Not IsByVal And Not IsByRef Then RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on praameter [" & LL & "] -- specify one or the other"
-    If InSignature And IsOptional And ArgDefault = "" Then RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & LL
+    If InSignature Then
+      If IsParamArray Then
+        If Right(LL, 2) <> "()" Then RecordError Errors, ErrorCount, TY_STYLE, LineN, "ParamArray variable not declared as an Array.  Add '()': " & LL
+      Else
+        If Not IsByVal And Not IsByRef Then RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on praameter [" & LL & "] -- specify one or the other"
+      End If
+      If IsOptional And ArgDefault = "" Then RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & LL
+    End If
     
     TestArgName Errors, ErrorCount, LineN, LL
   Next
@@ -308,7 +369,11 @@ Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal
   Ix = InStr(L, "(")
   If Ix = 0 Then Exit Sub
   Name = Left(L, Ix - 1)
-  Ix2 = InStrRev(L, ")")
+  If RegExTest(L, "\) As .*\(\)") Then
+    Ix2 = InStrRev(L, ")", Len(L) - 2)
+  Else
+    Ix2 = InStrRev(L, ")")
+  End If
   Args = Mid(L, Ix + 1, Ix2 - Ix - 1)
   Ret = Mid(L, Ix2 + 1)
   

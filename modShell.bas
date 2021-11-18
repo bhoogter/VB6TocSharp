@@ -8,14 +8,14 @@ Public Const SW_SHOWMAXIMIZED As Long = 3
 Public Const SW_SHOW As Long = 5
 Public Const SW_SHOWDEFAULT As Long = 10
 
-Public Const CREATE_NO_WINDOW = &H8000000
-Global Const INFINITE = -1&
+Public Const CREATE_NO_WINDOW As Long = &H8000000
+Global Const INFINITE As Long = -1&
 
-Private LastProcessID  As Long
+Private LastProcessID As Long
 
-Private Const DIRSEP = "\"
+Private Const DIRSEP As String = "\"
 
-Global Const NORMAL_PRIORITY_CLASS = &H20&
+Global Const NORMAL_PRIORITY_CLASS  As Long = &H20&
 
 Enum enSW
   enSW_HIDE = 0
@@ -59,17 +59,17 @@ Private Declare Function CloseHandle Lib "kernel32" (hObject As Long) As Boolean
 Private Declare Function GetDesktopWindow Lib "USER32" () As Long
 Private Declare Function ShellExecute Lib "shell32" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long
 
-Public Function RunCmdToOutput(ByVal cmd As String, Optional ByRef ErrStr As String = "", Optional ByVal AsAdmin As Boolean = False) As String
+Public Function RunCmdToOutput(ByVal Cmd As String, Optional ByRef ErrStr As String = "", Optional ByVal AsAdmin As Boolean = False) As String
 On Error GoTo RunError
   Dim A As String, B As String, C As String
   Dim tLen As Long, Iter As Long
   A = TempFile
   B = TempFile
   If Not AsAdmin Then
-    ShellAndWait "cmd /c " & cmd & " 1> " & A & " 2> " & B, enSW_HIDE
+    ShellAndWait "cmd /c " & Cmd & " 1> " & A & " 2> " & B, enSW_HIDE
   Else
     C = TempFile(, , ".bat")
-    WriteFile C, cmd & " 1> " & A & " 2> " & B, True
+    WriteFile C, Cmd & " 1> " & A & " 2> " & B, True
     RunFileAsAdmin C, , enSW_HIDE
   End If
   
@@ -94,28 +94,27 @@ End Function
 
 ' to allow for Shell.
 ' This routine shells out to another application and waits for it to exit.
-Public Sub ShellAndWait(AppToRun, Optional ByVal SW As enSW = enSW_NORMAL)
-    Dim NameOfProc As PROCESS_INFORMATION
-    Dim NameStart As STARTUPINFO
-    Dim rc As Long
+Public Sub ShellAndWait(ByVal AppToRun As String, Optional ByVal SW As enSW = enSW_NORMAL)
+  Dim NameOfProc As PROCESS_INFORMATION
+  Dim NameStart As STARTUPINFO
+  Dim RC As Long
     
 On Error GoTo ErrorRoutineErr
-    NameStart.Cb = Len(NameStart)
-    If SW = enSW_HIDE Then
-      rc = CreateProcessA(0&, AppToRun, 0&, 0&, CLng(SW), CREATE_NO_WINDOW, 0&, 0&, NameStart, NameOfProc)
-    Else
-      rc = CreateProcessA(0&, AppToRun, 0&, 0&, CLng(SW), NORMAL_PRIORITY_CLASS, 0&, 0&, NameStart, NameOfProc)
-    End If
-    LastProcessID = NameOfProc.dwProcessId
-    rc = WaitForSingleObject(NameOfProc.hProcess, INFINITE)
-    rc = CloseHandle(NameOfProc.hProcess)
+  NameStart.Cb = Len(NameStart)
+  If SW = enSW_HIDE Then
+    RC = CreateProcessA(0&, AppToRun, 0&, 0&, CLng(SW), CREATE_NO_WINDOW, 0&, 0&, NameStart, NameOfProc)
+  Else
+    RC = CreateProcessA(0&, AppToRun, 0&, 0&, CLng(SW), NORMAL_PRIORITY_CLASS, 0&, 0&, NameStart, NameOfProc)
+  End If
+  LastProcessID = NameOfProc.dwProcessId
+  RC = WaitForSingleObject(NameOfProc.hProcess, INFINITE)
+  RC = CloseHandle(NameOfProc.hProcess)
     
 ErrorRoutineResume:
-    Exit Sub
+  Exit Sub
 ErrorRoutineErr:
-    MsgBox "AppShell.Form1.ShellAndWait: " & Err & Error
-    Resume Next
-
+  MsgBox "AppShell.Form1.ShellAndWait: " & Err & Error
+  Resume Next
 End Sub
 
 Public Function TempFile(Optional ByVal UseFolder As String = "", Optional ByVal UsePrefix As String = "tmp_", Optional ByVal Extension As String = ".tmp", Optional ByVal TestWrite As Boolean = True) As String
@@ -160,15 +159,15 @@ TestClearFailed:
   Exit Function
 End Function
 
-Public Sub RunShellExecuteAdmin(ByVal App As String, Optional ByVal nHwnd As Long, Optional ByVal WindowState As Long = SW_SHOWNORMAL)
+Public Sub RunShellExecuteAdmin(ByVal App As String, Optional ByVal nHwnd As Long = 0, Optional ByVal WindowState As Long = SW_SHOWNORMAL)
   If nHwnd = 0 Then nHwnd = GetDesktopWindow()
   LastProcessID = ShellExecute(nHwnd, "runas", App, vbNullString, vbNullString, WindowState)
 '  ShellExecute nHwnd, "runas", App, Command & " /admin", vbNullString, SW_SHOWNORMAL
 End Sub
 
-Public Function RunFileAsAdmin(ByVal App As String, Optional ByVal nHwnd As Long, Optional ByVal WindowState As Long = SW_SHOWNORMAL) As Boolean
+Public Function RunFileAsAdmin(ByVal App As String, Optional ByVal nHwnd As Long = 0, Optional ByVal WindowState As Long = SW_SHOWNORMAL) As Boolean
 '  If Not IsWinXP Then
-    RunShellExecuteAdmin App, nHwnd, WindowState
+  RunShellExecuteAdmin App, nHwnd, WindowState
 '  Else
 '    ShellOut App
 '  End If

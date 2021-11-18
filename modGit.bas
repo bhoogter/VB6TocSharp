@@ -2,7 +2,7 @@ Attribute VB_Name = "modGit"
 Option Explicit
 
 Public Const Status As String = "status "
-Public Const ST As String = "status "
+Public Const St As String = "status "
 Public Const Commit As String = "commit -m "
 Public Const Push As String = "push "
 Public Const Pull As String = "pull "
@@ -35,8 +35,8 @@ Public Function Git(ByVal C As String) As Boolean
   Git = True
 End Function
 
-Public Function GitConf(Optional ByVal vName As String, Optional ByVal vEMail As String, Optional ByVal Clear As Boolean = False)
-  If Not IsIDE Then Exit Function
+Public Sub GitConf(Optional ByVal vName As String = "", Optional ByVal vEMail As String = "", Optional ByVal Clear As Boolean = False)
+  If Not IsIDE Then Exit Sub
   
   GitCmd "git config --unset user.name", True, True
   GitCmd "git config --unset user.email", True, True
@@ -52,7 +52,7 @@ Public Function GitConf(Optional ByVal vName As String, Optional ByVal vEMail As
     GitCmd "git config --global user.name " & vName
     GitCmd "git config --global user.email " & vEMail
   End If
-End Function
+End Sub
 
 Public Function GitPull(Optional ByVal withReset As Boolean = True) As Boolean
   If Not IsIDE Then Exit Function
@@ -132,13 +132,13 @@ Public Function GitPush(ByVal Committer As String, ByVal CommitMessage As String
   GitPush = True
 End Function
 
-Public Function GitLog(Optional ByVal CharLimit As Long = 3000)
+Public Sub GitLog(Optional ByVal CharLimit As Long = 3000)
   Dim Res As String
-  If Not IsIDE Then Exit Function
+  If Not IsIDE Then Exit Sub
   Res = GitCmd("git log", True)
   Res = Left(Res, CharLimit)
   Debug.Print Res
-End Function
+End Sub
 
 Public Function GitCommits() As Boolean
   GitCmd "git log --pretty=format:""%h - %an, %ar : %s"" -10"

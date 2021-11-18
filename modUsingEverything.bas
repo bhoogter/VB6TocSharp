@@ -5,9 +5,9 @@ Private Everything As String
 Private Const VB6Compat As String = "Microsoft.VisualBasic.Compatibility.VB6"
 
 
-Public Function UsingEverything(Optional ByVal PackageName As String) As String
+Public Function UsingEverything(Optional ByVal PackageName As String = "") As String
   Dim List As String, Path As String, Name As String
-  Dim E As String, L
+  Dim E As String, L As Variant
   Dim R As String, N As String, M As String
   E = ""
   R = "": N = vbCrLf: M = ""

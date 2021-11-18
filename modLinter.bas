@@ -56,7 +56,7 @@ Public Enum lintErrorTypes
   ltNOpD
 End Enum
 
-Private Function CheckNoLint(ByVal tFileName As String, Optional ByVal lType As lintErrorTypes = ltUnkn, Optional ByVal vLine As String) As Boolean
+Private Function CheckNoLint(ByVal tFileName As String, Optional ByVal lType As lintErrorTypes = ltUnkn, Optional ByVal vLine As String = "") As Boolean
   Dim I As Long, L As String, A As Long
   Dim CA As String, cP As String, Cb As String
   CheckNoLint = False
@@ -86,7 +86,7 @@ Private Function CheckNoLint(ByVal tFileName As String, Optional ByVal lType As 
   Next
 End Function
 
-Private Function LintAbbr(ByVal lType As lintErrorTypes, Optional ByRef TypeName As String) As String
+Private Function LintAbbr(ByVal lType As lintErrorTypes, Optional ByRef TypeName As String = "") As String
   ' if this function returns "", the lint type is ignored.  Add the following after the normal lint type to disable:
   ' : LintAbbr = ""
   Select Case lType
@@ -198,20 +198,20 @@ End Function
 
 
 
-Public Function LintFolder(Optional ByVal Folder As String, Optional ByVal AutoFix As Boolean = False, Optional ByVal ForBuild As Boolean) As Boolean
+Public Function LintFolder(Optional ByVal Folder As String = "", Optional ByVal AutoFix As Boolean = False, Optional ByVal ForBuild As Boolean = False) As Boolean
   LintForBuild = True
   LintFolder = LintFileList(VBPModules(vbpFile) & vbCrLf & VBPClasses(vbpFile) & vbCrLf & VBPForms(), AutoFix)
 End Function
 
-Public Function LintModules(Optional ByVal Folder As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Public Function LintModules(Optional ByVal Folder As String = "", Optional ByVal AutoFix As Boolean = False) As Boolean
   LintModules = LintFileList(VBPModules, AutoFix)
 End Function
 
-Public Function LintClasses(Optional ByVal Folder As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Public Function LintClasses(Optional ByVal Folder As String = "", Optional ByVal AutoFix As Boolean = False) As Boolean
   LintClasses = LintFileList(VBPClasses, AutoFix)
 End Function
 
-Public Function LintForms(Optional ByVal Folder As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Public Function LintForms(Optional ByVal Folder As String = "", Optional ByVal AutoFix As Boolean = False) As Boolean
   LintForms = LintFileList(VBPForms(), AutoFix)
 End Function
 
@@ -288,7 +288,7 @@ Private Function LintModuleFirstLine(ByVal tFileName As String) As Long
   Loop While True
 End Function
 
-Public Function LintFileOptions(ByVal tFileName As String, Optional ByRef ErrStr As String) As Boolean
+Public Function LintFileOptions(ByVal tFileName As String, Optional ByRef ErrStr As String = "") As Boolean
   Dim I As Long, L As String, A As Long, F As String
   Dim oExplicit As Boolean
   
@@ -350,7 +350,7 @@ Private Sub AutoFixFinalize(ByVal tFileName As String, ByVal FixFile As String)
   WriteFile tFileName, Contents, True
 End Sub
 
-Public Function LintFileIndent(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Public Function LintFileIndent(ByVal tFileName As String, Optional ByRef ErrStr As String = "", Optional ByVal AutoFix As Boolean = False) As Boolean
   Dim A As Long
   Dim N As Long, I As Long
   Dim Continued As Long
@@ -596,7 +596,7 @@ Private Function LintFileIsEvent(ByVal fName As String, ByVal tL As String) As B
   LintFileIsEvent = LintFileIsEvent Or IsInStr(fName, "_ZipThreadDone")
 End Function
 
-Private Function LintFileNaming(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Private Function LintFileNaming(ByVal tFileName As String, Optional ByRef ErrStr As String = "", Optional ByVal AutoFix As Boolean = False) As Boolean
   Dim LNo As Long
   Dim A As Long, N As Long, I As Long, tE As String
   Dim OL As String, L As String, tL As String
@@ -757,7 +757,7 @@ SkipLine:
   LintFileNaming = ErrStr = ""
 End Function
 
-Private Function LintFileControlNaming(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Private Function LintFileControlNaming(ByVal tFileName As String, Optional ByRef ErrStr As String = "", Optional ByVal AutoFix As Boolean = False) As Boolean
   Const MaxCtrl As Long = 128
   Dim LNo As Long
   Dim Contents As String, I As Long
@@ -798,7 +798,7 @@ Private Function LintFileControlNaming(ByVal tFileName As String, Optional ByRef
   LintFileControlNaming = ErrStr = ""
 End Function
 
-Public Function LintFileBadCode(ByVal tFileName As String, Optional ByRef ErrStr As String, Optional ByVal AutoFix As Boolean = False) As Boolean
+Public Function LintFileBadCode(ByVal tFileName As String, Optional ByRef ErrStr As String = "", Optional ByVal AutoFix As Boolean = False) As Boolean
   Dim LNo As Long
   Dim A As Long, N As Long, I As Long, tE As String
   Dim OL As String, L As String, tL As String
