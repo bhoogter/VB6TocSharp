@@ -2,12 +2,13 @@ Attribute VB_Name = "modQuickLint"
 Option Explicit
  
 Private Const Idnt As Long = 2
-Private Const MAX_ERRORS As Long = 5
+Private Const MAX_ERRORS As Long = 10
 Private Const Attr As String = "Attribute"
 Private Const Q As String = """"
 Private Const A As String = "'"
 Private Const S As String = " "
 
+Private Const TY_ERROR As String = "Error"
 Private Const TY_INDNT As String = "Indnt"
 Private Const TY_ARGNA As String = "ArgNa"
 Private Const TY_FSPNA As String = "FSPNa"
@@ -16,6 +17,7 @@ Private Const TY_MIGRA As String = "Migra"
 Private Const TY_STYLE As String = "Style"
 Private Const TY_BLANK As String = "Blank"
 Private Const TY_EXPLI As String = "Expli"
+Private Const TY_COMPA As String = "Compa"
 Private Const TY_TYPEC As String = "TypeC"
 Private Const TY_NOTYP As String = "NoTyp"
 Private Const TY_BYRFV As String = "ByReV"
@@ -25,8 +27,11 @@ Private Const TY_CORRE As String = "Corre"
 Private Const TY_GOSUB As String = "GoSub"
 Private Const TY_CSTOP As String = "CStop"
 Private Const TY_OPDEF As String = "OpDef"
+Private Const TY_DFCTL As String = "DfCtl"
 
-Public Function Lint(Optional ByVal FileName As String = "") As Boolean
+Public ErrorPrefix As String
+
+Public Function Lint(Optional ByVal FileName As String = "", Optional ByVal Alert As Boolean = True) As String
   Dim FileList As String
   If FileName = "" Then FileName = "prj.vbp"
   If InStr(FileName, "\") = 0 Then FileName = App.Path & "\" & FileName
@@ -35,7 +40,7 @@ Public Function Lint(Optional ByVal FileName As String = "") As Boolean
   Lint = QuickLintFiles(FileList)
 End Function
 
-Public Function QuickLintFiles(ByVal List As String) As Boolean
+Public Function QuickLintFiles(ByVal List As String) As String
   Const lintDotsPerRow As Long = 50
   Dim L As Variant
   Dim X As Long
@@ -48,10 +53,8 @@ Public Function QuickLintFiles(ByVal List As String) As Boolean
     If Not Result = "" Then
       Dim S As String
       Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s).  To re-run for failing file, hit enter on the line below:"
-      S = "LINT FAILED: " & L & vbCrLf & Result
-      Debug.Print S
-      MsgBox S, , "Lint Folder"
-      Debug.Print "?Lint(""" & L & """)"
+      S = "LINT FAILED: " & L & vbCrLf & Result & vbCrLf & "?Lint(""" & L & """)"
+      QuickLintFiles = S
       Exit Function
     Else
       Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) = "cls", "x", True, ".");
@@ -61,26 +64,42 @@ Public Function QuickLintFiles(ByVal List As String) As Boolean
     DoEvents
   Next
   Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s)."
-  QuickLintFiles = True
+  QuickLintFiles = ""
 End Function
 
 Public Function QuickLintFile(ByVal File As String) As String
   If InStr(File, "\") = 0 Then File = App.Path & "\" & File
-  QuickLintFile = QuickLintContents(ReadEntireFile(File))
+  Dim FName As String, Contents As String, GivenName As String, CheckName As String
+  FName = Mid(File, InStrRev(File, "\") + 1)
+  CheckName = Replace(Replace(Replace(FName, ".bas", ""), ".cls", ""), ".frm", "")
+  ErrorPrefix = Right(Space(15) & FName, 15) & " "
+  Contents = ReadEntireFile(File)
+  GivenName = RegExNMatch(Contents, "Attribute VB_Name = ""([^""]+)""", 0)
+  GivenName = Replace(Replace(GivenName, "Attribute VB_Name = ", ""), """", "")
+  If CheckName <> GivenName Then
+    QuickLintFile = "Module name [" & GivenName & "] must match file name [" & FName & "].  Rename module or class to match the other"
+    Exit Function
+  End If
+  QuickLintFile = QuickLintContents(Contents)
 End Function
 
 Public Function QuickLintContents(ByVal Contents As String) As String
   Dim Lines() As String, LL As Variant, L As String
+On Error GoTo LintError
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
   
   Dim InAttributes As Boolean, InBody As Boolean
-  
+    
   Dim MultiLine As String
   Dim Indent As Long, LineN As Long
   Dim Errors As String, ErrorCount As Long
   Dim BlankLineCount As Long
   Dim Options As New Collection
   Indent = 0
+  
+  TestDefaultControlNames Errors, ErrorCount, 0, Contents
+
+  
   For Each LL In Lines
     If ErrorCount >= MAX_ERRORS Then Exit For
     
@@ -196,6 +215,10 @@ NextLine:
   TestModuleOptions Errors, ErrorCount, Options
   
   QuickLintContents = Errors
+  Exit Function
+LintError:
+  RecordError Errors, ErrorCount, TY_ERROR, 0, "Linter Error [" & Err.Number & "]: " & Err.Description
+  QuickLintContents = Errors
 End Function
 
 Private Function ReadEntireFile(ByVal tFileName As String) As String
@@ -231,7 +254,7 @@ End Function
   
 Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Typ As String, ByVal LineN As Long, ByVal Error As String)
   If Len(Errors) <> 0 Then Errors = Errors & vbCrLf
-  Errors = Errors & "[" & Right(Space(5) & Typ, 5) & "] Line " & Right(Space(5) & LineN, 5) & ": " & Error
+  Errors = Errors & ErrorPrefix & "[" & Right(Space(5) & Typ, 5) & "] Line " & Right(Space(5) & LineN, 5) & ": " & Error
   ErrorCount = ErrorCount + 1
 End Sub
 
@@ -263,9 +286,14 @@ End Sub
 Public Sub TestModuleOptions(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Options As Collection)
 On Error Resume Next
   Dim Value As String
+  Value = ""
   Value = Options("Explicit")
-  
   If Value <> "" Then RecordError Errors, ErrorCount, TY_EXPLI, 0, "Option Explicit not set on file"
+
+  Value = ""
+  Value = Options("Compare Binary")
+  Value = Options("Compare Database")
+  If Value <> "" Then RecordError Errors, ErrorCount, TY_COMPA, 0, "Use of Option Compare not recommended"
 End Sub
 
 Public Sub TestArgName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String)
@@ -380,6 +408,21 @@ Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal
   TestSignatureName Errors, ErrorCount, LineN, Name
   If WithReturn And Ret = "" Then RecordError Errors, ErrorCount, TY_FNCRE, LineN, "Function Return Type Not Specified -- Specify Return Type or Variant"
   TestDeclaration Errors, ErrorCount, LineN, Args, True
+End Sub
+
+Public Sub TestDefaultControlNames(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Contents As String)
+  Dim vTypes() As Variant, vType As Variant
+  Dim Matcher As String, Results As String, N As Long, I As Long
+  vTypes = Array("CheckBox", "Command", "Option", "Frame", "Label", "TextBox", "RichTextBox", "RichTextBoxNew", "ComboBox", "ListBox", "Timer", "UpDown", "HScrollBar", "Image", "Picture", "MSFlexGrid", "DBGrid", "Line", "Shape", "DTPicker")
+  
+  For Each vType In vTypes
+    Matcher = "Begin [a-zA-Z0-9]*.[a-zA-Z0-9]* " & vType & "[0-9]*"
+    N = RegExCount(Contents, Matcher)
+    For I = 0 To N - 1
+      Results = RegExNMatch(Contents, Matcher, I)
+      RecordError Errors, ErrorCount, TY_DFCTL, 0, "Default control name in use on form: " & Results
+    Next
+  Next
 End Sub
 
 Public Sub TestCodeLine(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String)

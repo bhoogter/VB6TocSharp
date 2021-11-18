@@ -264,7 +264,7 @@ End Function
 
 Private Sub cmdLint_Click()
   If Not ConfigValid Then Exit Sub
-  LintFolder
+  frmLinter.Show vbModal
 End Sub
 
 Private Sub cmdScan_Click()
