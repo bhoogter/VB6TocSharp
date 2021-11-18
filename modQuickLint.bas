@@ -52,7 +52,7 @@ End Function
 Public Function QuickLintFiles(ByVal List As String) As String
   Const lintDotsPerRow As Long = 50
   Dim L As Variant
-  Dim x As Long
+  Dim X As Long
   Dim StartTime As Date
   StartTime = Now
   
@@ -68,8 +68,8 @@ Public Function QuickLintFiles(ByVal List As String) As String
     Else
       Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) = "cls", "x", True, ".");
     End If
-    x = x + 1
-    If x >= lintDotsPerRow Then x = 0: Debug.Print
+    X = X + 1
+    If X >= lintDotsPerRow Then X = 0: Debug.Print
     DoEvents
   Next
   Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s)."
@@ -78,15 +78,15 @@ End Function
 
 Public Function QuickLintFile(ByVal File As String) As String
   If InStr(File, "\") = 0 Then File = App.Path & "\" & File
-  Dim FName As String, Contents As String, GivenName As String, CheckName As String
-  FName = Mid(File, InStrRev(File, "\") + 1)
-  CheckName = Replace(Replace(Replace(FName, ".bas", ""), ".cls", ""), ".frm", "")
-  ErrorPrefix = Right(Space(18) & FName, 18) & " "
+  Dim fName As String, Contents As String, GivenName As String, CheckName As String
+  fName = Mid(File, InStrRev(File, "\") + 1)
+  CheckName = Replace(Replace(Replace(fName, ".bas", ""), ".cls", ""), ".frm", "")
+  ErrorPrefix = Right(Space(18) & fName, 18) & " "
   Contents = ReadEntireFile(File)
   GivenName = RegExNMatch(Contents, "Attribute VB_Name = ""([^""]+)""", 0)
   GivenName = Replace(Replace(GivenName, "Attribute VB_Name = ", ""), """", "")
   If CheckName <> GivenName Then
-    QuickLintFile = "Module name [" & GivenName & "] must match file name [" & FName & "].  Rename module or class to match the other"
+    QuickLintFile = "Module name [" & GivenName & "] must match file name [" & fName & "].  Rename module or class to match the other"
     Exit Function
   End If
   QuickLintFile = QuickLintContents(Contents)
@@ -245,22 +245,22 @@ On Error Resume Next
 End Function
 
 Public Function CleanLine(ByVal Line As String) As String
-  Dim x As Long, Y As Long
+  Dim X As Long, Y As Long
   Do While True
-    x = InStr(Line, Q)
-    If x = 0 Then Exit Do
+    X = InStr(Line, Q)
+    If X = 0 Then Exit Do
     
-    Y = InStr(x + 1, Line, Q)
+    Y = InStr(X + 1, Line, Q)
     Do While Mid(Line, Y + 1, 1) = Q
       Y = InStr(Y + 2, Line, Q)
     Loop
     
     If Y = 0 Then Exit Do
-    Line = Left(Line, x - 1) & String(Y - x + 1, "S") & Mid(Line, Y + 1)
+    Line = Left(Line, X - 1) & String(Y - X + 1, "S") & Mid(Line, Y + 1)
   Loop
   
-  x = InStr(Line, A)
-  If x > 0 Then Line = RTrim(Left(Line, x - 1))
+  X = InStr(Line, A)
+  If X > 0 Then Line = RTrim(Left(Line, X - 1))
   
   CleanLine = Line
 End Function
@@ -288,6 +288,8 @@ Public Sub TestIndent(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Li
   If RTrim(L) = "" Then Exit Sub
   If RegExTest(L, "^On Error ") Then Exit Sub
   If RegExTest(L, "^[a-zA-Z][a-zA-Z0-9]*:$") Then Exit Sub
+  If StartsWith(L, "#If ") Or StartsWith(L, "#End If") Or StartsWith(L, "#Else") Or StartsWith(L, "#ElseIf ") Then Exit Sub
+  If StartsWith(L, "Debug.") Then Exit Sub
     
   If LineIndent <> ExpectedIndent Then RecordError Errors, ErrorCount, TY_INDNT, LineN, "Incorrect Indent -- expected " & ExpectedIndent & ", got " & LineIndent
 End Sub
@@ -430,7 +432,7 @@ Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal
   L = StripLeft(L, "Function ")
   L = StripLeft(L, "Property ")
   
-  Dim Ix As Long, Ix2 As Long, Name As String, Args As String, Ret As String
+  Dim Ix As Long, Ix2 As Long, Name As String, Args As String, RET As String
   Ix = InStr(L, "(")
   If Ix = 0 Then Exit Sub
   Name = Left(L, Ix - 1)
@@ -440,10 +442,10 @@ Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal
     Ix2 = InStrRev(L, ")")
   End If
   Args = Mid(L, Ix + 1, Ix2 - Ix - 1)
-  Ret = Mid(L, Ix2 + 1)
+  RET = Mid(L, Ix2 + 1)
   
   TestSignatureName Errors, ErrorCount, LineN, Name
-  If WithReturn And Ret = "" Then RecordError Errors, ErrorCount, TY_FNCRE, LineN, "Function Return Type Not Specified -- Specify Return Type or Variant"
+  If WithReturn And RET = "" Then RecordError Errors, ErrorCount, TY_FNCRE, LineN, "Function Return Type Not Specified -- Specify Return Type or Variant"
   TestDeclaration Errors, ErrorCount, LineN, Args, True
 End Sub
 

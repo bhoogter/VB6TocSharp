@@ -1,4 +1,4 @@
-frm = 26, 26, 990, 342, Z, 0, 0, 964, 316, C
+frm = 26, 26, 990, 342, C, 0, 0, 964, 316, C
 modUtils = 26, 26, 990, 605, C
 modConvert = 52, 52, 1016, 368, C
 modProjectFiles = 52, 52, 1016, 368, C
@@ -17,8 +17,9 @@ modControlProperties = 130, 130, 896, 463, C
 modProjectSpecific = 130, 130, 896, 466, C
 frmConfig = 78, 78, 1477, 574, C, 52, 52, 1451, 548, C
 modINI = 208, 208, 1647, 732, C
-modLinter = 78, 78, 824, 523, C
 modGit = 104, 104, 1376, 580, C
 modDirStack = 130, 130, 1402, 606, C
 modShell = 156, 156, 1428, 632, C
 modTestCases = 52, 52, 1364, 576, C
+modQuickLint = 52, 52, 1364, 576, Z
+frmLinter = 0, 0, 0, 0, C, 0, 0, 0, 0, C
