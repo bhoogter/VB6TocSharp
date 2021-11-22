@@ -31,19 +31,23 @@ Private Const TY_CORRE As String = "Corre"
 Private Const TY_GOSUB As String = "GoSub"
 Private Const TY_CSTOP As String = "CStop"
 Private Const TY_OPDEF As String = "OpDef"
+Private Const TY_OPBYR As String = "OpByR"
 Private Const TY_DFCTL As String = "DfCtl"
 
+Private Const WARNING_LINT_TYPES As String = TY_OPBYR
 Private Const DISABLED_LINT_TYPES As String = "" ' TY_ARGTY & "," & TY_OPDEF
 
 Public ErrorPrefix As String
 Public ErrorIgnore As String
 Public AutofixFind() As String
 Public AutofixRepl() As String
+Public AutofixFindRestOfFile() As String
+Public AutofixReplRestOfFile() As String
 
 Public WellKnownNames As New Collection
 
 Public Function ErrorTypes() As Variant()
-  ErrorTypes = Array(TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_DFCTL)
+  ErrorTypes = Array(TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_OPBYR, TY_DFCTL)
 End Function
 
 Private Function ResolveSources(ByVal FileName As String) As String
@@ -119,14 +123,14 @@ Public Function QuickLintFile(ByVal File As String, Optional ByVal MaxErrors As 
 End Function
 
 Public Function QuickLintContents(ByVal Contents As String, Optional ByVal MaxErrors As Long = MAX_ERRORS_DEFAULT, Optional ByVal AutoFix As String = "") As String
-  Dim Lines() As String, LL As Variant, L As String
+  Dim Lines() As String, ActualLine As Variant, LL As String, L As String
 On Error GoTo LintError
   ErrorIgnore = DISABLED_LINT_TYPES
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
   
   Dim InAttributes As Boolean, InBody As Boolean
     
-  Dim MultiLine As String, IsMultiLine As Boolean
+  Dim MultiLineOrig As String, MultiLine As String, IsMultiLine As Boolean
   Dim Indent As Long, LineN As Long
   Dim Errors As String, ErrorCount As Long
   Dim BlankLineCount As Long
@@ -137,21 +141,26 @@ On Error GoTo LintError
   
   TestDefaultControlNames Errors, ErrorCount, 0, Contents
   
-  For Each LL In Lines
+  For Each ActualLine In Lines
+    LL = ActualLine
     If MaxErrors > 0 And ErrorCount >= MaxErrors Then Exit For
     
     IsMultiLine = False
     If Right(LL, 2) = " _" Then
       Dim Portion As String
       Portion = Left(LL, Len(LL) - 2)
-      If MultiLine <> "" Then Portion = Trim(Portion)
+      MultiLineOrig = MultiLineOrig & LL & vbCrLf
+      If MultiLine <> "" Then Portion = " " & Trim(Portion)
       MultiLine = MultiLine + Portion
       LineN = LineN + 1
-      GoTo NextLine
+      GoTo NextLineWithoutRecord
     ElseIf MultiLine <> "" Then
-      LL = MultiLine & Trim(LL)
+      MultiLineOrig = MultiLineOrig & LL
+      LL = MultiLine & " " & Trim(LL)
       MultiLine = ""
       IsMultiLine = True
+    Else
+      MultiLineOrig = ""
     End If
     
     TestBlankLines Errors, ErrorCount, LineN, LL, BlankLineCount
@@ -250,12 +259,21 @@ On Error GoTo LintError
 NextStatement:
     Next
 NextLine:
-    If AutoFix <> "" And Not IsMultiLine Then
-      LL = PerformAutofix(LL)
-      If NewContents <> "" Then NewContents = NewContents & LL & vbCrLf
+    If AutoFix <> "" Then
+      Dim Fixed As String
+'      If IsMultiLine Then Stop
+'      If InStr(LL, "Function") > 0 Then Stop
+'      If InStr(LL, "Private Function") > 0 Then Stop
+      If IsMultiLine Then
+        Fixed = PerformAutofix(MultiLineOrig)
+      Else
+        Fixed = PerformAutofix(LL)
+      End If
+      NewContents = NewContents & Fixed & vbCrLf
     End If
+NextLineWithoutRecord:
   Next
-  If AutoFix <> "" Then WriteFile AutoFix, NewContents, True
+  If AutoFix <> "" Then WriteFile AutoFix, Left(NewContents, Len(NewContents) - 2), True
   
   TestModuleOptions Errors, ErrorCount, Options
   
@@ -299,14 +317,20 @@ Public Function CleanLine(ByVal Line As String) As String
 End Function
   
 Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Typ As String, ByVal LineN As Long, ByVal Error As String)
+  Dim eLine As String
   If InStr(ErrorIgnore, UCase(Typ)) > 0 Or InStr(ErrorIgnore, TY_ALLTY) > 0 Then Exit Sub
 
   If Len(Errors) <> 0 Then Errors = Errors & vbCrLf
   If InStr(Join(ErrorTypes, ","), Typ) = 0 Then
     Errors = Errors & ErrorPrefix & "[" & TY_ERROR & "] Line " & Right(Space(5) & LineN, 5) & ": Unknown error type in linter (add to ErrorTypes): " & Typ
   End If
-  Errors = Errors & ErrorPrefix & "[" & Right(Space(5) & Typ, 5) & "] Line " & Right(Space(5) & LineN, 5) & ": " & Error
-  ErrorCount = ErrorCount + 1
+  eLine = ErrorPrefix & "[" & Right(Space(5) & Typ, 5) & "] Line " & Right(Space(5) & LineN, 5) & ": " & Error
+  If InStr(WARNING_LINT_TYPES, Typ) > 0 Then
+    Debug.Print "WARNING: " & eLine
+  Else
+    Errors = Errors & eLine
+    ErrorCount = ErrorCount + 1
+  End If
 End Sub
 
 Public Function StartsWith(ByVal L As String, ByVal Find As String) As Boolean
@@ -393,16 +417,30 @@ Public Sub TestArgName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal L
   
   If RegExTest(LL, "^[a-z][a-z0-9_]*[%&@!#$]?$") Then
     RecordError Errors, ErrorCount, TY_ARGNA, LineN, "Identifier name declared as all lower-case: " & LL
-    AddFix "\b" & LL & "\b", WellKnownName(LL)
+    AddFix "\b" & LL & "\b", WellKnownName(LL), True
   End If
 End Sub
 
 Public Function WellKnownName(ByVal Str As String) As String
 On Error Resume Next
+  InitWellKnownNames
   WellKnownName = ""
   WellKnownName = WellKnownNames(LCase(Str))
   If WellKnownName = "" Then WellKnownName = Capitalize(Str)
 End Function
+
+Private Sub AddWellKnownName(ByVal S As String)
+On Error Resume Next
+  WellKnownNames.Add S, LCase(S)
+End Sub
+
+Public Sub InitWellKnownNames()
+  Dim L As Variant
+  If WellKnownNames.Count > 0 Then Exit Sub
+  For Each L In Array("hWnd")
+    AddWellKnownName L
+  Next
+End Sub
 
 Public Sub TestSignatureName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String)
   Dim LL As String
@@ -474,7 +512,13 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
           AddFix "\b" & Item & "\b", "ByRef " & Item
         End If
       End If
-      If IsOptional And ArgDefault = "" Then RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & ArgName
+      If IsOptional And IsByRef Then
+        RecordError Errors, ErrorCount, TY_OPBYR, LineN, "Modifiers 'Optional ByRef' may not migrate well: " & ArgName
+      End If
+      If IsOptional And ArgDefault = "" Then
+        RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & ArgName
+        AddFix "\b" & Item & "\b", Item & " = " & GetTypeDefault(ArgType)
+      End If
     End If
     
     TestArgName Errors, ErrorCount, LineN, LL
@@ -482,6 +526,21 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
     If Not StandardEvent Then TestArgType Errors, ErrorCount, LineN, LL, ArgType
   Next
 End Sub
+
+Public Function GetTypeDefault(ByVal ArgType As String) As String
+  Select Case LCase(ArgType)
+    Case "string"
+      GetTypeDefault = """"""
+    Case "long", "integer", "short", "byte", "date", "decimal", "float", "double", "currency"
+      GetTypeDefault = "0"
+    Case "boolean"
+      GetTypeDefault = "False"
+    Case "vbtristate"
+      GetTypeDefault = "vbUseDefault"
+    Case Else
+      GetTypeDefault = "Nothing"
+  End Select
+End Function
 
 Public Function IsStandardEvent(ByVal ArgName As String, ByVal ArgType As String) As Boolean
   If ArgName = "Cancel" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
@@ -558,25 +617,38 @@ Public Sub TestCodeLine(ByRef Errors As String, ByRef ErrorCount As Long, ByVal 
   If RegExTest(L, " Stop$") Or RegExTest(L, " Return$") Then RecordError Error, ErrorCount, TY_CSTOP, LineN, "Code contains STOP statement."
 End Sub
 
-Public Sub AddFix(ByVal Find As String, ByVal Repl As String)
+Public Sub AddFix(ByVal Find As String, ByVal Repl As String, Optional ByVal RestOfFile As Boolean = False)
   Dim N As Long
 On Error Resume Next
-  N = UBound(AutofixFind)
-  N = N + 1
-  ReDim Preserve AutofixFind(1 To N)
-  ReDim Preserve AutofixRepl(1 To N)
-  AutofixFind(N) = Find
-  AutofixRepl(N) = Repl
+  If RestOfFile Then
+    N = UBound(AutofixFindRestOfFile)
+    N = N + 1
+    ReDim Preserve AutofixFindRestOfFile(1 To N)
+    ReDim Preserve AutofixReplRestOfFile(1 To N)
+    AutofixFindRestOfFile(N) = Find
+    AutofixReplRestOfFile(N) = Repl
+  Else
+    N = UBound(AutofixFind)
+    N = N + 1
+    ReDim Preserve AutofixFind(1 To N)
+    ReDim Preserve AutofixRepl(1 To N)
+    AutofixFind(N) = Find
+    AutofixRepl(N) = Repl
+  End If
 End Sub
+
+Public Function GetFixCount(Optional ByVal RestOfFile As Boolean = False) As Long
+On Error Resume Next
+  GetFixCount = 0
+  GetFixCount = UBound(IIf(RestOfFile, AutofixFindRestOfFile, AutofixFind))
+End Function
 
 Public Function PerformAutofix(ByVal Line As String) As String
   Dim I As Long, N As Long
-On Error Resume Next
-  N = -1
-  N = UBound(AutofixFind)
-  If N >= 1 Then
+    Dim Find As String, Repl As String
+  N = GetFixCount(False)
+  If N > 0 Then
     For I = LBound(AutofixFind) To UBound(AutofixFind)
-      Dim Find As String, Repl As String
       Find = AutofixFind(I)
       Repl = AutofixRepl(I)
       If Find = "" Then GoTo NextFix
@@ -584,7 +656,21 @@ On Error Resume Next
 NextFix:
     Next
   End If
+  
+  N = GetFixCount(True)
+  If N > 0 Then
+    For I = LBound(AutofixFindRestOfFile) To UBound(AutofixFindRestOfFile)
+      Find = AutofixFindRestOfFile(I)
+      Repl = AutofixReplRestOfFile(I)
+      If Find = "" Then GoTo NextFixRestOfFile
+      Line = RegExReplace(Line, Find, Repl)
+NextFixRestOfFile:
+    Next
+  End If
+  
+Finish:
   PerformAutofix = Line
-  AutofixFind = Array()
-  AutofixRepl = Array()
+  
+  Erase AutofixFind
+  Erase AutofixRepl
 End Function
