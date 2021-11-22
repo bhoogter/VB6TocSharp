@@ -596,7 +596,7 @@ Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal
   Ix = InStr(L, "(")
   If Ix = 0 Then Exit Sub
   Name = Left(L, Ix - 1)
-  If RegExTest(L, "\) As .*\(\)") Then
+  If RegExTest(L, "\) As .*\(\)$") Then
     Ix2 = InStrRev(L, ")", Len(L) - 2)
   Else
     Ix2 = InStrRev(L, ")")
