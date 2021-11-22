@@ -319,7 +319,7 @@ End Function
   
 Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Typ As String, ByVal LineN As Long, ByVal Error As String)
   Dim eLine As String
-  If InStr(ErrorIgnore, UCase(Typ)) > 0 Or InStr(ErrorIgnore, TY_ALLTY) > 0 Then Exit Sub
+  If InStr(UCase(ErrorIgnore), UCase(Typ)) > 0 Or InStr(ErrorIgnore, TY_ALLTY) > 0 Then Exit Sub
 
   If Len(Errors) <> 0 Then Errors = Errors & vbCrLf
   If InStr(Join(ErrorTypes, ","), Typ) = 0 Then
