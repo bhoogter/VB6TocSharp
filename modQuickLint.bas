@@ -128,7 +128,11 @@ Public Function QuickLintContents(ByVal Contents As String, Optional ByVal MaxEr
 On Error GoTo LintError
   ErrorIgnore = DISABLED_LINT_TYPES
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
-  
+  Erase AutofixFind
+  Erase AutofixRepl
+  Erase AutofixFindRestOfFile
+  Erase AutofixReplRestOfFile
+
   Dim InAttributes As Boolean, InBody As Boolean
     
   Dim MultiLineOrig As String, MultiLine As String, IsMultiLine As Boolean
