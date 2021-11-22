@@ -34,9 +34,9 @@ Private Const TY_OPDEF As String = "OpDef"
 Private Const TY_OPBYR As String = "OpByR"
 Private Const TY_DFCTL As String = "DfCtl"
 
-Private Const DISABLED_LINT_TYPES As String = "" ' TY_ARGTY & "," & TY_OPDEF
-Private Const WARNING_LINT_TYPES As String = TY_OPBYR
-Private Const AUTOFIX_LINT_TYPES As String = TY_INDNT & "," & TY_ARGNA & "," & TY_OPDEF & "," & TY_NOTYP
+Private Const DISABLED_LINT_TYPES As String = TY_OPBYR ' TY_ARGTY & "," & TY_OPDEF
+Private Const WARNING_LINT_TYPES As String = ""
+Private Const AUTOFIX_LINT_TYPES As String = TY_INDNT & "," & TY_ARGNA & "," & TY_OPDEF & "," & TY_NOTYP & "," & TY_STYLE
 
 Public ErrorPrefix As String
 Public ErrorIgnore As String
@@ -184,7 +184,7 @@ On Error GoTo LintError
     End If
     
     LineN = LineN + 1
-    'If LineN = 15 Then Stop
+'    If LineN = 41 Then Stop
     
     Dim UnindentedAlready As Boolean
     If RegExTest(L, " ^Option ") Then Options.Add "true", Replace(L, "Options ", "")
@@ -212,22 +212,26 @@ On Error GoTo LintError
       
       If RegExTest(L, "^[ ]*(Else|ElseIf .*)$") Then
         Indent = Indent + Idnt
-      ElseIf RegExTest(St, "^[ ]*(End (If|Function|Sub|Property)|Next|Wend|Loop|Loop .*|Enum|Type|Select)$") Then
+      ElseIf RegExTest(St, "^[ ]*(End (If|Function|Sub|Property)|Loop|Loop .*|Enum|Type|Select)$") Then
         If Not UnindentedAlready Then Indent = Indent - Idnt
       ElseIf RegExTest(St, "^[ ]*If ") Then
         If Not RegExTest(St, "Then ") Then Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*For ") Then
-        If Not RegExTest(St, " Next") Then Indent = Indent + Idnt
+        Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*Next$") Then
-        Indent = Indent - Idnt
+        If Not UnindentedAlready Then Indent = Indent - Idnt
       ElseIf RegExTest(St, "^[ ]*Next [a-zA-Z_][a-zA-Z0-9_]*$") Then
         RecordError Errors, ErrorCount, TY_STYLE, LineN, "Remove variable from NEXT statement"
-        Indent = Indent - Idnt
+        AddFix TY_STYLE, "Next [a-zA-Z_][a-zA-Z0-9_]*$", "Next"
+        If Not UnindentedAlready Then Indent = Indent - Idnt
       ElseIf RegExTest(St, "^[ ]*While ") Then
         RecordError Errors, ErrorCount, TY_STYLE, LineN, "Use Do While/Until...Loop in place of While...Wend"
-        If Not RegExTest(St, " Wend$") Then Indent = Indent + Idnt
+        AddFix TY_STYLE, "\bWhile\b", "Do While"
+        Indent = Indent + Idnt
+      ElseIf RegExTest(St, "^[ ]*Wend") Then
+        AddFix TY_STYLE, "\bWend\b", "Loop"
       ElseIf RegExTest(St, "^[ ]*Do (While|Until)") Then
-        If Not RegExTest(St, ": Loop") Then Indent = Indent + Idnt
+        Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*Loop$") Then
       ElseIf RegExTest(St, "^[ ]*Do$") Then
         Indent = Indent + Idnt
@@ -346,7 +350,7 @@ Public Sub TestIndent(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Li
   If RTrim(L) = "" Then Exit Sub
   If RegExTest(L, "^On Error ") Then Exit Sub
   If RegExTest(L, "^[a-zA-Z][a-zA-Z0-9]*:$") Then Exit Sub
-  If StartsWith(L, "#If ") Or StartsWith(L, "#End If") Or StartsWith(L, "#Else") Or StartsWith(L, "#ElseIf ") Then Exit Sub
+  If RegExTest(L, "#(If|End If|Else|Const)") Then Exit Sub
   If StartsWith(L, "Debug.") Then Exit Sub
     
   If LineIndent <> ExpectedIndent Then
@@ -503,7 +507,7 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
     StandardEvent = IsStandardEvent(ArgName, ArgType)
     
 '    If IsParamArray Then Stop
-    If ArgType = "" And Not StandardEvent Then
+    If ArgType = "" And Not IsEvent And Not StandardEvent Then
       RecordError Errors, ErrorCount, TY_NOTYP, LineN, "Local Parameter Missing Type: [" & ArgName & "]"
       AddFix TY_NOTYP, "\b" & ArgName & "\b", ArgName & " As Variant"
     End If
@@ -547,11 +551,23 @@ Public Function GetTypeDefault(ByVal ArgType As String) As String
 End Function
 
 Public Function IsStandardEvent(ByVal ArgName As String, ByVal ArgType As String) As Boolean
-  If ArgName = "Cancel" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Cancel" Then IsStandardEvent = True: Exit Function
+  If ArgName = "LastRow" Then IsStandardEvent = True: Exit Function
+  If ArgName = "LastCol" Then IsStandardEvent = True: Exit Function
+  If ArgName = "newCol" Then IsStandardEvent = True: Exit Function
+  If ArgName = "newCol" Then IsStandardEvent = True: Exit Function
+  If ArgName = "newRow" Then IsStandardEvent = True: Exit Function
+  If ArgName = "OldValue" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Index" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Offset" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
   If ArgName = "UnloadMode" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
   If ArgName = "KeyCode" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
   If ArgName = "KeyAscii" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Button" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
   If ArgName = "Shift" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "X" And ArgType = "Single" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Y" And ArgType = "Single" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Source" And ArgType = "Control" Then IsStandardEvent = True: Exit Function
   IsStandardEvent = False
 End Function
 
