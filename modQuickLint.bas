@@ -148,15 +148,17 @@ On Error GoTo LintError
       Dim Portion As String
       Portion = Left(LL, Len(LL) - 2)
       MultiLineOrig = MultiLineOrig & LL & vbCrLf
-      If MultiLine <> "" Then Portion = Trim(Portion)
+      If MultiLine <> "" Then Portion = " " & Trim(Portion)
       MultiLine = MultiLine + Portion
       LineN = LineN + 1
       GoTo NextLineWithoutRecord
     ElseIf MultiLine <> "" Then
       MultiLineOrig = MultiLineOrig & LL
-      LL = MultiLine & Trim(LL)
+      LL = MultiLine & " " & Trim(LL)
       MultiLine = ""
       IsMultiLine = True
+    Else
+      MultiLineOrig = ""
     End If
     
     TestBlankLines Errors, ErrorCount, LineN, LL, BlankLineCount
@@ -259,6 +261,7 @@ NextLine:
       Dim Fixed As String
 '      If IsMultiLine Then Stop
 '      If InStr(LL, "Function") > 0 Then Stop
+'      If InStr(LL, "Private Function") > 0 Then Stop
       If IsMultiLine Then
         Fixed = PerformAutofix(MultiLineOrig)
       Else
@@ -412,10 +415,24 @@ End Sub
 
 Public Function WellKnownName(ByVal Str As String) As String
 On Error Resume Next
+  InitWellKnownNames
   WellKnownName = ""
   WellKnownName = WellKnownNames(LCase(Str))
   If WellKnownName = "" Then WellKnownName = Capitalize(Str)
 End Function
+
+Private Sub AddWellKnownName(ByVal S As String)
+On Error Resume Next
+  WellKnownNames.Add S, LCase(S)
+End Sub
+
+Public Sub InitWellKnownNames()
+  Dim L As Variant
+  If WellKnownNames.Count > 0 Then Exit Sub
+  For Each L In Array("hWnd")
+    AddWellKnownName L
+  Next
+End Sub
 
 Public Sub TestSignatureName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String)
   Dim LL As String
