@@ -119,14 +119,14 @@ Public Function QuickLintFile(ByVal File As String, Optional ByVal MaxErrors As 
 End Function
 
 Public Function QuickLintContents(ByVal Contents As String, Optional ByVal MaxErrors As Long = MAX_ERRORS_DEFAULT, Optional ByVal AutoFix As String = "") As String
-  Dim Lines() As String, LL As Variant, L As String
+  Dim Lines() As String, ActualLine As Variant, LL As String, L As String
 On Error GoTo LintError
   ErrorIgnore = DISABLED_LINT_TYPES
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
   
   Dim InAttributes As Boolean, InBody As Boolean
     
-  Dim MultiLine As String, IsMultiLine As Boolean
+  Dim MultiLineOrig As String, MultiLine As String, IsMultiLine As Boolean
   Dim Indent As Long, LineN As Long
   Dim Errors As String, ErrorCount As Long
   Dim BlankLineCount As Long
@@ -137,18 +137,21 @@ On Error GoTo LintError
   
   TestDefaultControlNames Errors, ErrorCount, 0, Contents
   
-  For Each LL In Lines
+  For Each ActualLine In Lines
+    LL = ActualLine
     If MaxErrors > 0 And ErrorCount >= MaxErrors Then Exit For
     
     IsMultiLine = False
     If Right(LL, 2) = " _" Then
       Dim Portion As String
       Portion = Left(LL, Len(LL) - 2)
+      MultiLineOrig = MultiLineOrig & LL & vbCrLf
       If MultiLine <> "" Then Portion = Trim(Portion)
       MultiLine = MultiLine + Portion
       LineN = LineN + 1
-      GoTo NextLine
+      GoTo NextLineWithoutRecord
     ElseIf MultiLine <> "" Then
+      MultiLineOrig = MultiLineOrig & LL
       LL = MultiLine & Trim(LL)
       MultiLine = ""
       IsMultiLine = True
@@ -250,12 +253,14 @@ On Error GoTo LintError
 NextStatement:
     Next
 NextLine:
-    If AutoFix <> "" And Not IsMultiLine Then
-      LL = PerformAutofix(LL)
-      If NewContents <> "" Then NewContents = NewContents & LL & vbCrLf
+    If AutoFix <> "" Then
+      Dim Fixed As String
+      Fixed = IIf(IsMultiLine, PerformAutofix(MultiLineOrig), PerformAutofix(LL))
+      NewContents = NewContents & Fixed & vbCrLf
     End If
+NextLineWithoutRecord:
   Next
-  If AutoFix <> "" Then WriteFile AutoFix, NewContents, True
+  If AutoFix <> "" Then WriteFile AutoFix, Left(NewContents, Len(NewContents) - 2), True
   
   TestModuleOptions Errors, ErrorCount, Options
   
@@ -585,6 +590,7 @@ NextFix:
     Next
   End If
   PerformAutofix = Line
-  AutofixFind = Array()
-  AutofixRepl = Array()
+  
+  Erase AutofixFind
+  Erase AutofixRepl
 End Function
