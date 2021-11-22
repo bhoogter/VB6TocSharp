@@ -39,6 +39,8 @@ Public ErrorPrefix As String
 Public ErrorIgnore As String
 Public AutofixFind() As String
 Public AutofixRepl() As String
+Public AutofixFindRestOfFile() As String
+Public AutofixReplRestOfFile() As String
 
 Public WellKnownNames As New Collection
 
@@ -255,7 +257,13 @@ NextStatement:
 NextLine:
     If AutoFix <> "" Then
       Dim Fixed As String
-      Fixed = IIf(IsMultiLine, PerformAutofix(MultiLineOrig), PerformAutofix(LL))
+'      If IsMultiLine Then Stop
+'      If InStr(LL, "Function") > 0 Then Stop
+      If IsMultiLine Then
+        Fixed = PerformAutofix(MultiLineOrig)
+      Else
+        Fixed = PerformAutofix(LL)
+      End If
       NewContents = NewContents & Fixed & vbCrLf
     End If
 NextLineWithoutRecord:
@@ -398,7 +406,7 @@ Public Sub TestArgName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal L
   
   If RegExTest(LL, "^[a-z][a-z0-9_]*[%&@!#$]?$") Then
     RecordError Errors, ErrorCount, TY_ARGNA, LineN, "Identifier name declared as all lower-case: " & LL
-    AddFix "\b" & LL & "\b", WellKnownName(LL)
+    AddFix "\b" & LL & "\b", WellKnownName(LL), True
   End If
 End Sub
 
@@ -563,25 +571,38 @@ Public Sub TestCodeLine(ByRef Errors As String, ByRef ErrorCount As Long, ByVal 
   If RegExTest(L, " Stop$") Or RegExTest(L, " Return$") Then RecordError Error, ErrorCount, TY_CSTOP, LineN, "Code contains STOP statement."
 End Sub
 
-Public Sub AddFix(ByVal Find As String, ByVal Repl As String)
+Public Sub AddFix(ByVal Find As String, ByVal Repl As String, Optional ByVal RestOfFile As Boolean = False)
   Dim N As Long
 On Error Resume Next
-  N = UBound(AutofixFind)
-  N = N + 1
-  ReDim Preserve AutofixFind(1 To N)
-  ReDim Preserve AutofixRepl(1 To N)
-  AutofixFind(N) = Find
-  AutofixRepl(N) = Repl
+  If RestOfFile Then
+    N = UBound(AutofixFindRestOfFile)
+    N = N + 1
+    ReDim Preserve AutofixFindRestOfFile(1 To N)
+    ReDim Preserve AutofixReplRestOfFile(1 To N)
+    AutofixFindRestOfFile(N) = Find
+    AutofixReplRestOfFile(N) = Repl
+  Else
+    N = UBound(AutofixFind)
+    N = N + 1
+    ReDim Preserve AutofixFind(1 To N)
+    ReDim Preserve AutofixRepl(1 To N)
+    AutofixFind(N) = Find
+    AutofixRepl(N) = Repl
+  End If
 End Sub
+
+Public Function GetFixCount(Optional ByVal RestOfFile As Boolean = False) As Long
+On Error Resume Next
+  GetFixCount = 0
+  GetFixCount = UBound(IIf(RestOfFile, AutofixFindRestOfFile, AutofixFind))
+End Function
 
 Public Function PerformAutofix(ByVal Line As String) As String
   Dim I As Long, N As Long
-On Error Resume Next
-  N = -1
-  N = UBound(AutofixFind)
-  If N >= 1 Then
+    Dim Find As String, Repl As String
+  N = GetFixCount(False)
+  If N > 0 Then
     For I = LBound(AutofixFind) To UBound(AutofixFind)
-      Dim Find As String, Repl As String
       Find = AutofixFind(I)
       Repl = AutofixRepl(I)
       If Find = "" Then GoTo NextFix
@@ -589,6 +610,19 @@ On Error Resume Next
 NextFix:
     Next
   End If
+  
+  N = GetFixCount(True)
+  If N > 0 Then
+    For I = LBound(AutofixFindRestOfFile) To UBound(AutofixFindRestOfFile)
+      Find = AutofixFindRestOfFile(I)
+      Repl = AutofixReplRestOfFile(I)
+      If Find = "" Then GoTo NextFixRestOfFile
+      Line = RegExReplace(Line, Find, Repl)
+NextFixRestOfFile:
+    Next
+  End If
+  
+Finish:
   PerformAutofix = Line
   
   Erase AutofixFind
