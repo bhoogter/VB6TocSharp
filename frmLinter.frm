@@ -89,7 +89,7 @@ Private Sub Form_Load()
 End Sub
 
 Private Sub cmdClose_Click()
-  Close
+  Unload Me
 End Sub
 
 Private Sub cmdLint_Click()
