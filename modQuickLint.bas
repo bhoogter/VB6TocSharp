@@ -568,6 +568,7 @@ Public Function IsStandardEvent(ByVal ArgName As String, ByVal ArgType As String
   If ArgName = "X" And ArgType = "Single" Then IsStandardEvent = True: Exit Function
   If ArgName = "Y" And ArgType = "Single" Then IsStandardEvent = True: Exit Function
   If ArgName = "Source" And ArgType = "Control" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Item" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
   IsStandardEvent = False
 End Function
 
