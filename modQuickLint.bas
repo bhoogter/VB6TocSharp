@@ -155,7 +155,7 @@ On Error GoTo LintError
       Indent = Indent - Idnt
     ElseIf RegExTest(L, "^[ ]*End Select$") Then
       Indent = Indent - Idnt - Idnt
-    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*))$") Then
+    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*)|ElseIf .*)$") Then
       Indent = Indent - Idnt
       UnindentedAlready = True
     Else
@@ -176,7 +176,7 @@ On Error GoTo LintError
         Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*(End (If|Function|Sub|Property)|Next|Wend|Loop|Loop .*|Enum|Type|Select)$") Then
         If Not UnindentedAlready Then Indent = Indent - Idnt
-      ElseIf RegExTest(St, "^[ ]*If ") Then
+      ElseIf RegExTest(St, "^[ ]*(If |ElseIf )") Then
         If Not RegExTest(St, "Then ") Then Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*For ") Then
         If Not RegExTest(St, " Next") Then Indent = Indent + Idnt
