@@ -75,7 +75,7 @@ Public Function LintFix(Optional ByVal FileName As String = "") As String
   QuickLintFiles FileList, 0, True
 End Function
 
-Public Function QuickLintFiles(ByVal List As String, Optional ByVal MaxErrors As Long = MAX_ERRORS_DEFAULT, Optional ByVal AutoFix As Boolean = True) As String
+Public Function QuickLintFiles(ByVal List As String, Optional ByVal MaxErrors As Long = MAX_ERRORS_DEFAULT, Optional ByVal AutoFix As Boolean = False) As String
   Const lintDotsPerRow As Long = 50
   Dim L As Variant
   Dim X As Long
