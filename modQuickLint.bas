@@ -31,8 +31,10 @@ Private Const TY_CORRE As String = "Corre"
 Private Const TY_GOSUB As String = "GoSub"
 Private Const TY_CSTOP As String = "CStop"
 Private Const TY_OPDEF As String = "OpDef"
+Private Const TY_OPBYR As String = "OpByR"
 Private Const TY_DFCTL As String = "DfCtl"
 
+Private Const WARNING_LINT_TYPES As String = TY_OPBYR
 Private Const DISABLED_LINT_TYPES As String = "" ' TY_ARGTY & "," & TY_OPDEF
 
 Public ErrorPrefix As String
@@ -45,7 +47,7 @@ Public AutofixReplRestOfFile() As String
 Public WellKnownNames As New Collection
 
 Public Function ErrorTypes() As Variant()
-  ErrorTypes = Array(TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_DFCTL)
+  ErrorTypes = Array(TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_OPBYR, TY_DFCTL)
 End Function
 
 Private Function ResolveSources(ByVal FileName As String) As String
@@ -315,14 +317,20 @@ Public Function CleanLine(ByVal Line As String) As String
 End Function
   
 Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Typ As String, ByVal LineN As Long, ByVal Error As String)
+  Dim eLine As String
   If InStr(ErrorIgnore, UCase(Typ)) > 0 Or InStr(ErrorIgnore, TY_ALLTY) > 0 Then Exit Sub
 
   If Len(Errors) <> 0 Then Errors = Errors & vbCrLf
   If InStr(Join(ErrorTypes, ","), Typ) = 0 Then
     Errors = Errors & ErrorPrefix & "[" & TY_ERROR & "] Line " & Right(Space(5) & LineN, 5) & ": Unknown error type in linter (add to ErrorTypes): " & Typ
   End If
-  Errors = Errors & ErrorPrefix & "[" & Right(Space(5) & Typ, 5) & "] Line " & Right(Space(5) & LineN, 5) & ": " & Error
-  ErrorCount = ErrorCount + 1
+  eLine = ErrorPrefix & "[" & Right(Space(5) & Typ, 5) & "] Line " & Right(Space(5) & LineN, 5) & ": " & Error
+  If InStr(WARNING_LINT_TYPES, Typ) > 0 Then
+    Debug.Print "WARNING: " & eLine
+  Else
+    Errors = Errors & eLine
+    ErrorCount = ErrorCount + 1
+  End If
 End Sub
 
 Public Function StartsWith(ByVal L As String, ByVal Find As String) As Boolean
@@ -503,6 +511,9 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
           RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on parameter [" & ArgName & "] -- specify one or the other"
           AddFix "\b" & Item & "\b", "ByRef " & Item
         End If
+      End If
+      If IsOptional And IsByRef Then
+        RecordError Errors, ErrorCount, TY_OPBYR, LineN, "Modifiers 'Optional ByRef' may not migrate well: " & ArgName
       End If
       If IsOptional And ArgDefault = "" Then
         RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & ArgName
