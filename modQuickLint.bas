@@ -34,8 +34,9 @@ Private Const TY_OPDEF As String = "OpDef"
 Private Const TY_OPBYR As String = "OpByR"
 Private Const TY_DFCTL As String = "DfCtl"
 
-Private Const WARNING_LINT_TYPES As String = TY_OPBYR
 Private Const DISABLED_LINT_TYPES As String = "" ' TY_ARGTY & "," & TY_OPDEF
+Private Const WARNING_LINT_TYPES As String = TY_OPBYR
+Private Const AUTOFIX_LINT_TYPES As String = TY_INDNT & "," & TY_ARGNA & "," & TY_OPDEF & "," & TY_NOTYP
 
 Public ErrorPrefix As String
 Public ErrorIgnore As String
@@ -350,7 +351,7 @@ Public Sub TestIndent(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Li
     
   If LineIndent <> ExpectedIndent Then
     RecordError Errors, ErrorCount, TY_INDNT, LineN, "Incorrect Indent -- expected " & ExpectedIndent & ", got " & LineIndent
-    AddFix "^[ ]*", Space(ExpectedIndent)
+    AddFix TY_INDNT, "^[ ]*", Space(ExpectedIndent)
   End If
 End Sub
 
@@ -392,32 +393,32 @@ Public Sub TestArgName(ByRef Errors As String, ByRef ErrorCount As Long, ByVal L
   If RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*%$") Then ' % Integer Dim L%
     RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Integer deprecated: " & LL
     LL = Left(LL, Len(LL) - 1)
-    AddFix "\b" & LL & ".\b", LL & " As Integer"
+    AddFix TY_TYPEC, "\b" & LL & ".\b", LL & " As Integer"
   ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*&$") Then ' & Long  Dim M&
     RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Long deprecated: " & LL
     LL = Left(LL, Len(LL) - 1)
-    AddFix "\b" & LL & ".\b", LL & " As Long"
+    AddFix TY_TYPEC, "\b" & LL & ".\b", LL & " As Long"
   ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*@$") Then ' @ Decimal Const W@ = 37.5
     RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Decimal deprecated: " & LL
     LL = Left(LL, Len(LL) - 1)
-    AddFix "\b" & LL & ".\b", LL & " As Decimal"
+    AddFix TY_TYPEC, "\b" & LL & ".\b", LL & " As Decimal"
   ElseIf RegExTest(LL, "^[a-zA-Z_][a-TY_TYPEC-Z0-9_]*!$") Then ' ! Single  Dim Q!
     RecordError Errors, ErrorCount, TY_DEPRE, LineN, "Use of Type Character For Single deprecated: " & LL
     LL = Left(LL, Len(LL) - 1)
-    AddFix "\b" & LL & ".\b", LL & " As Single"
+    AddFix TY_TYPEC, "\b" & LL & ".\b", LL & " As Single"
   ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*#$") Then ' # Double  Dim X#
     RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For Double deprecated: " & LL
     LL = Left(LL, Len(LL) - 1)
-    AddFix "\b" & LL & ".\b", LL & " As Double"
+    AddFix TY_TYPEC, "\b" & LL & ".\b", LL & " As Double"
   ElseIf RegExTest(LL, "^[a-zA-Z_][a-zA-Z0-9_]*\$$") Then ' $ String  Dim V$ = "Secret"
     RecordError Errors, ErrorCount, TY_TYPEC, LineN, "Use of Type Character For String deprecated: " & LL
     LL = Left(LL, Len(LL) - 1)
-    AddFix "\b" & LL & ".\b", LL & " As String"
+    AddFix TY_TYPEC, "\b" & LL & ".\b", LL & " As String"
   End If
   
   If RegExTest(LL, "^[a-z][a-z0-9_]*[%&@!#$]?$") Then
     RecordError Errors, ErrorCount, TY_ARGNA, LineN, "Identifier name declared as all lower-case: " & LL
-    AddFix "\b" & LL & "\b", WellKnownName(LL), True
+    AddFix TY_ARGNA, "\b" & LL & "\b", WellKnownName(LL), True
   End If
 End Sub
 
@@ -502,14 +503,17 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
     StandardEvent = IsStandardEvent(ArgName, ArgType)
     
 '    If IsParamArray Then Stop
-    If ArgType = "" And Not StandardEvent Then RecordError Errors, ErrorCount, TY_NOTYP, LineN, "Local Parameter Missing Type: [" & ArgName & "]"
+    If ArgType = "" And Not StandardEvent Then
+      RecordError Errors, ErrorCount, TY_NOTYP, LineN, "Local Parameter Missing Type: [" & ArgName & "]"
+      AddFix TY_NOTYP, "\b" & ArgName & "\b", ArgName & " As Variant"
+    End If
     If InSignature Then
       If IsParamArray Then
         If Right(LL, 2) <> "()" Then RecordError Errors, ErrorCount, TY_STYLE, LineN, "ParamArray variable not declared as an Array.  Add '()': " & ArgName
       Else
         If Not IsByVal And Not IsByRef And Not StandardEvent Then
           RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on parameter [" & ArgName & "] -- specify one or the other"
-          AddFix "\b" & Item & "\b", "ByRef " & Item
+          AddFix TY_BYRFV, "\b" & Item & "\b", "ByRef " & Item
         End If
       End If
       If IsOptional And IsByRef Then
@@ -517,7 +521,7 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
       End If
       If IsOptional And ArgDefault = "" Then
         RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & ArgName
-        AddFix "\b" & Item & "\b", Item & " = " & GetTypeDefault(ArgType)
+        AddFix TY_OPDEF, "\b" & Item & "\b", Item & " = " & GetTypeDefault(ArgType)
       End If
     End If
     
@@ -617,8 +621,10 @@ Public Sub TestCodeLine(ByRef Errors As String, ByRef ErrorCount As Long, ByVal 
   If RegExTest(L, " Stop$") Or RegExTest(L, " Return$") Then RecordError Error, ErrorCount, TY_CSTOP, LineN, "Code contains STOP statement."
 End Sub
 
-Public Sub AddFix(ByVal Find As String, ByVal Repl As String, Optional ByVal RestOfFile As Boolean = False)
+Public Sub AddFix(ByVal Typ As String, ByVal Find As String, ByVal Repl As String, Optional ByVal RestOfFile As Boolean = False)
   Dim N As Long
+  If InStr(AUTOFIX_LINT_TYPES, Typ) = 0 Then Exit Sub
+  
 On Error Resume Next
   If RestOfFile Then
     N = UBound(AutofixFindRestOfFile)
