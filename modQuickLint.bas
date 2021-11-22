@@ -504,7 +504,10 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
           AddFix "\b" & Item & "\b", "ByRef " & Item
         End If
       End If
-      If IsOptional And ArgDefault = "" Then RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & ArgName
+      If IsOptional And ArgDefault = "" Then
+        RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & ArgName
+        AddFix "\b" & Item & "\b", Item & " = " & GetTypeDefault(ArgType)
+      End If
     End If
     
     TestArgName Errors, ErrorCount, LineN, LL
@@ -512,6 +515,21 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
     If Not StandardEvent Then TestArgType Errors, ErrorCount, LineN, LL, ArgType
   Next
 End Sub
+
+Public Function GetTypeDefault(ByVal ArgType As String) As String
+  Select Case LCase(ArgType)
+    Case "string"
+      GetTypeDefault = """"""
+    Case "long", "integer", "short", "byte", "date", "decimal", "float", "double", "currency"
+      GetTypeDefault = "0"
+    Case "boolean"
+      GetTypeDefault = "False"
+    Case "vbtristate"
+      GetTypeDefault = "vbUseDefault"
+    Case Else
+      GetTypeDefault = "Nothing"
+  End Select
+End Function
 
 Public Function IsStandardEvent(ByVal ArgName As String, ByVal ArgType As String) As Boolean
   If ArgName = "Cancel" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
