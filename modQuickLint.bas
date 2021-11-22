@@ -33,6 +33,8 @@ Private Const TY_CSTOP As String = "CStop"
 Private Const TY_OPDEF As String = "OpDef"
 Private Const TY_DFCTL As String = "DfCtl"
 
+Private Const DISABLED_LINT_TYPES As String = "" ' TY_ARGTY & "," & TY_OPDEF
+
 Public ErrorPrefix As String
 Public ErrorIgnore As String
 
@@ -41,10 +43,21 @@ Public Function ErrorTypes() As Variant()
 End Function
 
 Public Function Lint(Optional ByVal FileName As String = "", Optional ByVal Alert As Boolean = True) As String
+  
   Dim FileList As String
   If FileName = "" Then FileName = "prj.vbp"
-  If InStr(FileName, "\") = 0 Then FileName = App.Path & "\" & FileName
-  FileList = IIf(Right(FileName, 4) = ".vbp", VBPCode(FileName), FileName)
+  If FileName = "forms" Then
+    FileList = VBPForms(True)
+  ElseIf FileName = "modules" Then
+    FileList = VBPModules
+  ElseIf FileName = "classes" Then
+    FileList = VBPClasses
+  ElseIf FileName = "usercontrols" Then
+    FileList = VBPUserControls
+  Else
+    If InStr(FileName, "\") = 0 Then FileName = App.Path & "\" & FileName
+    FileList = IIf(Right(FileName, 4) = ".vbp", VBPCode(FileName), FileName)
+  End If
   
   Lint = QuickLintFiles(FileList)
 End Function
@@ -95,7 +108,7 @@ End Function
 Public Function QuickLintContents(ByVal Contents As String) As String
   Dim Lines() As String, LL As Variant, L As String
 On Error GoTo LintError
-  ErrorIgnore = ""
+  ErrorIgnore = DISABLED_LINT_TYPES
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
   
   Dim InAttributes As Boolean, InBody As Boolean
@@ -355,6 +368,7 @@ End Sub
 
 Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String, ByVal InSignature As Boolean)
   Dim IsOptional As Boolean, IsByVal As Boolean, IsByRef As Boolean, IsParamArray As Boolean
+  Dim IsWithEvents As Boolean, IsEvent As Boolean
   L = Trim(L)
   L = StripLeft(L, "Dim ")
   L = StripLeft(L, "Private ")
@@ -364,7 +378,13 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
   
   Dim LL As Variant
   For Each LL In Split(L, ", ")
-    Dim Ix As Long, ArgName As String, ArgType As String, ArgDefault As String
+    Dim Ix As Long, ArgName As String, ArgType As String, ArgDefault As String, StandardEvent As Boolean
+    
+    IsEvent = StartsWith(LL, "Event ")
+    LL = StripLeft(LL, "Event ")
+    
+    IsWithEvents = StartsWith(LL, "WithEvents ")
+    LL = StripLeft(LL, "WithEvents ")
     
     IsOptional = StartsWith(LL, "Optional ")
     LL = StripLeft(LL, "Optional ")
@@ -394,28 +414,40 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
       ArgType = ""
     End If
     
+    ArgName = LL
+    StandardEvent = IsStandardEvent(ArgName, ArgType)
+    
 '    If IsParamArray Then Stop
-    If ArgType = "" Then RecordError Errors, ErrorCount, TY_NOTYP, LineN, "Local Parameter Missing Type: [" & LL & "]"
+    If ArgType = "" And Not StandardEvent Then RecordError Errors, ErrorCount, TY_NOTYP, LineN, "Local Parameter Missing Type: [" & ArgName & "]"
     If InSignature Then
       If IsParamArray Then
-        If Right(LL, 2) <> "()" Then RecordError Errors, ErrorCount, TY_STYLE, LineN, "ParamArray variable not declared as an Array.  Add '()': " & LL
+        If Right(LL, 2) <> "()" Then RecordError Errors, ErrorCount, TY_STYLE, LineN, "ParamArray variable not declared as an Array.  Add '()': " & ArgName
       Else
-        If Not IsByVal And Not IsByRef Then RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on parameter [" & LL & "] -- specify one or the other"
+        If Not IsByVal And Not IsByRef And Not StandardEvent Then RecordError Errors, ErrorCount, TY_BYRFV, LineN, "ByVal or ByRef not specified on parameter [" & ArgName & "] -- specify one or the other"
       End If
-      If IsOptional And ArgDefault = "" Then RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & LL
+      If IsOptional And ArgDefault = "" Then RecordError Errors, ErrorCount, TY_OPDEF, LineN, "Parameter declared OPTIONAL but no default specified. Must specify default: " & ArgName
     End If
     
     TestArgName Errors, ErrorCount, LineN, LL
     
-    TestArgType Errors, ErrorCount, LineN, LL, ArgType
+    If Not StandardEvent Then TestArgType Errors, ErrorCount, LineN, LL, ArgType
   Next
 End Sub
 
+Public Function IsStandardEvent(ByVal ArgName As String, ByVal ArgType As String) As Boolean
+  If ArgName = "Cancel" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "UnloadMode" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "KeyCode" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "KeyAscii" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  If ArgName = "Shift" And ArgType = "Integer" Then IsStandardEvent = True: Exit Function
+  IsStandardEvent = False
+End Function
+
 Public Sub TestArgType(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String, ByVal Typ As String)
-  If Typ = "Integer" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long"
-  If Typ = "Short" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long"
-  If Typ = "Byte" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long"
-  If Typ = "Float" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Double"
+  If Typ = "Integer" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long (or disable type linting for file)"
+  If Typ = "Short" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long (or disable type linting for file)"
+  If Typ = "Byte" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long (or disable type linting for file)"
+  If Typ = "Float" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Double (or disable type linting for file)"
 End Sub
 
 
