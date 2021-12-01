@@ -9,13 +9,13 @@ Public Const SW_SHOW As Long = 5
 Public Const SW_SHOWDEFAULT As Long = 10
 
 Public Const CREATE_NO_WINDOW As Long = &H8000000
-Global Const INFINITE As Long = -1&
+Global Const INFINITE As Long = -1
 
 Private LastProcessID As Long
 
 Private Const DIRSEP As String = "\"
 
-Global Const NORMAL_PRIORITY_CLASS  As Long = &H20&
+Global Const NORMAL_PRIORITY_CLASS  As Long = &H20
 
 Enum enSW
   enSW_HIDE = 0
@@ -113,7 +113,7 @@ On Error GoTo ErrorRoutineErr
 ErrorRoutineResume:
   Exit Sub
 ErrorRoutineErr:
-  MsgBox "AppShell.Form1.ShellAndWait: " & Err & Error
+  MsgBox "AppShell.Form1.ShellAndWait [" & Err.Number & "]: " & Err.Description
   Resume Next
 End Sub
 

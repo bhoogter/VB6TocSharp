@@ -29,6 +29,7 @@ Public Function UsingEverything(Optional ByVal PackageName As String = "") As St
     E = E & N & "using System.Windows.Controls;"
     E = E & N & "using static System.DateTime;"
     E = E & N & "using static System.Math;"
+    E = E & N & "using System.Linq;"
     
     E = E & N & "using static Microsoft.VisualBasic.Globals;"
     E = E & N & "using static Microsoft.VisualBasic.Collection;"

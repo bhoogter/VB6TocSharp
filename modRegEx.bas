@@ -53,7 +53,7 @@ On Error Resume Next
   oRe.Global = True
   Set oAl = CreateObject("System.Collections.ArrayList")
   
-  Do
+  Do While True
     Set oMatches = oRe.Execute(szStr)
     If oMatches.Count > 0 Then
       oAl.Add oMatches(0).SubMatches(2)

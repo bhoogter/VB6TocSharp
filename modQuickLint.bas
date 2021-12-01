@@ -188,7 +188,7 @@ On Error GoTo LintError
     End If
     
     LineN = LineN + 1
-'    If LineN = 41 Then Stop
+'    If LineN = 487 Then Stop
     
     Dim UnindentedAlready As Boolean
     If RegExTest(L, " ^Option ") Then Options.Add "true", Replace(L, "Options ", "")
@@ -219,7 +219,7 @@ On Error GoTo LintError
       ElseIf RegExTest(St, "^[ ]*(End (If|Function|Sub|Property)|Loop|Loop .*|Enum|Type|Select)$") Then
         If Not UnindentedAlready Then Indent = Indent - Idnt
       ElseIf RegExTest(St, "^[ ]*If ") Then
-        If Not RegExTest(St, "Then ") Then Indent = Indent + Idnt
+        If Not RegExTest(St, "\bThen ") Then Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*For ") Then
         Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*Next$") Then
@@ -350,6 +350,11 @@ Public Function StripLeft(ByVal L As String, ByVal Find As String) As String
   If StartsWith(L, Find) Then StripLeft = Mid(L, Len(Find) + 1) Else StripLeft = L
 End Function
 
+Public Function RecordLeft(ByRef L As String, ByVal Find As String) As Boolean
+  RecordLeft = StartsWith(L, Find)
+  If RecordLeft Then L = Mid(L, Len(Find) + 1)
+End Function
+
 Public Sub TestIndent(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String, ByVal LineIndent As Long, ByVal ExpectedIndent As Long)
   If RTrim(L) = "" Then Exit Sub
   If RegExTest(L, "^On Error ") Then Exit Sub
@@ -470,39 +475,28 @@ Public Sub TestDeclaration(ByRef Errors As String, ByRef ErrorCount As Long, ByV
   
   Dim Item As Variant, LL As String
   For Each Item In Split(L, ", ")
-    Dim Ix As Long, ArgName As String, ArgType As String, ArgDefault As String, StandardEvent As Boolean
+    Dim IX As Long, ArgName As String, ArgType As String, ArgDefault As String, StandardEvent As Boolean
     LL = Item
     
-    IsEvent = StartsWith(LL, "Event ")
-    LL = StripLeft(LL, "Event ")
+    IsEvent = RecordLeft(LL, "Event ")
+    IsWithEvents = RecordLeft(LL, "WithEvents ")
+    IsOptional = RecordLeft(LL, "Optional ")
+    IsByVal = RecordLeft(LL, "ByVal ")
+    IsByRef = RecordLeft(LL, "ByRef ")
+    IsParamArray = RecordLeft(LL, "ParamArray ")
     
-    IsWithEvents = StartsWith(LL, "WithEvents ")
-    LL = StripLeft(LL, "WithEvents ")
-    
-    IsOptional = StartsWith(LL, "Optional ")
-    LL = StripLeft(LL, "Optional ")
-    
-    IsByVal = StartsWith(LL, "ByVal ")
-    LL = StripLeft(LL, "ByVal ")
-    
-    IsByRef = StartsWith(LL, "ByRef ")
-    LL = StripLeft(LL, "ByRef ")
-    
-    IsParamArray = StartsWith(LL, "ParamArray ")
-    LL = StripLeft(LL, "ParamArray ")
-    
-    Ix = InStr(LL, " = ")
-    If Ix > 0 Then
-      ArgDefault = Trim(Mid(LL, Ix + 3))
-      LL = Left(LL, Ix - 1)
+    IX = InStr(LL, " = ")
+    If IX > 0 Then
+      ArgDefault = Trim(Mid(LL, IX + 3))
+      LL = Left(LL, IX - 1)
     Else
       ArgDefault = ""
     End If
     
-    Ix = InStr(LL, " As ")
-    If Ix > 0 Then
-      ArgType = Trim(Mid(LL, Ix + 4))
-      LL = Left(LL, Ix - 1)
+    IX = InStr(LL, " As ")
+    If IX > 0 Then
+      ArgType = Trim(Mid(LL, IX + 4))
+      LL = Left(LL, IX - 1)
     Else
       ArgType = ""
     End If
@@ -595,22 +589,24 @@ Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal
   L = StripLeft(L, "Sub ")
   If StartsWith(L, "Function ") Or StartsWith(L, "Property Get ") Then WithReturn = True
   L = StripLeft(L, "Function ")
-  L = StripLeft(L, "Property ")
+  L = StripLeft(L, "Property Get ")
+  L = StripLeft(L, "Property Let ")
+  L = StripLeft(L, "Property Set ")
   
-  Dim Ix As Long, Ix2 As Long, Name As String, Args As String, RET As String
-  Ix = InStr(L, "(")
-  If Ix = 0 Then Exit Sub
-  Name = Left(L, Ix - 1)
+  Dim IX As Long, Ix2 As Long, Name As String, Args As String, Ret As String
+  IX = InStr(L, "(")
+  If IX = 0 Then Exit Sub
+  Name = Left(L, IX - 1)
   If RegExTest(L, "\) As .*\(\)$") Then
     Ix2 = InStrRev(L, ")", Len(L) - 2)
   Else
     Ix2 = InStrRev(L, ")")
   End If
-  Args = Mid(L, Ix + 1, Ix2 - Ix - 1)
-  RET = Mid(L, Ix2 + 1)
+  Args = Mid(L, IX + 1, Ix2 - IX - 1)
+  Ret = Mid(L, Ix2 + 1)
   
   TestSignatureName Errors, ErrorCount, LineN, Name
-  If WithReturn And RET = "" Then RecordError Errors, ErrorCount, TY_FNCRE, LineN, "Function Return Type Not Specified -- Specify Return Type or Variant"
+  If WithReturn And Ret = "" Then RecordError Errors, ErrorCount, TY_FNCRE, LineN, "Function Return Type Not Specified -- Specify Return Type or Variant"
   TestDeclaration Errors, ErrorCount, LineN, Args, True
 End Sub
 
@@ -630,16 +626,16 @@ Public Sub TestDefaultControlNames(ByRef Errors As String, ByRef ErrorCount As L
 End Sub
 
 Public Sub TestCodeLine(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String)
-  If RegExTest(L, "+ """) Or RegExTest(L, """ +") Then RecordError Error, ErrorCount, TY_CORRE, LineN, "Possible use of + instead of & on String concatenation"
-  If RegExTest(L, " Me[.]") Then RecordError Error, ErrorCount, TY_CORRE, LineN, "Use of 'Me.*' is not required."
+  If RegExTest(L, "+ """) Or RegExTest(L, """ +") Then RecordError Errors, ErrorCount, TY_CORRE, LineN, "Possible use of + instead of & on String concatenation"
+  If RegExTest(L, " Me[.]") Then RecordError Errors, ErrorCount, TY_CORRE, LineN, "Use of 'Me.*' is not required."
   
-  If RegExTest(L, "\.Enabled = [-0-9]") Then RecordError Error, ErrorCount, TY_CORRE, LineN, "Property [Enabled] Should Be Boolean.  Numeric found."
-  If RegExTest(L, "\.Visible = [-0-9]") Then RecordError Error, ErrorCount, TY_CORRE, LineN, "Property [Visible] Should Be Boolean.  Numeric found."
+  If RegExTest(L, "\.Enabled = [-0-9]") Then RecordError Errors, ErrorCount, TY_CORRE, LineN, "Property [Enabled] Should Be Boolean.  Numeric found."
+  If RegExTest(L, "\.Visible = [-0-9]") Then RecordError Errors, ErrorCount, TY_CORRE, LineN, "Property [Visible] Should Be Boolean.  Numeric found."
 
-  If RegExTest(L, " Call ") Then RecordError Error, ErrorCount, TY_CORRE, LineN, "Remove keyword 'Call'."
-  If RegExTest(L, " GoSub ") Or RegExTest(L, " Return$") Then RecordError Error, ErrorCount, TY_GOSUB, LineN, "Remove uses of 'GoSub' and 'Return'."
+  If RegExTest(L, " Call ") Then RecordError Errors, ErrorCount, TY_CORRE, LineN, "Remove keyword 'Call'."
+  If RegExTest(L, " GoSub ") Or RegExTest(L, " Return$") Then RecordError Errors, ErrorCount, TY_GOSUB, LineN, "Remove uses of 'GoSub' and 'Return'."
 
-  If RegExTest(L, " Stop$") Or RegExTest(L, " Return$") Then RecordError Error, ErrorCount, TY_CSTOP, LineN, "Code contains STOP statement."
+  If RegExTest(L, " Stop$") Or RegExTest(L, " Return$") Then RecordError Errors, ErrorCount, TY_CSTOP, LineN, "Code contains STOP statement."
 End Sub
 
 Public Sub AddFix(ByVal Typ As String, ByVal Find As String, ByVal Repl As String, Optional ByVal RestOfFile As Boolean = False)
