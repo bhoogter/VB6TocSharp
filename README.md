@@ -19,6 +19,12 @@ If you want to convert the entire project, simply click `ALL`, and it will do th
 
 NOTE:  It might not be the fastest, but it's faster than doing it manually!
 
+## Updates 2021-12-01
+
+The original version of the converter approached the problem in a block-by-block approach, separating every logical program unit into its own string and converting it on its own.  As a result, the converter made multiple passes and basically ran extremely slow.  After updating the linter to not use this approach, but simply to run through the code from top to bottom, it appeared evident that the converter could do the same thing with just as much accuracy.
+
+So, released today is the v2 of the converter, along side v1, via radio buttons on the main form.  Feel free to mix and match, convert the whole project with one, and then individual files with the other.  Hopefully, with the two completely different approaches, one of the two will work out better than the other and will result in less work.  Again, they are still, both, only an 80-90% conversion.  There are many things you will have to do by hand and double-check (like loop bounds), but again, it sure beats changing all of the `&`s in your VB6 code to `+`s for C#.
+
 ## How Do I ...?
 
 There are a lot of questions when it comes to conversion.  If you just want to know the way this converter deals with specific patterns, please see the [How Do I ...?](https://github.com/bhoogter/VB6TocSharp/wiki/How-Do-I-...%3F) page in our wiki.
