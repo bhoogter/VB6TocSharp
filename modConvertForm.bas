@@ -2,6 +2,7 @@ Attribute VB_Name = "modConvertForm"
 Option Explicit
 
 Private EventStubs As String
+Public FormControlArrays As String
 
 Public Function Frm2Xml(ByVal F As String) As String
   Dim Sp() As String, L As Variant, I As Long
@@ -60,6 +61,7 @@ Public Function ConvertFormUi(ByVal F As String, ByVal CodeSection As String) As
   Sp = Split(F, vbCrLf)
   
   EventStubs = ""
+  FormControlArrays = ""
   
   For K = LBound(Sp) To UBound(Sp)
     L = Trim(Sp(K))
@@ -115,7 +117,7 @@ Private Function ConvertProperty(ByVal S As String) As String
 End Function
 
 Private Function StartControl(ByVal L As String, ByVal Props As Collection, ByVal DoEmpty As Boolean, ByVal Code As String, ByRef TagType As String) As String
-  Dim cType As String, cName As String, cIndex As String
+  Dim cType As String, oName As String, cName As String, cIndex As String
   Dim tType As String, tCont As Boolean, tDef As String, Features As String
   Dim S As String, N As String, M As String
   Dim V As String
@@ -123,11 +125,16 @@ Private Function StartControl(ByVal L As String, ByVal Props As Collection, ByVa
   TagType = ""
   
   cType = SplitWord(L, 2)
-  cName = SplitWord(L, 3)
+  oName = SplitWord(L, 3)
   cIndex = cValP(Props, "Index")
-  If cIndex <> "" Then cName = cName & "_" & cIndex
-  
   ControlData cType, tType, tCont, tDef, Features
+  If cIndex <> "" Then
+    If InStr(FormControlArrays, "[" & oName & ",") = 0 Then FormControlArrays = FormControlArrays & "[" & oName & "," & tType & "]"
+    cName = oName & "_" & cIndex
+  Else
+    cName = oName
+  End If
+  
   
   S = ""
 On Error Resume Next

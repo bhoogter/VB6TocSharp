@@ -21,9 +21,20 @@ Public Const INIKey_VBPFile As String = "VBPFile"
 Public Const INIKey_OutputFolder As String = "OutputFolder"
 Public Const INIKey_AssemblyName As String = "AssemblyName"
 
-Public Function INIFile() As String
+
+Public Property Get vbpFile() As String
+  LoadSettings
+  If mVBPFile = "" Then mVBPFile = def_vbpFile
+  vbpFile = mVBPFile
+End Property
+
+Public Property Get vbpPath() As String
+  vbpPath = FilePath(vbpFile)
+End Property
+
+Public Property Get INIFile() As String
   INIFile = App.Path & "\VB6toCS.INI"
-End Function
+End Property
 
 Public Sub LoadSettings(Optional ByVal Force As Boolean = False)
   If Loaded And Not Force Then Exit Sub
@@ -63,15 +74,3 @@ Public Function OutputSubFolder(ByVal F As String) As String
     Case Else:   OutputSubFolder = ""
   End Select
 End Function
-
-Public Property Get vbpFile() As String
-  LoadSettings
-  If mVBPFile = "" Then mVBPFile = def_vbpFile
-  vbpFile = mVBPFile
-End Property
-
-Public Property Get vbpPath() As String
-  vbpPath = FilePath(vbpFile)
-End Property
-
-

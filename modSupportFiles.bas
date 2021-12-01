@@ -201,7 +201,7 @@ SkipClass:
   
   CreateProjectFile = S
   
-  WriteOut ChgExt(tFileName(vbpFile), ".csproj"), S
+  WriteOut ChgExt(ProjFileName(vbpFile), ".csproj"), S
 End Function
 
 Public Function VBExtensionClass() As String

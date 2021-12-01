@@ -1,0 +1,23 @@
+<Window x:Class="VB2CS.Forms.frmLinter"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:local="clr-namespace:VB2CS.Forms"
+    xmlns:usercontrols="clr-namespace:VB2CS.UserControls"
+    mc:Ignorable="d"
+    Title="Lint Project"    Height="486"    Width="521" Loaded="Form_Load">
+    <Grid>
+        <GroupBox x:Name="fraConfig" Margin="9,9,0,0" Width="472" Height="438" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Header="Configuration:">
+            <Grid Margin="0,-15,0,0">
+                <TextBox x:Name="txtResults" Margin="9,129,0,0" Padding="2,2,2,2" Width="455" Height="301" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" />
+                <TextBox x:Name="txtVBPFile" Margin="120,34,0,0" Padding="2,2,2,2" Width="301" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" />
+                <TextBox x:Name="txtFile" Margin="120,60,0,0" Padding="2,2,2,2" Width="301" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" />
+                <Button x:Name="cmdClose" Margin="243,86,0,0" Padding="2,2,2,2" Width="95" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="D&amp;one" Click="cmdClose_Click" />
+                <Button x:Name="cmdLint" Margin="140,86,0,0" Padding="2,2,2,2" Width="95" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="L&amp;int" Click="cmdLint_Click" />
+                <Label x:Name="lblSrc" Margin="17,34,0,0" Padding="2,2,2,2" Width="95" Height="18" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Project File:" />
+                <Label x:Name="lblFile" Margin="17,60,0,0" Padding="2,2,2,2" Width="95" Height="18" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Single File:" />
+            </Grid>
+        </GroupBox>
+    </Grid>
+</Window>

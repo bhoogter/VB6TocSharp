@@ -11,19 +11,25 @@ Public Const vbCrLf4 As String = vbCrLf & vbCrLf & vbCrLf & vbCrLf
 
 Public Const STR_CHR_UCASE As String = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
 Public Const STR_CHR_LCASE As String = "abcdefghijklmnopqrstuvwxyz"
-Public Const STR_CHR_DIGIT As String = "1234567890"
+Public Const STR_CHR_DIGIT As String = "1234567890" ' eol comment
+
+
+' block comment
+' again
 
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
+'after
+
 Public Function IsNotInStr(ByVal S As String, ByVal Fnd As String) As Boolean: IsNotInStr = Not IsInStr(S, Fnd): End Function
 Public Function FileExists(ByVal FN As String) As Boolean: FileExists = FN <> "" And Dir(FN) <> "": End Function
 Public Function DirExists(ByVal FN As String) As Boolean: DirExists = FN <> "" And Dir(FN, vbDirectory) <> "": End Function
-Public Function tFileName(ByVal FN As String) As String: tFileName = Mid(FN, InStrRev(FN, "\") + 1): End Function
-Public Function FileBaseName(ByVal FN As String) As String: FileBaseName = Left(tFileName(FN), InStrRev(tFileName(FN), ".") - 1): End Function
+Public Function ProjFileName(ByVal FN As String) As String: ProjFileName = Mid(FN, InStrRev(FN, "\") + 1): End Function
+Public Function FileBaseName(ByVal FN As String) As String: FileBaseName = Left(ProjFileName(FN), InStrRev(ProjFileName(FN), ".") - 1): End Function
 Public Function FilePath(ByVal FN As String) As String: FilePath = Left(FN, InStrRev(FN, "\")): End Function
 Public Function ChgExt(ByVal FN As String, ByVal NewExt As String) As String: ChgExt = Left(FN, InStrRev(FN, ".") - 1) & NewExt: End Function
 Public Function tLeft(ByVal Str As String, ByVal N As Long) As String: tLeft = Left(Trim(Str), N): End Function
 Public Function tMid(ByVal Str As String, ByVal N As Long, Optional ByVal M As Long = 0) As String: tMid = IIf(M = 0, Mid(Trim(Str), N), Mid(Trim(Str), N, M)): End Function
-Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / Len(Str): End Function
+Public Function StrCnt(ByVal Src As String, ByVal Str As String) As Long: StrCnt = (Len(Src) - Len(Replace(Src, Str, ""))) / IIf(Len(Str) = 0, 1, Len(Str)): End Function
 Public Function LMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: LMatch = Left(Src, Len(tMatch)) = tMatch: End Function
 Public Function tLMatch(ByVal Src As String, ByVal tMatch As String) As Boolean: tLMatch = Left(LTrim(Src), Len(tMatch)) = tMatch: End Function
 Public Function Px(ByVal Twips As Long) As Long:  Px = Twips / 14: End Function
@@ -389,6 +395,12 @@ Public Function isOperator(ByVal S As String) As Boolean
 End Function
 
 Public Sub Prg(Optional ByVal Val As Long = -1, Optional ByVal Max As Long = -1, Optional ByVal Cap As String = "#")
+  Dim L As Variant, Found As Boolean
+  For Each L In Forms
+    If L.Name = "frm" Then Found = True: Exit For
+  Next
+  If Not Found Then Exit Sub
+
   frm.Prg Val, Max, Cap
 End Sub
 

@@ -1,20 +1,39 @@
 VERSION 5.00
 Begin VB.Form frm 
    Caption         =   "VB6 -> .NET"
-   ClientHeight    =   4560
+   ClientHeight    =   5205
    ClientLeft      =   120
    ClientTop       =   465
    ClientWidth     =   5190
    LinkTopic       =   "Form1"
-   ScaleHeight     =   4560
+   ScaleHeight     =   5205
    ScaleWidth      =   5190
    StartUpPosition =   3  'Windows Default
    Begin VB.Frame fra 
-      Height          =   4335
+      Height          =   4935
       Left            =   120
       TabIndex        =   0
       Top             =   120
       Width           =   4935
+      Begin VB.OptionButton optVersion 
+         Caption         =   "v2"
+         Height          =   255
+         Index           =   1
+         Left            =   2648
+         TabIndex        =   17
+         Top             =   1080
+         Width           =   615
+      End
+      Begin VB.OptionButton optVersion 
+         Caption         =   "v1"
+         Height          =   255
+         Index           =   0
+         Left            =   1928
+         TabIndex        =   16
+         Top             =   1080
+         Value           =   -1  'True
+         Width           =   615
+      End
       Begin VB.CommandButton cmdSupport 
          Caption         =   "SUPPORT"
          Height          =   285
@@ -36,14 +55,14 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   6
-         Top             =   1080
+         Top             =   1680
          Width           =   1455
       End
       Begin VB.TextBox txtFile 
          Height          =   285
          Left            =   2040
          TabIndex        =   5
-         Top             =   1200
+         Top             =   1800
          Width           =   2415
       End
       Begin VB.CommandButton cmdLint 
@@ -70,7 +89,7 @@ Begin VB.Form frm
          MultiLine       =   -1  'True
          ScrollBars      =   2  'Vertical
          TabIndex        =   12
-         Top             =   1560
+         Top             =   2160
          Width           =   2655
       End
       Begin VB.CommandButton cmdClasses 
@@ -78,7 +97,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   8
-         Top             =   2280
+         Top             =   2880
          Width           =   1455
       End
       Begin VB.CommandButton cmdModules 
@@ -86,7 +105,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   9
-         Top             =   2880
+         Top             =   3480
          Width           =   1455
       End
       Begin VB.CommandButton cmdAll 
@@ -94,7 +113,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   10
-         Top             =   3720
+         Top             =   4320
          Width           =   1455
       End
       Begin VB.CommandButton cmdForms 
@@ -102,7 +121,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   240
          TabIndex        =   7
-         Top             =   1680
+         Top             =   2280
          Width           =   1455
       End
       Begin VB.CommandButton cmdExit 
@@ -111,7 +130,7 @@ Begin VB.Form frm
          Height          =   495
          Left            =   3240
          TabIndex        =   11
-         Top             =   3720
+         Top             =   4320
          Width           =   1455
       End
       Begin VB.TextBox txtSrc 
@@ -129,14 +148,14 @@ Begin VB.Form frm
          Height          =   255
          Left            =   2040
          TabIndex        =   13
-         Top             =   3360
+         Top             =   4200
          Width           =   2415
       End
       Begin VB.Shape shpPrgBack 
          BackColor       =   &H00FFC0C0&
          Height          =   255
          Left            =   2040
-         Top             =   3360
+         Top             =   3960
          Width           =   2415
       End
       Begin VB.Shape shpPrg 
@@ -145,7 +164,7 @@ Begin VB.Form frm
          BorderStyle     =   0  'Transparent
          Height          =   255
          Left            =   2040
-         Top             =   3360
+         Top             =   3960
          Visible         =   0   'False
          Width           =   1335
       End
@@ -169,17 +188,26 @@ Option Explicit
 
 Public pMax As Long
 
+Public Property Get ConverterVersion() As String
+  Dim I As Long
+  For I = optVersion.LBound To optVersion.UBound
+    If optVersion(I) Then ConverterVersion = optVersion(I).Caption: Exit Function
+  Next
+  ConverterVersion = CONVERTER_VERSION_1
+End Property
+
 Private Sub cmdAll_Click()
   If Not ConfigValid Then Exit Sub
   IsWorking
-  ConvertProject txtSrc
+  ConvertProject txtSrc, ConverterVersion
   IsWorking True
+  MsgBox "Complete"
 End Sub
 
 Private Sub cmdClasses_Click()
   If Not ConfigValid Then Exit Sub
   IsWorking
-  ConvertFileList FilePath(txtSrc), VBPClasses(txtSrc)
+  ConvertFileList FilePath(txtSrc), VBPClasses(txtSrc), vbCrLf, ConverterVersion
   IsWorking True
 End Sub
 
@@ -200,7 +228,7 @@ Private Sub cmdFile_Click()
   End If
   If Not ConfigValid Then Exit Sub
   IsWorking
-  Success = ConvertFile(txtFile)
+  Success = ConvertFile(txtFile, False, ConverterVersion)
   IsWorking True
   If Success Then MsgBox "Converted " & txtFile & "."
 End Sub
@@ -208,14 +236,14 @@ End Sub
 Private Sub cmdForms_Click()
   If Not ConfigValid Then Exit Sub
   IsWorking
-  ConvertFileList FilePath(txtSrc), VBPForms(txtSrc)
+  ConvertFileList FilePath(txtSrc), VBPForms(txtSrc), vbCrLf, ConverterVersion
   IsWorking True
 End Sub
 
 Private Sub cmdModules_Click()
   If Not ConfigValid Then Exit Sub
   IsWorking
-  ConvertFileList FilePath(txtSrc), VBPModules(txtSrc)
+  ConvertFileList FilePath(txtSrc), VBPModules(txtSrc), vbCrLf, ConverterVersion
   IsWorking True
 End Sub
 
@@ -286,3 +314,4 @@ Private Sub Form_Load()
   modConfig.Hush = False
   txtSrc = vbpFile
 End Sub
+

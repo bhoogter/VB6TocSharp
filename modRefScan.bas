@@ -240,6 +240,21 @@ Public Function IsControlRef(ByVal Src As String, Optional ByVal FormName As Str
   End If
 End Function
 
+Public Function FormControlRefDeclType(ByVal Src As String, Optional ByVal FormName As String = "") As String
+  Dim Tok As String, Tok2 As String
+  Dim FTok As String, TTok As String
+  Tok = RegExNMatch(Src, patToken)
+  Tok2 = RegExNMatch(Src, patToken, 1)
+  TTok = Tok & "." & Tok2
+  FTok = FormName & "." & Tok
+'If IsInStr(Src, "SetFocus") Then Stop
+  If FuncRef(TTok) <> "" And FuncRefEntity(TTok) = "Control" Then
+    FormControlRefDeclType = FuncRefDecl(TTok)
+  ElseIf FuncRef(FTok) <> "" And FuncRefEntity(FTok) = "Control" Then
+    FormControlRefDeclType = FuncRefDecl(FTok)
+  End If
+End Function
+
 
 Public Function FuncRefDeclTyp(ByVal fName As String) As String
   FuncRefDeclTyp = SplitWord(FuncRefDecl(fName), 1)
