@@ -86,7 +86,7 @@ static class modRefScan
             _ScanRefs = _ScanRefs + 1;
         SkipForm:;
         }
-        RefList(KillRef:= true);
+        RefList( true);
         WriteFile(RefList(), OutRes);
         OutRes = "";
         return _ScanRefs;
@@ -240,8 +240,8 @@ static class modRefScan
         }
         InitFuncs();
         // TODO: (NOT SUPPORTED): On Error Resume Next
-        _FuncRef = Funcs(fName);
-        if (_FuncRef == "") _FuncRef = LocalFuncs(fName);
+        _FuncRef = Funcs.Item(fName);
+        if (_FuncRef == "") _FuncRef = LocalFuncs.Item(fName);
         cFuncRef_Name = fName;
         cFuncRef_Value = _FuncRef;
         return _FuncRef;

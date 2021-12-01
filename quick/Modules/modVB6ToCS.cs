@@ -1,6 +1,5 @@
 using System;
 using static Microsoft.VisualBasic.Constants;
-using static Microsoft.VisualBasic.Conversion;
 using static Microsoft.VisualBasic.Strings;
 using static modConfig;
 using static modProjectFiles;
@@ -24,7 +23,7 @@ static class modVB6ToCS
             case "Currency":
             case "Byte":
             case "Single":
-                _ConvertDefaultDefault = 0;
+                _ConvertDefaultDefault = "0";
                 break;
             case "Date":
                 _ConvertDefaultDefault = "DateTime.MinValue";
@@ -163,7 +162,7 @@ static class modVB6ToCS
                 _ConvertDataType = S;
                 break;
             default:
-                if (IsInStr(VBPClasses(ClassNames:= true), S))
+                if (IsInStr(VBPClasses("", false), S))
                 {
                     _ConvertDataType = S;
                 }
@@ -354,9 +353,11 @@ static class modVB6ToCS
                 break;
         }
     }
-    public static string ConvertVb6Specific(string S, ref bool Complete = false)
+    public static string ConvertVb6Specific(string S) => ConvertVb6Specific(S, out _);
+    public static string ConvertVb6Specific(string S, out bool Complete)
     {
         string _ConvertVb6Specific = "";
+        Complete = false;
         string W = "";
         string R = "";
         switch (Trim(S))
@@ -370,7 +371,7 @@ static class modVB6ToCS
         }
         Complete = false;
         W = RegExNMatch(Trim(S), patToken);
-        R = SplitWord(Trim(S), 2, , , true);
+        R = SplitWord(Trim(S), 2, " ", true, true);
         switch (W)
         {
             case "True":
@@ -411,7 +412,7 @@ static class modVB6ToCS
                 S = "VBOpenFile(" + Replace(SplitWord(R, 2, " As "), "#", "") + ", " + SplitWord(R, 1, " For ") + ");";
                 break;
             case "Print":
-                S = "VBWriteFile(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", , true), ";", ",") + ");";
+                S = "VBWriteFile(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", true, true), ";", ",") + ");";
                 break;
             case "Close":
                 S = "VBCloseFile(" + Replace(R, "#", "") + ");";
@@ -455,7 +456,7 @@ static class modVB6ToCS
                 RedimTyp = ConvertDataType(SubParam(RedimVar).asType);
                 R = Trim(Replace(R, RedimVar, ""));
                 if (tLeft(R, 1) == "(") R = Mid(Trim(R), 2);
-                RedimMax = Val(nextBy(R, ")"));
+                RedimMax = nextBy(R, ")");
                 RedimTmp = RedimVar + "_" + Random() + "_tmp";
                 RedimIter = "redim_iter_" + Random();
                 S = "";
@@ -490,20 +491,20 @@ static class modVB6ToCS
         string W = "";
         string R = "";
         W = RegExNMatch(Trim(S), patToken);
-        R = SplitWord(Trim(S), 2, , , true);
+        R = SplitWord(Trim(S), 2, " ", true, true);
         switch (W)
         {
             case "Open":
                 S = "VBOpenFile(" + Replace(SplitWord(R, 2, " As "), "#", "") + ", " + SplitWord(R, 1, " For ") + ")";
                 break;
             case "Print":
-                S = "VBWriteFile(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", , true), ";", ",") + ")";
+                S = "VBWriteFile(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", true, true), ";", ",") + ")";
                 break;
             case "Input":
-                S = "VBReadFile(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", , true), ";", ",") + ")";
+                S = "VBReadFile(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", true, true), ";", ",") + ")";
                 break;
             case "Line":
-                S = "VBReadFileLine(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", , true), ";", ",") + ")";
+                S = "VBReadFileLine(" + Replace(SplitWord(R, 1, ","), "#", "") + ", " + Replace(SplitWord(R, 2, ", ", true, true), ";", ",") + ")";
                 break;
             case "Close":
                 S = "VBCloseFile(" + Replace(R, "#", "") + ")";

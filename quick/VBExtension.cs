@@ -1,5 +1,4 @@
 using Microsoft.VisualBasic;
-using Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -16,61 +15,61 @@ using static Microsoft.VisualBasic.Constants;
 
 public static class VBExtension
 {
-    private static Printer mPrinter = new Printer();
-    private static List<Printer> mPrinters = null;
+    //private static Printer mPrinter = new Printer();
+    //private static List<Printer> mPrinters = null;
     public enum vbTriState { vbFalse = 0, vbTrue = -1, vbUseDefault = -2 }
 
     public static int MousePointer { get { return 0; } set { } }
     public static int SenderIndex(string name) { return ValI(name.Substring(name.LastIndexOf('_') + 1)); }
     public static int SenderIndex(object sender) { return SenderIndex(((FrameworkElement)sender).Name); }
 
-    public static List<Printer> Printers
-    {
-        get
-        {
-            if (mPrinters == null)
-            {
-                mPrinters = new List<Printer>();
-                foreach (var P in new PrinterCollection()) mPrinters.Add((Printer)P);
-            }
-            return mPrinters;
-        }
-    }
+    //public static List<Printer> Printers
+    //{
+    //    get
+    //    {
+    //        if (mPrinters == null)
+    //        {
+    //            mPrinters = new List<Printer>();
+    //            foreach (var P in new PrinterCollection()) mPrinters.Add((Printer)P);
+    //        }
+    //        return mPrinters;
+    //    }
+    //}
 
-    public static List<string> PrinterNames()
-    {
-        System.Drawing.Printing.PrinterSettings.StringCollection col = System.Drawing.Printing.PrinterSettings.InstalledPrinters;
-        string[] arr = new string[col.Count];
-        col.CopyTo(arr, 0);
-        return new List<string>(arr);
-    }
-    public static void ResetPrinters() { mPrinters = null; }
-    public static Printer Printer
-    {
-        get => mPrinter ?? new Printer();
-        set { foreach (var P in Printers) { if (((Printer)P).DeviceName == value.DeviceName) mPrinter = P; } }
-    }
-    public static string PrinterName() { return VBExtension.Printer != null ? Printer.DeviceName : ""; }
-    public static void PrintPicture(this Printer P, BitmapImage I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
-    { System.Drawing.Image I2 = null; P.PaintPicture(I2, ValF(x1), ValF(y1), ValF(w1), ValF(h1), ValF(x2), ValF(h2), ValF(w2), ValF(h2)); }
-    public static void PrintPicture(this Printer P, ImageSource I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
-    { System.Drawing.Image I2 = null; P.PaintPicture(I2, ValF(x1), ValF(y1), ValF(w1), ValF(h1), ValF(x2), ValF(h2), ValF(w2), ValF(h2)); }
-    public static void PaintPicture(this Printer P, System.Windows.Controls.Image I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
-    { System.Drawing.Image I2 = null; P.PaintPicture(I2, ValF(x1), ValF(y1), ValF(w1), ValF(h1), ValF(x2), ValF(h2), ValF(w2), ValF(h2)); }
-    public static void PaintPicture(this Image P, System.Windows.Controls.Image I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
-    { System.Drawing.Image I2 = null; }
-    public static void PrintNNL(this Printer P, params String[] s) { float Y = P.CurrentY; P.Print(s); P.CurrentY = Y; }
-    public static void Line(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0, bool Box = false) { }
-    public static void LineStep(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0, bool Box = false) { }
-    public static void Box(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0)
-    {
-        P.Line(X1, Y1, X2, Y2, Style, true);
-    }
-    public static void BoxStep(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0)
-    {
-        P.Line(X1, Y1, X1 + X2, Y1 + Y2, Style, true);
-    }
-    public static void Circle(this Printer P, float X1, float Y1, float X2, float Y2, float Radius = 0, bool Box = false) { }
+    //public static List<string> PrinterNames()
+    //{
+    //    System.Drawing.Printing.PrinterSettings.StringCollection col = System.Drawing.Printing.PrinterSettings.InstalledPrinters;
+    //    string[] arr = new string[col.Count];
+    //    col.CopyTo(arr, 0);
+    //    return new List<string>(arr);
+    //}
+    //public static void ResetPrinters() { mPrinters = null; }
+    //public static Printer Printer
+    //{
+    //    get => mPrinter ?? new Printer();
+    //    set { foreach (var P in Printers) { if (((Printer)P).DeviceName == value.DeviceName) mPrinter = P; } }
+    //}
+    //public static string PrinterName() { return VBExtension.Printer != null ? Printer.DeviceName : ""; }
+    //public static void PrintPicture(this Printer P, BitmapImage I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
+    //{ System.Drawing.Image I2 = null; P.PaintPicture(I2, ValF(x1), ValF(y1), ValF(w1), ValF(h1), ValF(x2), ValF(h2), ValF(w2), ValF(h2)); }
+    //public static void PrintPicture(this Printer P, ImageSource I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
+    //{ System.Drawing.Image I2 = null; P.PaintPicture(I2, ValF(x1), ValF(y1), ValF(w1), ValF(h1), ValF(x2), ValF(h2), ValF(w2), ValF(h2)); }
+    //public static void PaintPicture(this Printer P, System.Windows.Controls.Image I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
+    //{ System.Drawing.Image I2 = null; P.PaintPicture(I2, ValF(x1), ValF(y1), ValF(w1), ValF(h1), ValF(x2), ValF(h2), ValF(w2), ValF(h2)); }
+    //public static void PaintPicture(this Image P, System.Windows.Controls.Image I, dynamic x1 = null, dynamic y1 = null, dynamic w1 = null, dynamic h1 = null, dynamic x2 = null, dynamic y2 = null, dynamic w2 = null, dynamic h2 = null)
+    //{ System.Drawing.Image I2 = null; }
+    //public static void PrintNNL(this Printer P, params String[] s) { float Y = P.CurrentY; P.Print(s); P.CurrentY = Y; }
+    //public static void Line(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0, bool Box = false) { }
+    //public static void LineStep(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0, bool Box = false) { }
+    //public static void Box(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0)
+    //{
+    //    P.Line(X1, Y1, X2, Y2, Style, true);
+    //}
+    //public static void BoxStep(this Printer P, float X1, float Y1, float X2, float Y2, int Style = 0)
+    //{
+    //    P.Line(X1, Y1, X1 + X2, Y1 + Y2, Style, true);
+    //}
+    //public static void Circle(this Printer P, float X1, float Y1, float X2, float Y2, float Radius = 0, bool Box = false) { }
     public static string Tab(int N) { return "::TABSTOP:" + N; }
 
     public static void Load(Window Ob) { }
@@ -105,6 +104,13 @@ public static class VBExtension
         }
         if (f == "") return 0;
         return double.Parse(f);
+    }
+
+    public static string RepeatString(int X, string S)
+    {
+        string R = "";
+        for (int i = 0; i < X; i++) R += S;
+        return R;
     }
 
     public static decimal ValD(string A) { return (decimal)ValDouble((A ?? "").Replace(",", "")); }
@@ -691,22 +697,6 @@ public static class VBExtension
         public void startTimer(int MilliSeconds, dynamic setTag) { Tag = setTag; startTimer(MilliSeconds); }
         public void startTimerSeconds(int Seconds, dynamic setTag) { Tag = setTag; startTimerSeconds(Seconds); }
         public void stopTimer() { Enabled = false; }
-    }
-
-
-
-    public static void unloadControls(this Window Frm, string Name, int baseIndex = -1)
-    {
-        Panel G = (Panel)Frm.Content;
-        foreach (var C in Frm.Controls())
-        {
-            string N = ((FrameworkElement)C).Name;
-            if (N.StartsWith(Name + "_"))
-            {
-                if (controlIndex(N) == baseIndex) continue;
-                G.Children.Remove(C);
-            }
-        }
     }
 
     public static int LBound<T>(this List<T> FL) => 0;

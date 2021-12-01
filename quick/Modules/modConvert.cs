@@ -71,7 +71,7 @@ static class modConvert
             if (L == "modFunctionList.bas") goto NextItem;
             ConvertFile(Path + L, false, ConverterVersion);
         NextItem:;
-            Prg(N, , N + "/" + V + ": " + L);
+            Prg(N, -1 , N + "/" + V + ": " + L);
             DoEvents();
         }
         Prg();

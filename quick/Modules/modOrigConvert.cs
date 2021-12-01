@@ -83,7 +83,7 @@ static class modOrigConvert
                 L = Mid(L, Len(F) + 2);
                 if (nextBy(L, " Else ", 2) != "")
                 {
-                    R = R + _SanitizeCode(nextBy(L, " Else ", 1));
+                    R = R + SanitizeCode(nextBy(L, " Else ", 1));
                     R = R + N + "Else";
                     L = nextBy(L, "Else ", 2);
                 }
@@ -105,7 +105,7 @@ static class modOrigConvert
                         L = Replace(L, NamedParamTok, NamedParamSrc);
                         if (F == L) break;
                         L = Trim(Mid(L, Len(F) + 2));
-                        R = R + _SanitizeCode(L);
+                        R = R + SanitizeCode(L);
                     } while (false);
                 }
             }
@@ -238,12 +238,12 @@ static class modOrigConvert
                 {
                     L = Trim(tMid(L, Len(ArraySpec) + 3));
                     aMin = 0;
-                    aMax = Val(SplitWord(ArraySpec));
+                    aMax = ValI(SplitWord(ArraySpec));
                     ArraySpec = Trim(tMid(ArraySpec, Len(aMax) + 1));
                     if (tLeft(ArraySpec, 3) == "To ")
                     {
                         aMin = aMax;
-                        aMax = Val(tMid(ArraySpec, 4));
+                        aMax = ValI(tMid(ArraySpec, 4));
                     }
                 }
             }
@@ -619,13 +619,15 @@ static class modOrigConvert
         {
             Res = Res + "= " + pDef;
         }
-        SubParamDecl(pName, pType, false, true, false);
+        SubParamDecl(pName, pType, "false", true, false);
         _ConvertParameter = Trim(Res);
         return _ConvertParameter;
     }
-    public static string ConvertPrototype(string SS, ref string returnVariable = "", bool AsModule = false, ref string asName = "")
+    public static string ConvertPrototype(string SS, out string returnVariable, bool AsModule, out string asName)
     {
         string _ConvertPrototype = "";
+        returnVariable = "";
+        asName = "";
         string retToken = "#RET#";
         string Res = "";
         string fName = "";
@@ -692,7 +694,7 @@ static class modOrigConvert
         {
             returnVariable = fName;
             Res = Res + vbCrLf + sSpace(SpIndent) + ConvertDataType(retType) + " " + returnVariable + " = " + ConvertDefaultDefault(retType) + ";";
-            SubParamDecl(returnVariable, retType, false, false, true);
+            SubParamDecl(returnVariable, retType, "false", false, true);
         }
         if (IsEvent(asName)) Res = EventStub(asName) + Res;
         _ConvertPrototype = Trim(Res);
@@ -725,7 +727,7 @@ static class modOrigConvert
         }
         if (IsNumeric(Trim(S)))
         {
-            _ConvertElement = Val(S);
+            _ConvertElement = S;
             if (IsInStr(S, ".")) _ConvertElement = _ConvertElement + "m";
             return _ConvertElement;
         }
@@ -752,7 +754,7 @@ static class modOrigConvert
         S = RegExReplace(S, patNotToken + patToken + "!" + patToken + patNotToken, "$1$2(\"$3\")$4"); // RS!Field -> RS(__S3)
         S = RegExReplace(S, "^" + patToken + "!" + patToken + patNotToken, "$1(\"$2\")$3"); // RS!Field -> RS(__S4)
         S = RegExReplace(S, "([^a-zA-Z0-9_.])NullDate([^a-zA-Z0-9_.])", "$1NullDate()$2");
-        S = ConvertVb6Specific(S, ref Complete);
+        S = ConvertVb6Specific(S, out Complete);
         if (Complete) { _ConvertElement = S; return _ConvertElement; }
         if (RegExTest(Trim(S), "^" + patToken + "$"))
         {
@@ -820,7 +822,7 @@ static class modOrigConvert
         if (S == FirstToken) { _ConvertElement = S + "()"; goto ManageFunctions; }
         if (FirstToken == FirstWord && !isOperator(SplitWord(S, 2)))
         { // Sub without parenthesis
-            _ConvertElement = FirstWord + "(" + SplitWord(S, 2, , , true) + ")";
+            _ConvertElement = FirstWord + "(" + SplitWord(S, 2, " ", true, true) + ")";
         }
         else
         {
@@ -845,7 +847,7 @@ static class modOrigConvert
             string Ts = "";
             Ts = SplitWord(_ConvertElement, 1, ":=");
             Ts = Ts + ": ";
-            Ts = Ts + _ConvertElement(SplitWord(_ConvertElement, 2, ":=", true, true));
+            Ts = Ts + ConvertElement(SplitWord(_ConvertElement, 2, ":=", true, true));
             _ConvertElement = Ts;
         }
         _ConvertElement = Replace(_ConvertElement, " & ", " + ");
@@ -874,7 +876,7 @@ static class modOrigConvert
         }
         if (WithLevel > 0)
         {
-            T = Stack(ref WithVars, , true);
+            T = Stack(ref WithVars, "##REM##", true);
             _ConvertElement = Trim(RegExReplace(_ConvertElement, "([ (])(\\.)" + patToken, "$1" + T + "$2$3"));
             if (Left(_ConvertElement, 1) == ".") _ConvertElement = T + _ConvertElement;
         }
@@ -903,7 +905,7 @@ static class modOrigConvert
             TB = TB + ConvertValue(Ts);
             TB = TB + "].Value";
         }
-        else if (vP.AsArray != "")
+        else if (vP.asArray != "")
         {
             TB = TB + "[";
             TB = TB + ConvertValue(Ts);
@@ -959,12 +961,12 @@ static class modOrigConvert
         SubParamUsedList(TokenList(S));
         if (RegExTest(S, "^-[a-zA-Z0-9_]"))
         {
-            _ConvertValue = "-" + _ConvertValue(Mid(S, 2));
+            _ConvertValue = "-" + ConvertValue(Mid(S, 2));
             return _ConvertValue;
         }
         while (true)
         {
-            F = NextByOp(S, 1, ref Op);
+            F = NextByOp(S, 1, out Op);
             if (F == "") break;
             switch (Trim(Op))
             {
@@ -1001,7 +1003,7 @@ static class modOrigConvert
             }
             if (Left(F, 1) == "(" && Right(F, 1) == ")")
             {
-                O = O + "(" + _ConvertValue(Mid(F, 2, Len(F) - 2)) + ")" + OpN;
+                O = O + "(" + ConvertValue(Mid(F, 2, Len(F) - 2)) + ")" + OpN;
             }
             else
             {
@@ -1122,7 +1124,7 @@ static class modOrigConvert
         // If IsInStr(S, __S1) Then Stop
         if (Trim(S) == "") { _ConvertCodeLine = ""; return _ConvertCodeLine; }
         bool Complete = false;
-        S = ConvertVb6Specific(S, ref Complete);
+        S = ConvertVb6Specific(S, out Complete);
         if (Complete)
         {
             _ConvertCodeLine = S;
@@ -1148,7 +1150,7 @@ static class modOrigConvert
                             _ConvertCodeLine = RegExReplace(A, "^" + patToken + "(\\(\")([^\"]+)(\"\\))", "$1.Fields[\"$3\"].Value");
                             break;
                         default:
-                            if (Left(A, 1) == ".") A = Stack(ref WithVars, , true) + A;
+                            if (Left(A, 1) == ".") A = Stack(ref WithVars, "##REM##" , true) + A;
                             _ConvertCodeLine = A;
                             break;
                     }
@@ -1156,14 +1158,14 @@ static class modOrigConvert
             }
             else
             {
-                if (Left(A, 1) == ".") A = Stack(ref WithVars, , true) + A;
+                if (Left(A, 1) == ".") A = Stack(ref WithVars, "##REM##" , true) + A;
                 _ConvertCodeLine = A;
             }
             string tAWord = "";
             tAWord = SplitWord(A, 1, ".");
             if (IsFormRef(tAWord))
             {
-                A = Replace(A, tAWord, tAWord + ".instance", , 1);
+                A = Replace(A, tAWord, tAWord + ".instance", 1, 1);
             }
             _ConvertCodeLine = ConvertValue(_ConvertCodeLine) + " = ";
             B = ConvertValue(Trim(Mid(S, T + 1)));
@@ -1175,7 +1177,7 @@ static class modOrigConvert
             // If IsInStr(S, __S1) Then Stop
             if (LMatch(LTrim(S), "Call ")) S = Mid(LTrim(S), 6);
             FirstWord = SplitWord(Trim(S));
-            Rest = SplitWord(Trim(S), 2, , , true);
+            Rest = SplitWord(Trim(S), 2, " ",true , true);
             if (Rest == "")
             {
                 _ConvertCodeLine = S + IIf(Right(S, 1) != ")", "()", "");
@@ -1208,7 +1210,7 @@ static class modOrigConvert
             {
                 _ConvertCodeLine = ConvertValue(S);
             }
-            if (WithLevel > 0 && Left(Trim(_ConvertCodeLine), 1) == ".") _ConvertCodeLine = Stack(ref WithVars, , true) + Trim(_ConvertCodeLine);
+            if (WithLevel > 0 && Left(Trim(_ConvertCodeLine), 1) == ".") _ConvertCodeLine = Stack(ref WithVars, "##REM##", true) + Trim(_ConvertCodeLine);
         }
         // If IsInStr(ConvertCodeLine, __S1) Then Stop
         _ConvertCodeLine = _ConvertCodeLine + ";";
@@ -1257,7 +1259,7 @@ static class modOrigConvert
         _PostConvertCodeLine = S;
         return _PostConvertCodeLine;
     }
-    public static string ConvertSub(string Str, bool AsModule = false, VbTriState ScanFirst = vbUseDefault)
+    public static string ConvertSub(string Str, bool AsModule = false, vbTriState ScanFirst = vbTriState.vbUseDefault)
     {
         string _ConvertSub = "";
         string oStr = "";
@@ -1279,17 +1281,17 @@ static class modOrigConvert
         // If IsInStr(Str, __S1) Then Stop
         switch (ScanFirst)
         {
-            case vbUseDefault:
+            case vbTriState.vbUseDefault:
                 oStr = Str;
-                ConvertSub(oStr, AsModule, vbTrue);
+                ConvertSub(oStr, AsModule, vbTriState.vbTrue);
                 // If IsInStr(Str, __S1) Then Stop
-                _ConvertSub = _ConvertSub(oStr, AsModule, vbFalse);
+                _ConvertSub = ConvertSub(oStr, AsModule, vbTriState.vbFalse);
                 return _ConvertSub;
                 break;
-            case vbTrue:
+            case vbTriState.vbTrue:
                 SubBegin();
                 break;
-            case vbFalse:
+            case vbTriState.vbFalse:
                 SubBegin(true);
                 break;
         }
@@ -1328,7 +1330,7 @@ static class modOrigConvert
                 // If (LMatch(CurrSub, __S1)) Then CurrSub = Mid(CurrSub, 10)
                 // If (LMatch(CurrSub, __S1)) Then CurrSub = Mid(CurrSub, 5)
                 // If IsInStr(L, __S1) Then Stop
-                O = O + sSpace(Ind) + ConvertPrototype(L, ref returnVariable, AsModule, ref CurrSub);
+                O = O + sSpace(Ind) + ConvertPrototype(L, out returnVariable, AsModule, out CurrSub);
                 Ind = Ind + SpIndent;
             }
             else if (RegExNMatch(L, PQ) != "")
@@ -1440,8 +1442,8 @@ static class modOrigConvert
                 { // TODO: (NOT SUPPORTED) LIKE statement changed to ==: T Like __S1
                     O = O + "// CONVERSION: Case was " + T + vbCrLf;
                     O = O + sSpace(Ind);
-                    cN = Val(SplitWord(T, 1, " To "));
-                    CM = Val(SplitWord(T, 2, " To "));
+                    cN = ValI(SplitWord(T, 1, " To "));
+                    CM = ValI(SplitWord(T, 2, " To "));
                     for (K = cN; K <= CM; K += 1)
                     {
                         O = O + "case " + K + ": ";

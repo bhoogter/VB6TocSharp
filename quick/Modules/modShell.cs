@@ -71,9 +71,10 @@ static class modShell
     private static extern int GetDesktopWindow();
     [DllImport("shell32")]
     private static extern int ShellExecute(int hwnd, string lpOperation, string lpFile, string lpParameters, string lpDirectory, int nShowCmd);
-    public static string RunCmdToOutput(string Cmd, ref string ErrStr = "", bool AsAdmin = false)
+    public static string RunCmdToOutput(string Cmd, out string ErrStr, bool AsAdmin = false)
     {
         string _RunCmdToOutput = "";
+        ErrStr = "";
         // TODO: (NOT SUPPORTED): On Error GoTo RunError
         string A = "";
         string B = "";
@@ -90,13 +91,13 @@ static class modShell
         {
             C = TempFile(".bat");
             WriteFile(C, Cmd + " 1> " + A + " 2> " + B, true);
-            RunFileAsAdmin(C, , enSW.enSW_HIDE);
+            RunFileAsAdmin(C, 0, (int)enSW.enSW_HIDE);
         }
         Iter = 0;
         int MaxIter = 10;
         while (true)
         {
-            tLen = FileLen(A);
+            tLen = (int)FileLen(A);
             Sleep(800);
             if (Iter > MaxIter || FileLen(A) == tLen) break;
             Iter = Iter + 1;
@@ -122,15 +123,15 @@ static class modShell
         NameStart.Cb = Len(NameStart);
         if (SW == enSW.enSW_HIDE)
         {
-            RC = CreateProcessA(0, AppToRun, 0, 0, CLng(SW), CREATE_NO_WINDOW, 0, 0, NameStart, NameOfProc);
+            RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), CREATE_NO_WINDOW, 0, 0, ref NameStart, ref NameOfProc);
         }
         else
         {
-            RC = CreateProcessA(0, AppToRun, 0, 0, CLng(SW), NORMAL_PRIORITY_CLASS, 0, 0, NameStart, NameOfProc);
+            RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), NORMAL_PRIORITY_CLASS, 0, 0, ref NameStart, ref NameOfProc);
         }
         LastProcessID = NameOfProc.dwProcessId;
         RC = WaitForSingleObject(NameOfProc.hProcess, INFINITE);
-        RC = CloseHandle(NameOfProc.hProcess);
+        RC = CloseHandle(ref NameOfProc.hProcess) ? 1 : 0;
     ErrorRoutineResume:;
         return;
     ErrorRoutineErr:;
@@ -145,7 +146,7 @@ static class modShell
         if (UseFolder != "" && !DirExists(UseFolder)) UseFolder = "";
         if (UseFolder == "") UseFolder = AppContext.BaseDirectory + DIRSEP;
         if (Right(UseFolder, 1) != DIRSEP) UseFolder = UseFolder + DIRSEP;
-        FN = Replace(UsePrefix + CDbl(DateTime.Now) + "_" + App.ThreadID + "_" + Random(999999), ".", "_");
+        FN = Replace(UsePrefix + CDbl(DateTime.Now) + "_" + 0 + "_" + Random(999999), ".", "_");
         while (FileExists(UseFolder + FN + ".tmp"))
         {
             FN = FN + Chr(Random(25) + Asc("a"));

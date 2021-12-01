@@ -33,9 +33,9 @@ static class modDirStack
         N = Val(DirStack.Item("n")) + 1;
         DirStack.Remove("n");
         DirStack.Add(N, "n");
-        DirStack.Add(CurDir, "_" + N);
+        DirStack.Add(CurDir(), "_" + N);
         if (doSet) ChDir(NewDir);
-        _PushDir = CurDir;
+        _PushDir = CurDir();
         return _PushDir;
     }
     public static string PopDir(bool doSet = true)

@@ -44,7 +44,7 @@ static class modConvertForm
             }
             else
             {
-                R = R + sSpace(I * SpIndent) + "<prop name=\"" + SplitWord(L, 1, "=") + "\" value=\"" + SplitWord(L, 2, "=", , true) + "\" />" + vbCrLf;
+                R = R + sSpace(I * SpIndent) + "<prop name=\"" + SplitWord(L, 1, "=") + "\" value=\"" + SplitWord(L, 2, "=", true, true) + "\" />" + vbCrLf;
             }
         NextLine:;
         }
@@ -140,14 +140,14 @@ static class modConvertForm
                     else
                     {
                         pK = Prefix + LCase(SplitWord(M, 1, "="));
-                        pV = ConvertProperty(SplitWord(M, 2, "=", , true));
+                        pV = ConvertProperty(SplitWord(M, 2, "=", true, true));
                         // TODO: (NOT SUPPORTED): On Error Resume Next
                         Props.Add(pV, pK);
                         // TODO: (NOT SUPPORTED): On Error GoTo 0
                     }
                 } while (true);
                 K = K + J - 1;
-                R = R + sSpace(I * SpIndent) + StartControl(L, Props, LMatch(M, "End"), CodeSection, Tag) + vbCrLf;
+                R = R + sSpace(I * SpIndent) + StartControl(L, Props, LMatch(M, "End"), CodeSection, ref Tag) + vbCrLf;
                 I = I + 1;
                 Stck[I] = Tag;
             }
@@ -193,7 +193,7 @@ static class modConvertForm
         TagType = "";
         cType = SplitWord(L, 2);
         oName = SplitWord(L, 3);
-        cIndex = cValP(ref Props, "Index");
+        cIndex = cValP(Props, "Index");
         ControlData(cType, ref tType, ref tCont, ref tDef, ref Features);
         if (cIndex != "")
         {
@@ -220,9 +220,9 @@ static class modConvertForm
             S = S + N + "    xmlns:local=\"clr-namespace:" + AssemblyName() + ".Forms\"";
             S = S + N + "    xmlns:usercontrols=\"clr-namespace:" + AssemblyName() + ".UserControls\"";
             S = S + N + "    mc:Ignorable=\"d\"";
-            S = S + N + "    Title=" + Quote(cValP(ref Props, "caption"));
-            S = S + M + "    Height=" + Quote(Px(cValP(ref Props, "clientheight", 0) + 435));
-            S = S + M + "    Width=" + Quote(Px(cValP(ref Props, "clientwidth", 0) + 435));
+            S = S + N + "    Title=" + Quote(cValP(Props, "caption"));
+            S = S + M + "    Height=" + Quote(Px(cValP(Props, "clientheight", "0") + 435));
+            S = S + M + "    Width=" + Quote(Px(cValP(Props, "clientwidth", "0") + 435));
             S = S + CheckControlEvents("Window", "Form", Code);
             S = S + M + ">";
             S = S + N + " <Grid";
@@ -231,31 +231,31 @@ static class modConvertForm
         {
             S = S + "<" + tType;
             S = S + " x:Name=\"" + cName + "\"";
-            S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
-            S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
-            S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
+            S = S + " Margin=" + Quote(Px(cValP(Props, "left")) + "," + Px(cValP(Props, "top")) + ",0,0");
+            S = S + " Width=" + Quote(Px(cValP(Props, "width")));
+            S = S + " Height=" + Quote(Px(cValP(Props, "height")));
             S = S + " VerticalAlignment=\"Top\"";
             S = S + " HorizontalAlignment=\"Left\"";
-            S = S + " FontFamily=" + Quote(cValP(ref Props, "font.name", "Calibri"));
-            S = S + " FontSize=" + Quote(cValP(ref Props, "font.size", 10));
-            S = S + " Header=\"" + cValP(ref Props, "caption") + "\"";
+            S = S + " FontFamily=" + Quote(cValP(Props, "font.name", "Calibri"));
+            S = S + " FontSize=" + Quote(cValP(Props, "font.size", "10"));
+            S = S + " Header=\"" + cValP(Props, "caption") + "\"";
             S = S + "> <Grid Margin=\"0,-15,0,0\"";
         }
         else if (tType == "Canvas")
         {
             S = S + "<" + tType;
             S = S + " x:Name=\"" + cName + "\"";
-            S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
-            S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
-            S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
+            S = S + " Margin=" + Quote(Px(cValP(Props, "left")) + "," + Px(cValP(Props, "top")) + ",0,0");
+            S = S + " Width=" + Quote(Px(cValP(Props, "width")));
+            S = S + " Height=" + Quote(Px(cValP(Props, "height")));
         }
         else if (tType == "Image")
         {
             S = S + "<" + tType;
             S = S + " x:Name=\"" + cName + "\"";
-            S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
-            S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
-            S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
+            S = S + " Margin=" + Quote(Px(cValP(Props, "left")) + "," + Px(cValP(Props, "top")) + ",0,0");
+            S = S + " Width=" + Quote(Px(cValP(Props, "width")));
+            S = S + " Height=" + Quote(Px(cValP(Props, "height")));
             S = S + " VerticalAlignment=" + Quote("Top");
             S = S + " HorizontalAlignment=" + Quote("Left");
         }
@@ -264,33 +264,33 @@ static class modConvertForm
             S = "";
             S = S + "<" + tType;
             S = S + " x:Name=\"" + cName + "\"";
-            S = S + " Margin=" + Quote(Px(cValP(ref Props, "left")) + "," + Px(cValP(ref Props, "top")) + ",0,0");
+            S = S + " Margin=" + Quote(Px(cValP(Props, "left")) + "," + Px(cValP(Props, "top")) + ",0,0");
             S = S + " Padding=" + Quote("2,2,2,2");
-            S = S + " Width=" + Quote(Px(cValP(ref Props, "width")));
-            S = S + " Height=" + Quote(Px(cValP(ref Props, "height")));
+            S = S + " Width=" + Quote(Px(cValP(Props, "width")));
+            S = S + " Height=" + Quote(Px(cValP(Props, "height")));
             S = S + " VerticalAlignment=" + Quote("Top");
             S = S + " HorizontalAlignment=" + Quote("Left");
         }
         if (IsInStr(Features, "Font"))
         {
-            S = S + " FontFamily=" + Quote(cValP(ref Props, "font.name", "Calibri"));
-            S = S + " FontSize=" + Quote(cValP(ref Props, "font.size", 10));
-            if (Val(cValP(ref Props, "font.weight", "400")) > 400) S = S + " FontWeight=" + Quote("Bold");
+            S = S + " FontFamily=" + Quote(cValP(Props, "font.name", "Calibri"));
+            S = S + " FontSize=" + Quote(cValP(Props, "font.size", "10"));
+            if (Val(cValP(Props, "font.weight", "400")) > 400) S = S + " FontWeight=" + Quote("Bold");
         }
         if (IsInStr(Features, "Content"))
         {
-            S = S + " Content=" + QuoteXML(cValP(ref Props, "caption") + cValP(ref Props, "text"));
+            S = S + " Content=" + QuoteXML(cValP(Props, "caption") + cValP(Props, "text"));
         }
         if (IsInStr(Features, "Header"))
         {
-            S = S + " Content=" + QuoteXML(cValP(ref Props, "caption") + cValP(ref Props, "text"));
+            S = S + " Content=" + QuoteXML(cValP(Props, "caption") + cValP(Props, "text"));
         }
-        V = cValP(ref Props, "caption") + cValP(ref Props, "text");
+        V = cValP(Props, "caption") + cValP(Props, "text");
         if (IsInStr(Features, "Text") && V != "")
         {
             S = S + " Text=" + QuoteXML(V);
         }
-        V = cValP(ref Props, "ToolTipText");
+        V = cValP(Props, "ToolTipText");
         if (IsInStr(Features, "ToolTip") && V != "")
         {
             S = S + " ToolTip=" + Quote(V);

@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using VB2CS.Forms;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
-using static Microsoft.VisualBasic.Information;
 using static Microsoft.VisualBasic.Interaction;
 using static Microsoft.VisualBasic.Strings;
 using static Microsoft.VisualBasic.VBMath;
@@ -28,11 +27,7 @@ static class modUtils
     public const string STR_CHR_DIGIT = "1234567890"; // eol comment
                                                       // block comment
                                                       // again
-    public static bool IsInStr(string Src, string Find)
-    {
-        bool _IsInStr = false; _IsInStr = InStr(Src, Find) > 0; return _IsInStr;
-    }
-    // after
+                                                      // after
     public static bool IsNotInStr(string S, string Fnd)
     {
         bool _IsNotInStr = false; _IsNotInStr = !IsInStr(S, Fnd); return _IsNotInStr;
@@ -81,10 +76,12 @@ static class modUtils
     {
         bool _tLMatch = false; _tLMatch = Left(LTrim(Src), Len(tMatch)) == tMatch; return _tLMatch;
     }
+    public static int Px(string Twips) => Px(ValI(Twips));
     public static int Px(int Twips)
     {
         int _Px = 0; _Px = Twips / 14; return _Px;
     }
+    public static string Quote(int S) => Quote("" + S);
     public static string Quote(string S)
     {
         string _Quote = ""; _Quote = "\"" + S + "\""; return _Quote;
@@ -108,7 +105,7 @@ static class modUtils
         // Exit Function
         // works on a very simple princicple... debug statements don't get compiled...
         // TODO: (NOT SUPPORTED): On Error GoTo IDEInUse
-        Console.WriteLine(1 / 0); // division by zero error
+        //Console.WriteLine(1 / 0); // division by zero error
         _IsIDE = false;
         return _IsIDE;
     IDEInUse:;
@@ -207,7 +204,7 @@ static class modUtils
         }
         else
         {
-            _nextBy = _nextBy(Mid(Src, L + Len(Del)), Del, Ind - 1);
+            _nextBy = nextBy(Mid(Src, L + Len(Del)), Del, Ind - 1);
         }
         return _nextBy;
     }
@@ -286,13 +283,16 @@ static class modUtils
         }
         else
         {
-            _nextByP = _nextByP(Mid(Src, Len(R) + Len(Del) + 1), Del, Ind - 1);
+            _nextByP = nextByP(Mid(Src, Len(R) + Len(Del) + 1), Del, Ind - 1);
         }
         return _nextByP;
     }
-    public static string NextByOp(string Src, int Ind = 1, ref string Op = "")
+
+    public static string NextByOp(string Src, int Ind = 1) => NextByOp(Src, Ind, out _);
+    public static string NextByOp(string Src, int Ind, out string Op)
     {
         string _NextByOp = "";
+        Op = "";
         string A = "";
         string S = "";
         string D = "";
@@ -360,7 +360,7 @@ static class modUtils
         }
         else
         {
-            _NextByOp = _NextByOp(Trim(Mid(Src, Len(P) + 3)), Ind - 1, Op);
+            _NextByOp = NextByOp(Trim(Mid(Src, Len(P) + 3)), Ind - 1, out Op);
         }
         return _NextByOp;
     }
@@ -442,41 +442,12 @@ static class modUtils
         }
         return _CountWords;
     }
-    public static dynamic ArrSlice(ref dynamic sourceArray, int fromIndex, int toIndex)
-    {
-        dynamic _ArrSlice = null;
-        int Idx = 0;
-        List<dynamic> tempList = new List<dynamic>();
-        if (!IsArray(sourceArray)) return _ArrSlice;
-        fromIndex = FitRange(0, fromIndex, sourceArray.Count);
-        toIndex = FitRange(fromIndex, toIndex, sourceArray.Count);
-        for (Idx = fromIndex; Idx <= toIndex; Idx += 1)
-        {
-            ArrAdd(ref tempList, ref sourceArray(Idx));
-        }
-        _ArrSlice = tempList;
-        return _ArrSlice;
-    }
-    public static void ArrAdd(ref List<dynamic> Arr, ref dynamic Item)
-    {
-        int X = 0;
-        // TODO: (NOT SUPPORTED): Err.Clear
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        X = Arr.Count;
-        if (Err().Number != 0)
-        {
-            Arr = new List<dynamic>() { Item };
-            return;
-        }
-        // TODO: (NOT SUPPORTED): ReDim Preserve Arr(UBound(Arr) + 1)
-        Arr[Arr.Count] = Item;
-    }
-    public static dynamic SubArr(dynamic sourceArray, int fromIndex, int copyLength)
-    {
-        dynamic _SubArr = null;
-        _SubArr = ArrSlice(ref sourceArray, fromIndex, fromIndex + copyLength - 1);
-        return _SubArr;
-    }
+    public static dynamic ArrSlice(List<dynamic> sourceArray, int fromIndex, int toIndex) => sourceArray.GetRange(fromIndex, toIndex);
+
+    public static void ArrAdd(List<dynamic> Arr, dynamic Item) { Arr += Item; }
+
+    public static dynamic SubArr(dynamic sourceArray, int fromIndex, int copyLength) => ArrSlice(sourceArray, fromIndex, fromIndex + copyLength - 1);
+
     public static bool InRange(dynamic LBnd, dynamic CHK, dynamic UBnd, bool IncludeBounds = true)
     {
         bool _InRange = false;
@@ -590,7 +561,7 @@ static class modUtils
         _cVal = Coll.Item(LCase(Key));
         return _cVal;
     }
-    public static string cValP(ref Collection Coll, string Key, string Def = "")
+    public static string cValP(Collection Coll, string Key, string Def = "")
     {
         string _cValP = "";
         _cValP = P(deQuote(cVal(ref Coll, Key, Def)));
@@ -605,7 +576,7 @@ static class modUtils
         _P = Str;
         return _P;
     }
-    public static string ModuleName(string S)
+    public static string ModuleName(string S = "")
     {
         string _ModuleName = "";
         int J = 0;
@@ -661,7 +632,7 @@ static class modUtils
     {
         int _Random = 0;
         Randomize();
-        _Random = ((Rnd() * Max) + 1);
+        _Random = ((int)((Rnd() * Max) + 1));
         return _Random;
     }
     public static string Stack(ref string Src, string Val = "##REM##", bool Peek = false)

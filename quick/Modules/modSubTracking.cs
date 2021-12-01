@@ -5,8 +5,7 @@ using static modOrigConvert;
 using static modRegEx;
 using static modUtils;
 using static modVB6ToCS;
-
-
+using static VBExtension;
 
 static class modSubTracking
 {
@@ -207,14 +206,14 @@ static class modSubTracking
         switch (GSL)
         {
             case "get":
-                Props[X].Getter = ConvertSub(S, , vbFalse);
+                Props[X].Getter = ConvertSub(S, false, vbTriState.vbFalse);
                 Props[X].asType = ConvertDataType(pType);
                 Props[X].asFunc = asFunc;
                 Props[X].funcArgs = pArgs;
                 break;
             case "set":
             case "let":
-                Props[X].Setter = ConvertSub(S, , vbFalse);
+                Props[X].Setter = ConvertSub(S, false, vbTriState.vbFalse);
                 Props[X].origArgName = pArgName;
                 if (pType != "") Props[X].asType = ConvertDataType(pType);
                 if (asFunc) Props[X].asFunc = true;

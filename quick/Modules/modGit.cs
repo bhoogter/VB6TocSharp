@@ -31,7 +31,7 @@ static class modGit
         string ErrSt = "";
         PushDir(GitFolder());
         if (!HideCommand) GitOut("$ " + C);
-        _GitCmd = RunCmdToOutput(C, ref ErrSt);
+        _GitCmd = RunCmdToOutput(C, out ErrSt);
         PopDir();
         if (!NoOutput) GitOut(_GitCmd);
         if (ErrSt != "") GitOut("ERR: " + ErrSt);
@@ -55,7 +55,7 @@ static class modGit
     }
     public static void GitConf(string vName = "", string vEMail = "", bool Clear = false)
     {
-        if (!IsIDE) return;
+        if (!IsIDE()) return;
         GitCmd("git config --unset user.name", true, true);
         GitCmd("git config --unset user.email", true, true);
         if (Clear)
@@ -79,7 +79,7 @@ static class modGit
     public static bool GitPull(bool withReset = true)
     {
         bool _GitPull = false;
-        if (!IsIDE) return _GitPull;
+        if (!IsIDE()) return _GitPull;
         // If withReset Then GitReset
         if (withReset)
         {
@@ -95,28 +95,28 @@ static class modGit
     public static string GitStatus()
     {
         string _GitStatus = "";
-        if (!IsIDE) return _GitStatus;
+        if (!IsIDE()) return _GitStatus;
         _GitStatus = GitCmd("git status");
         return _GitStatus;
     }
     public static string GitVersion()
     {
         string _GitVersion = "";
-        if (!IsIDE) return _GitVersion;
+        if (!IsIDE()) return _GitVersion;
         _GitVersion = GitCmd("git --version");
         return _GitVersion;
     }
     public static bool HasGit()
     {
         bool _HasGit = false;
-        if (!IsIDE) return _HasGit;
+        if (!IsIDE()) return _HasGit;
         _HasGit = GitVersion() != "";
         return _HasGit;
     }
     public static bool GitReset(bool Hard = false, bool toMaster = false)
     {
         bool _GitReset = false;
-        if (!IsIDE) return _GitReset;
+        if (!IsIDE()) return _GitReset;
         if (!Hard)
         {
             GitCmd("git checkout -- .");
@@ -135,7 +135,7 @@ static class modGit
     public static bool GitPush(string Committer, string CommitMessage)
     {
         bool _GitPush = false;
-        if (!IsIDE) return _GitPush;
+        if (!IsIDE()) return _GitPush;
         GitCmd("git add .");
         GitCmd("git status");
         // If MsgBox(__S1, vbOKCancel + vbQuestion + vbDefaultButton1, __S2, , , 10) = vbCancel Then
@@ -164,7 +164,7 @@ static class modGit
     public static void GitLog(int CharLimit = 3000)
     {
         string Res = "";
-        if (!IsIDE) return;
+        if (!IsIDE()) return;
         Res = GitCmd("git log", true);
         Res = Left(Res, CharLimit);
         Console.WriteLine(Res);
