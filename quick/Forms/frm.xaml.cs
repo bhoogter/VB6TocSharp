@@ -43,6 +43,7 @@ namespace VB2CS.Forms
             }
         }
 
+        private void cmdAll_Click(object sender, RoutedEventArgs e) { cmdAll_Click(); }
         private void cmdAll_Click()
         {
             if (!ConfigValid()) return;
@@ -51,6 +52,7 @@ namespace VB2CS.Forms
             IsWorking(true);
             MsgBox("Complete");
         }
+        private void cmdClasses_Click(object sender, RoutedEventArgs e) { cmdClasses_Click(); }
         private void cmdClasses_Click()
         {
             if (!ConfigValid()) return;
@@ -58,15 +60,18 @@ namespace VB2CS.Forms
             ConvertFileList(FilePath(txtSrc.Text), VBPClasses(txtSrc.Text), vbCrLf, ConverterVersion);
             IsWorking(true);
         }
+        private void cmdConfig_Click(object sender, RoutedEventArgs e) { cmdConfig_Click(); }
         private void cmdConfig_Click()
         {
             frmConfig.instance.ShowDialog();
             modConfig.LoadSettings();
         }
+        private void cmdExit_Click(object sender, RoutedEventArgs e) { cmdExit_Click(); }
         private void cmdExit_Click()
         {
             Unload();
         }
+        private void cmdFile_Click(object sender, RoutedEventArgs e) { cmdFile_Click(); }
         private void cmdFile_Click()
         {
             bool Success = false;
@@ -81,6 +86,7 @@ namespace VB2CS.Forms
             IsWorking(true);
             if (Success) MsgBox("Converted " + txtFile.Text + ".");
         }
+        private void cmdForms_Click(object sender, RoutedEventArgs e) { cmdForms_Click(); }
         private void cmdForms_Click()
         {
             if (!ConfigValid()) return;
@@ -88,6 +94,7 @@ namespace VB2CS.Forms
             ConvertFileList(FilePath(txtSrc.Text), VBPForms(txtSrc.Text), vbCrLf, ConverterVersion);
             IsWorking(true);
         }
+        private void cmdModules_Click(object sender, RoutedEventArgs e) { cmdModules_Click(); }
         private void cmdModules_Click()
         {
             if (!ConfigValid()) return;
@@ -144,11 +151,13 @@ namespace VB2CS.Forms
             lblPrg.Visibility = shpPrg.Visibility;
             return _Prg;
         }
+        private void cmdLint_Click(object sender, RoutedEventArgs e) { cmdLint_Click(); }
         private void cmdLint_Click()
         {
             if (!ConfigValid()) return;
             frmLinter.instance.ShowDialog();
         }
+        private void cmdScan_Click(object sender, RoutedEventArgs e) { cmdScan_Click(); }
         private void cmdScan_Click()
         {
             if (!ConfigValid()) return;
@@ -156,12 +165,14 @@ namespace VB2CS.Forms
             ScanRefs();
             IsWorking(true);
         }
+        private void cmdSupport_Click(object sender, RoutedEventArgs e) { cmdSupport_Click(); }
         private void cmdSupport_Click()
         {
             if (!ConfigValid()) return;
             if (MsgBox("Generate Project files?", vbYesNo) == vbYes) CreateProjectFile(vbpFile);
             if (MsgBox("Generate Support files?", vbYesNo) == vbYes) CreateProjectSupportFiles();
         }
+        private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }
         private void Form_Load()
         {
             modConfig.Hush = true;

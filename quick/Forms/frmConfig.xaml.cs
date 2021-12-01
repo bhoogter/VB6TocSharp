@@ -17,6 +17,7 @@ namespace VB2CS.Forms
         public frmConfig() { InitializeComponent(); }
 
 
+        private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }
         private void Form_Load()
         {
             modConfig.Hush = true;
@@ -25,10 +26,12 @@ namespace VB2CS.Forms
             txtAssemblyName.Text = modConfig.AssemblyName();
             modConfig.Hush = false;
         }
+        private void cmdCancel_Click(object sender, RoutedEventArgs e) { cmdCancel_Click(); }
         private void cmdCancel_Click()
         {
             Unload();
         }
+        private void cmdOK_Click(object sender, RoutedEventArgs e) { cmdOK_Click(); }
         private void cmdOK_Click()
         {
             modINI.INIWrite(INISection_Settings, INIKey_VBPFile, txtVBPFile.Text, INIFile);
@@ -58,8 +61,11 @@ namespace VB2CS.Forms
                 MsgBox("Please enter something for an assembly name.");
             }
         }
+        private void txtVBPFile_GotFocus(object sender, RoutedEventArgs e) { txtVBPFile_GotFocus(); }
         private void txtVBPFile_GotFocus() { txtVBPFile.SelectionStart = 0; txtVBPFile.SelectionLength = Len(txtVBPFile.Text); }
+        private void txtOutput_GotFocus(object sender, RoutedEventArgs e) { txtOutput_GotFocus(); }
         private void txtOutput_GotFocus() { txtOutput.SelectionStart = 0; txtOutput.SelectionLength = Len(txtOutput.Text); }
+        private void txtAssemblyName_GotFocus(object sender, RoutedEventArgs e) { txtAssemblyName_GotFocus(); }
         private void txtAssemblyName_GotFocus() { txtAssemblyName.SelectionStart = 0; txtAssemblyName.SelectionLength = Len(txtAssemblyName.Text); }
 
     }

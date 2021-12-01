@@ -92,7 +92,7 @@ Public Function QuickLintFiles(ByVal List As String, Optional ByVal MaxErrors As
     Result = QuickLintFile(L, MaxErrors, AutoFix)
     If Not Result = "" Then
       Dim S As String
-      Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s).  To re-run for failing file, hit enter on the line below:"
+      Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s).   To re-run for failing file, hit enter on the line below:"
       S = "LINT FAILED: " & L & vbCrLf & Result & vbCrLf & "?Lint(""" & L & """)"
       QuickLintFiles = S
       Exit Function
@@ -571,12 +571,18 @@ Public Function IsStandardEvent(ByVal ArgName As String, ByVal ArgType As String
 End Function
 
 Public Sub TestArgType(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Name As String, ByVal Typ As String)
-  If Typ = "Integer" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long (or disable type linting for file)"
-  If Typ = "Short" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long (or disable type linting for file)"
-  If Typ = "Byte" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Long (or disable type linting for file)"
-  If Typ = "Float" Then RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use Double (or disable type linting for file)"
+  Dim Expect As String
+  
+  If Typ = "Integer" Then Expect = "Long"
+  If Typ = "Short" Then Expect = "Long"
+  If Typ = "Byte" Then Expect = "Long"
+  If Typ = "Float" Then Expect = "Double"
+  If Typ = "Any" Then Expect = "String"
+  
+  If Expect <> "" Then
+    RecordError Errors, ErrorCount, TY_ARGTY, LineN, "Arg [" & Name & "] is of type [" & Typ & "] -- use " & Expect & " (or disable type linting for file)"
+  End If
 End Sub
-
 
 Public Sub TestSignature(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal LL As String)
   If Not RegExTest(LL, "^[ ]*(Private|Public|Friend) ") Then RecordError Errors, ErrorCount, TY_PRIPU, LineN, "Either Private or Public should be specified, but neither was."

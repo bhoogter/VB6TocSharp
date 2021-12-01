@@ -392,22 +392,22 @@ static class modTextFiles
         if (OverWrite)
         {
             Kill(File);
-            Open(File For Output As #FNo);
-    }
+            VBOpenFile(File, "Output", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Output As #FNo
+        }
         else
         {
-            Open(File For Append As #FNo);
-  }
+            VBOpenFile(File, "Append", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Append As #FNo
+        }
         if (PreventNL || Right(Str, 2) == vbCrLf)
         {
-            Print(#FNo, Str;);
-    }
+            VBWriteFile("Print #FNo, Str;"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str;
+        }
         else
         {
-            Print(#FNo, Str);
-  }
-        Close(#FNo);
-  _WriteFile = true;
+            VBWriteFile("Print #FNo, Str"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str
+        }
+        VBCloseFile(FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Close #FNo
+        _WriteFile = true;
         return _WriteFile;
     }
 

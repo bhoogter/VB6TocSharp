@@ -194,7 +194,7 @@ Public Function ConvertContents(ByVal Contents As String, ByVal vCodeType As Cod
     End If
     
     LineN = LineN + 1
-'    If LineN >= 8 Then Stop
+'    If LineN >= 357 Then Stop
     
     Dim UnindentedAlready As Boolean
     
@@ -927,8 +927,8 @@ Public Function ConvertArgType(ByVal Name As String, ByVal Typ As String) As Str
   End Select
 End Function
 
-Public Function ArgTypeDefault(ByVal ArgType As String, Optional ByVal AsArray As Boolean = False, Optional ByVal IsNewable As Boolean = False) As String
-  If Not AsArray Then
+Public Function ArgTypeDefault(ByVal ArgType As String, Optional ByVal asArray As Boolean = False, Optional ByVal IsNewable As Boolean = False) As String
+  If Not asArray Then
     Select Case LCase(ArgType)
       Case "string"
         ArgTypeDefault = """"""
@@ -993,6 +993,8 @@ Public Function ConvertSignature(ByVal LL As String, Optional ByVal vCodeType As
   If WithReturn Then
     ConvertSignature = ConvertSignature & vbCrLf & RetTargetType & " " & CurrentFunctionReturnValue & " = " & ArgTypeDefault(RetTargetType) & ";"
   End If
+  
+  If IsEvent(Name) Then ConvertSignature = EventStub(Name) & ConvertSignature
 End Function
 
 Public Function ConvertDeclare(ByVal L As String) As String
@@ -1041,6 +1043,23 @@ Public Function ConvertDeclare(ByVal L As String) As String
   ConvertDeclare = ConvertDeclare & Name & "("
   ConvertDeclare = ConvertDeclare & ConvertDeclaration(Args, DECL_EXTERN, True)
   ConvertDeclare = ConvertDeclare & ");"
+End Function
+
+Public Function ConvertFileOpen(ByVal L As String) As String
+    'Open pathname For mode [ Access access ] [ lock ] As [ # ] filenumber [ Len = reclength ]
+  Dim vPath As String, vMode As String, vAccess As String, vLock As Boolean, vNumber As String, vLen As String
+  L = Trim(L)
+  RecordLeft L, "Open "
+  vPath = RemoveUntil(L, " ", True)
+  RecordLeft L, "For "
+  vMode = RemoveUntil(L, " ", True)
+  If RecordLeft(L, "Access ") Then vAccess = RemoveUntil(L, " ", True)
+  vLock = RecordLeft(L, "Lock ")
+  RecordLeft L, "As #"
+  vNumber = L
+'  If RecordLeft(L, "Len = ") Then vLen = L
+  
+  ConvertFileOpen = "VBOpenFile(" & vPath & ", """ & vMode & """, " & vNumber & ")"
 End Function
 
 Public Function SplitByComma(ByVal L As String) As String()
@@ -1149,6 +1168,15 @@ Public Function ConvertStatement(ByVal L As String) As String
     NonCodeLine = True
   ElseIf RegExTest(L, "^[ ]*(([a-zA-Z_()0-9.]\.)*)?[a-zA-Z_0-9.]+$") Then ' Method call without parens or args (statement, not expression)
     ConvertStatement = ConvertStatement & L & "()"
+  ElseIf RegExTest(L, "^[ ]*Close #") Then
+    ConvertStatement = "VBCloseFile(" & Replace(Trim(L), "Close #", "") & ")"
+    LineComment = LineComment & "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " & L
+  ElseIf RegExTest(L, "^[ ]*Open .* As #") Then
+    ConvertStatement = ConvertFileOpen(L)
+    LineComment = LineComment & "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " & L
+  ElseIf RegExTest(L, "^[ ]*Print #") Then
+    ConvertStatement = "VBWriteFile(""" & Replace(Trim(L), """", """""") & """)"
+    LineComment = LineComment & "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " & L
   ElseIf RegExTest(L, "^[ ]*(([a-zA-Z_()0-9.]\.)*)?[a-zA-Z_0-9.]+ .*") Then ' Method call without parens but with args (statement, not expression)
     Dim FunctionCall As String, ArgList As String, ArgPart As Variant, ArgN As Long
     FunctionCall = RegExNMatch(L, "^[ ]*((([a-zA-Z_()0-9.]\.)*)?[a-zA-Z_0-9.]+)", 0)

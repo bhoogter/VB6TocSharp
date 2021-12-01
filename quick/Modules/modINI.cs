@@ -10,9 +10,9 @@ using static Microsoft.VisualBasic.Strings;
 static class modINI
 {
     [DllImport("kernel32")]
-    private static extern int WritePrivateProfileString(string lpApplicationName, Any lpKeyName, Any lpString, string lpFileName);
+    private static extern int WritePrivateProfileString(string lpApplicationName, string lpKeyName, string lpString, string lpFileName);
     [DllImport("kernel32")]
-    private static extern int GetPrivateProfileString(string lpApplicationName, Any lpKeyName, string lpDefault, string lpReturnedString, int nSize, string lpFileName);
+    private static extern int GetPrivateProfileString(string lpApplicationName, string lpKeyName, string lpDefault, string lpReturnedString, int nSize, string lpFileName);
     [DllImport("kernel32.dll")]
     private static extern int GetPrivateProfileSectionNames(string lpszReturnBuffer, int nSize, string lpFileName);
     [DllImport("kernel32")]
@@ -31,7 +31,7 @@ static class modINI
         // TODO: (NOT SUPPORTED): On Error Resume Next
         string sRet = "";
         sRet = String(255, Chr(0));
-        _INIRead = Left(sRet, GetPrivateProfileString(sSection, ByVal sKeyName, "", sRet, Len(sRet), sINIFileName));
+        _INIRead = Left(sRet, GetPrivateProfileString(sSection, sKeyName, "", sRet, Len(sRet), sINIFileName));
         return _INIRead;
     }
     public static List<string> INISections(string tFileName)
@@ -65,7 +65,7 @@ static class modINI
         int intLen = 0;
         int I = 0;
         int N = 0;
-        List<string> RET = new List<string>();
+        List<string> Ret = new List<string>();
         while ((intLen == Len(strBuffer) - 2) || (intLen == 0))
         {
             if (strBuffer == vbNullString)
@@ -80,21 +80,21 @@ static class modINI
             if (intLen == 0) return _INISectionKeys;
         }
         strBuffer = Left(strBuffer, intLen);
-        RET = new List<string>(Split(strBuffer, vbNullChar));
-        // TODO: (NOT SUPPORTED): ReDim Preserve RET(UBound(RET) - 1) As String
-        for (I = 0; I <= RET.Count; I += 1)
+        Ret = new List<string>(Split(strBuffer, vbNullChar));
+        // TODO: (NOT SUPPORTED): ReDim Preserve Ret(UBound(Ret) - 1) As String
+        for (I = 0; I <= Ret.Count; I += 1)
         {
-            N = InStr(RET[I], "=");
+            N = InStr(Ret[I], "=");
             if (N > 0)
             {
-                RET[I] = Left(RET[I], N - 1);
+                Ret[I] = Left(Ret[I], N - 1);
             }
             else
             {
-                Console.WriteLine("modINI.INISectionKeys - No '=' character found in line.  Section=" + Section + ", Line=" + RET[I] + ", file=" + tFileName);
+                Console.WriteLine("modINI.INISectionKeys - No '=' character found in line.  Section=" + Section + ", Line=" + Ret[I] + ", file=" + tFileName);
             }
         }
-        _INISectionKeys = RET;
+        _INISectionKeys = Ret;
         return _INISectionKeys;
     }
     public static string ReadIniValue(string INIPath, string Key, string Variable, string vDefault = "")

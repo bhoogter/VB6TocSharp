@@ -1,5 +1,6 @@
 Attribute VB_Name = "modTestCases"
 Option Explicit
+'@NO-LINT
 
 ' This module exists solely to list test conversion caess to make sure the converter can convert itself containing them.
 ' There should be no active and/or used code in this module.

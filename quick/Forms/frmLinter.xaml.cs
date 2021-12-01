@@ -13,15 +13,18 @@ namespace VB2CS.Forms
         public frmLinter() { InitializeComponent(); }
 
 
+        private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }
         private void Form_Load()
         {
             txtVBPFile.Text = modConfig.vbpFile;
             txtFile.Text = "";
         }
+        private void cmdClose_Click(object sender, RoutedEventArgs e) { cmdClose_Click(); }
         private void cmdClose_Click()
         {
             Unload();
         }
+        private void cmdLint_Click(object sender, RoutedEventArgs e) { cmdLint_Click(); }
         private void cmdLint_Click()
         {
             string File = "";

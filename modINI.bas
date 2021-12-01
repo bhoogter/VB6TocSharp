@@ -1,8 +1,8 @@
 Attribute VB_Name = "modINI"
 Option Explicit
 
-Private Declare Function WritePrivateProfileString Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpString As Any, ByVal lpFileName As String) As Long
-Private Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As Any, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
+Private Declare Function WritePrivateProfileString Lib "kernel32" Alias "WritePrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpString As String, ByVal lpFileName As String) As Long
+Private Declare Function GetPrivateProfileString Lib "kernel32" Alias "GetPrivateProfileStringA" (ByVal lpApplicationName As String, ByVal lpKeyName As String, ByVal lpDefault As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
 Private Declare Function GetPrivateProfileSectionNames Lib "kernel32.dll" Alias "GetPrivateProfileSectionNamesA" (ByVal lpszReturnBuffer As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
 Private Declare Function GetPrivateProfileSection Lib "kernel32" Alias "GetPrivateProfileSectionA" (ByVal lpAppName As String, ByVal lpReturnedString As String, ByVal nSize As Long, ByVal lpFileName As String) As Long
 
@@ -42,7 +42,7 @@ Public Function INISectionKeys(ByVal tFileName As String, ByVal Section As Strin
 On Error Resume Next
   Dim strBuffer As String, intLen As Long
   Dim I As Long, N As Long
-  Dim RET() As String
+  Dim Ret() As String
 
   Do While (intLen = Len(strBuffer) - 2) Or (intLen = 0)
     If strBuffer = vbNullString Then
@@ -56,17 +56,17 @@ On Error Resume Next
   Loop
   
   strBuffer = Left(strBuffer, intLen)
-  RET = Split(strBuffer, vbNullChar)
-  ReDim Preserve RET(UBound(RET) - 1) As String
-  For I = LBound(RET) To UBound(RET)
-    N = InStr(RET(I), "=")
+  Ret = Split(strBuffer, vbNullChar)
+  ReDim Preserve Ret(UBound(Ret) - 1) As String
+  For I = LBound(Ret) To UBound(Ret)
+    N = InStr(Ret(I), "=")
     If N > 0 Then
-      RET(I) = Left(RET(I), N - 1)
+      Ret(I) = Left(Ret(I), N - 1)
     Else
-      Debug.Print "modINI.INISectionKeys - No '=' character found in line.  Section=" & Section & ", Line=" & RET(I) & ", file=" & tFileName
+      Debug.Print "modINI.INISectionKeys - No '=' character found in line.  Section=" & Section & ", Line=" & Ret(I) & ", file=" & tFileName
     End If
   Next
-  INISectionKeys = RET
+  INISectionKeys = Ret
 End Function
 
 Public Function ReadIniValue(ByVal INIPath As String, ByVal Key As String, ByVal Variable As String, Optional ByVal vDefault As String = "") As String
