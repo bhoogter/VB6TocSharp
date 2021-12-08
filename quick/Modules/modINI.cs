@@ -20,11 +20,9 @@ static class modINI
     private static extern int GetPrivateProfileSection(string lpAppName, string lpReturnedString, int nSize, string lpFileName);
     public static bool INIWrite(string sSection, string sKeyName, string sNewString, string sINIFileName)
     {
-        bool _INIWrite = false;
         // TODO: (NOT SUPPORTED): On Error Resume Next
         WritePrivateProfileString(sSection, sKeyName, sNewString, sINIFileName);
-        _INIWrite = (Err().Number == 0);
-        return _INIWrite;
+        return Err().Number == 0;
     }
     public static string INIRead(string sSection, string sKeyName, string sINIFileName)
     {

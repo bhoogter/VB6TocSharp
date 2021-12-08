@@ -75,42 +75,46 @@ static class modShell
     {
         string _RunCmdToOutput = "";
         ErrStr = "";
-        // TODO: (NOT SUPPORTED): On Error GoTo RunError
-        string A = "";
-        string B = "";
-        string C = "";
-        int tLen = 0;
-        int Iter = 0;
-        A = TempFile();
-        B = TempFile();
-        if (!AsAdmin)
+        try
         {
-            ShellAndWait("cmd /c " + Cmd + " 1> " + A + " 2> " + B, enSW.enSW_HIDE);
+            string A = "";
+            string B = "";
+            string C = "";
+            int tLen = 0;
+            int Iter = 0;
+            A = TempFile();
+            B = TempFile();
+            if (!AsAdmin)
+            {
+                ShellAndWait("cmd /c " + Cmd + " 1> " + A + " 2> " + B, enSW.enSW_HIDE);
+            }
+            else
+            {
+                C = TempFile(".bat");
+                WriteFile(C, Cmd + " 1> " + A + " 2> " + B, true);
+                RunFileAsAdmin(C, 0, (int)enSW.enSW_HIDE);
+            }
+            Iter = 0;
+            int MaxIter = 10;
+            while (true)
+            {
+                tLen = (int)FileLen(A);
+                Sleep(800);
+                if (Iter > MaxIter || FileLen(A) == tLen) break;
+                Iter = Iter + 1;
+            }
+            _RunCmdToOutput = ReadEntireFileAndDelete(A);
+            if (Iter > MaxIter) _RunCmdToOutput = _RunCmdToOutput + vbCrLf2 + "<<< OUTPUT TRUNCATED >>>";
+            ErrStr = ReadEntireFileAndDelete(B);
+            DeleteFileIfExists(C);
+            return _RunCmdToOutput;
         }
-        else
+        catch (Exception e)
         {
-            C = TempFile(".bat");
-            WriteFile(C, Cmd + " 1> " + A + " 2> " + B, true);
-            RunFileAsAdmin(C, 0, (int)enSW.enSW_HIDE);
+            _RunCmdToOutput = "";
+            ErrStr = "ShellOut.RunCmdToOutput: Command Execution Error - [" + Err().Number + "] " + Err().Description;
+            return _RunCmdToOutput;
         }
-        Iter = 0;
-        int MaxIter = 10;
-        while (true)
-        {
-            tLen = (int)FileLen(A);
-            Sleep(800);
-            if (Iter > MaxIter || FileLen(A) == tLen) break;
-            Iter = Iter + 1;
-        }
-        _RunCmdToOutput = ReadEntireFileAndDelete(A);
-        if (Iter > MaxIter) _RunCmdToOutput = _RunCmdToOutput + vbCrLf2 + "<<< OUTPUT TRUNCATED >>>";
-        ErrStr = ReadEntireFileAndDelete(B);
-        DeleteFileIfExists(C);
-        return _RunCmdToOutput;
-    RunError:;
-        _RunCmdToOutput = "";
-        ErrStr = "ShellOut.RunCmdToOutput: Command Execution Error - [" + Err().Number + "] " + Err().Description;
-        return _RunCmdToOutput;
     }
     // to allow for Shell.
     // This routine shells out to another application and waits for it to exit.
@@ -119,24 +123,26 @@ static class modShell
         PROCESS_INFORMATION NameOfProc = null;
         STARTUPINFO NameStart = null;
         int RC = 0;
-        // TODO: (NOT SUPPORTED): On Error GoTo ErrorRoutineErr
-        NameStart.Cb = Len(NameStart);
-        if (SW == enSW.enSW_HIDE)
+        try
         {
-            RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), CREATE_NO_WINDOW, 0, 0, ref NameStart, ref NameOfProc);
+            NameStart.Cb = Len(NameStart);
+            if (SW == enSW.enSW_HIDE)
+            {
+                RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), CREATE_NO_WINDOW, 0, 0, ref NameStart, ref NameOfProc);
+            }
+            else
+            {
+                RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), NORMAL_PRIORITY_CLASS, 0, 0, ref NameStart, ref NameOfProc);
+            }
+            LastProcessID = NameOfProc.dwProcessId;
+            RC = WaitForSingleObject(NameOfProc.hProcess, INFINITE);
+            RC = CloseHandle(ref NameOfProc.hProcess) ? 1 : 0;
         }
-        else
+        catch (Exception e)
         {
-            RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), NORMAL_PRIORITY_CLASS, 0, 0, ref NameStart, ref NameOfProc);
+            MsgBox("AppShell.Form1.ShellAndWait [" + Err().Number + "]: " + Err().Description);
+
         }
-        LastProcessID = NameOfProc.dwProcessId;
-        RC = WaitForSingleObject(NameOfProc.hProcess, INFINITE);
-        RC = CloseHandle(ref NameOfProc.hProcess) ? 1 : 0;
-    ErrorRoutineResume:;
-        return;
-    ErrorRoutineErr:;
-        MsgBox("AppShell.Form1.ShellAndWait [" + Err().Number + "]: " + Err().Description);
-        // TODO: (NOT SUPPORTED): Resume Next
     }
     public static string TempFile(string UseFolder = "", string UsePrefix = "tmp_", string Extension = ".tmp", bool TestWrite = true)
     {
@@ -154,33 +160,33 @@ static class modShell
         _TempFile = UseFolder + FN + Extension;
         if (TestWrite)
         {
-            // TODO: (NOT SUPPORTED): On Error GoTo TestWriteFailed
-            WriteFile(_TempFile, "TEST", true, true);
-            // TODO: (NOT SUPPORTED): On Error GoTo TestReadFailed
-            Res = ReadFile(_TempFile);
+            try
+            {
+                WriteFile(_TempFile, "TEST", true, true);
+            }
+            catch (Exception e)
+            {
+                MsgBox("Failed to write temp file " + _TempFile + "." + vbCrLf + Err().Description, vbCritical);
+                return _TempFile;
+            }
+            try
+            {
+                Res = ReadFile(_TempFile);
+            }
+            catch (Exception e)
+            {
+                MsgBox("Failed to read temp file " + _TempFile + "." + vbCrLf + Err().Description, vbCritical);
+            }
             if (Res != "TEST") MsgBox("Test write to temp file " + _TempFile + " failed." + vbCrLf + "Result (Len=" + Len(Res) + "):" + vbCrLf + Res, vbCritical);
-            // TODO: (NOT SUPPORTED): On Error GoTo TestClearFailed
-            Kill(_TempFile);
+            try
+            {
+                Kill(_TempFile);
+            }
+            catch (Exception e)
+            {
+                MsgBox("Failed to clear temp file " + _TempFile + "." + vbCrLf + Err().Description, vbCritical);
+            }
         }
-        return _TempFile;
-    TestWriteFailed:;
-        MsgBox("Failed to write temp file " + _TempFile + "." + vbCrLf + Err().Description, vbCritical);
-        return _TempFile;
-    TestReadFailed:;
-        MsgBox("Failed to read temp file " + _TempFile + "." + vbCrLf + Err().Description, vbCritical);
-        return _TempFile;
-    TestClearFailed:;
-        if (Err().Number == 53)
-        {
-            // TODO: (NOT SUPPORTED): Err.Clear
-            // TODO: (NOT SUPPORTED): Resume Next
-        }
-        // BFH20160627
-        // Jerry wanted this commented out.  Absolutely horrible idea.
-        // If IsDevelopment Then
-        MsgBox("Failed to clear temp file " + _TempFile + "." + vbCrLf + Err().Description, vbCritical);
-        // End If
-        return _TempFile;
         return _TempFile;
     }
     public static void RunShellExecuteAdmin(string App, int nHwnd = 0, int WindowState = SW_SHOWNORMAL)

@@ -1,13 +1,11 @@
-using Microsoft.VisualBasic;
-using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
 using static Microsoft.VisualBasic.Strings;
 using static modUtils;
 using static VBExtension;
-using  System.Linq;
 
 
 static class modTextFiles
@@ -49,14 +47,11 @@ static class modTextFiles
 
     public static bool DeleteFileIfExists(string sFIle, bool bNoAttributeClearing = false)
     {
-        bool _DeleteFileIfExists = false;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
         if (!FileExists(sFIle)) return _DeleteFileIfExists;
         if (!bNoAttributeClearing) File.SetAttributes(sFIle, 0);
         if (FileExists(sFIle)) File.Delete(sFIle);
         // DeleteFileIfExists = FileExists(sFile)
-        _DeleteFileIfExists = true;
-        return _DeleteFileIfExists;
+        return true;
     }
     public static string ReadEntireFile(string tFileName) => File.ReadAllText(tFileName);
 
@@ -76,7 +71,6 @@ static class modTextFiles
         // :  String - The string contents of the file.
         // :::SEE ALSO
         // :  ReadEntireFile
-        // TODO: (NOT SUPPORTED): On Error Resume Next
         _ReadEntireFileAndDelete = ReadEntireFile(tFileName);
         File.Delete(tFileName);
         return _ReadEntireFileAndDelete;
@@ -233,15 +227,12 @@ static class modTextFiles
         Code = 0;
         Blnk = 0;
         Cmnt = 0;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        if (!FileExists(tFileName))
-        {
-            return _VBFileCountLines;
-        }
+
+        if (!FileExists(tFileName)) return _VBFileCountLines;
         S = ReadEntireFile(tFileName);
         Totl = CountLines(S, false, "");
         Code = CountLines(S);
-        N = CountLines(S,true, "");
+        N = CountLines(S, true, "");
         Cmnt = N - Code;
         Blnk = Totl - N;
         _VBFileCountLines = true;
@@ -294,7 +285,6 @@ static class modTextFiles
         // :::SEE ALSO
         // :  ReadEntireFile, WriteFile, CountLines
         int FNo = 0;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
         //FNo = FreeFile;
         if (OverWrite)
         {
@@ -314,8 +304,7 @@ static class modTextFiles
             //VBWriteFile("Print #FNo, Str"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str
         }
         VBCloseFile(FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Close #FNo
-        _WriteFile = true;
-        return _WriteFile;
+        return true;
     }
 
 }
