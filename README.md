@@ -60,9 +60,10 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 - Universal imports - Imports EVERY code module, just like VB6 did automatically.  Make Visual Studio do the work of deciding which ones are used simply by optimizing imports after conversion.
 - C# 2017 - This is a late-comer.  There has never been a freeware solution for VB6 -> C#, and now that VB.NET is more or less discontinued, why not?
 
-## Known Issues
+## Known Issues (v1 only)
 
 - Currently, the converter will often balk at a file that contains the word 'Property' anywhere in it (other than a property declaration).  While this is a pain and likely will be fixed, it was encountered towards the end of the projects usefulness (and hence not urgent on the repair list), and where it hindered progress, the variable that contained the word '...Property' was simply renamed temporarily to something like '...Prppty', and then changed back in the converted file.
+    - This has been addressed in Version 2, however it may still appear in some cases in v1.
 
 ## Down-sides
 
