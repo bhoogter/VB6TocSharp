@@ -67,25 +67,29 @@ Please see the [wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more inf
 
 ## Down-sides
 
-- This will not produce code that will compile in its generated form.  The last mile is simply the most expensive, and it seemed more expedient to make something get most of the way, and finish the course manually.
-- This isn't the most customizable solution.  Unless, of course, you want to dive into a little source code on the converter.  But, that's why its available.
-- The resultant code is a mess, stylistically.  That's what a modern IDE is for.  All the bad formatting can be cleaned up with ^K^D.  Unused imports with ^K^E.  And, there's a lot of extra {'s and }'s you will probably want to delete.
+- This will not produce code that will compile in its generated form.  The last mile is simply the most expensive to automate, and often best to do manually.  It seemed more expedient to make something get most of the way, and finish any edge cases or final conversion by hand.
+- Limited UI customziation (but limitless code-based customization).  This isn't the most customizable solution.  Unless, of course, you want to dive into a little source code on the converter.  But, that's why its available.
+- Unlinted output.  The resultant code is a mess, stylistically.  That's what a modern IDE is for.  All the bad formatting can be cleaned up with ^K^D.  Unused imports with ^K^E.  And, there's a lot of extra {'s and }'s you will probably want to delete.
 - The converter currently is REALLY bad at loop bounds.  Sorry, it's one of the pitfalls of a VB6->C# conversion, and there isn't much logic into how it converts.  It's tedius, but do a project-wide search for all for loops and manually inspect the bounds.
 - There is an extra method for every event.  One for the correct signature, one for the original signature.  In most cases, the redundancy is unnecessary, but it provided the easiest conversion.  These can be reduced to a single method in most cases (but not all, which is why I don't).
 
+NOTE:  Most of the places the converter knows there will be a problem it will annotate the code with a `// TODO:` comment.  Be sure to thoroughly address each of these.
+
 ## Pluses
 
-- Do the whole thing or just one file at a time.
 - It's free.
-- You have the source.
+- You have the source (customize it, whatever).
+- Do the whole thing or just one file at a time.
 - It's a lot better than doing it all by hand.
 - It will give you a good insight into what's going on, without having to ALL of the manual effort to do a simple conversion.
-- Not a fast conversion, but a strightforward one.  Inspect functions such as `ConvertSub` or `ConvertPrototype`.
+- Not the fastest conversion, but a strightforward one (but v2 just got a whole lot better.  Inspect functions such as `ConvertSub` or `ConvertPrototype`.  
+    - But think about it...  You're looking to convert in a one-off, not run over and over during converted exectution.
 - Allows inspection of how something is being converted.  Don't like the output?  Change it.
+    - You can put a VB6 breakpoint anywhere you like and stop.  Additionally, just add a line like `If LineN = 387 Then Stop`, and the converter will stop right there.
 
 ## Extras
 
-- An albeit slow, but useful VB6 code linter.  Root out as much tech debt before even beginning the process.
+- A VB6 code linter. `?Lint`.  Root out as much tech debt before even beginning the process.
 - VB6 form to XAML
 
 ## Contact
