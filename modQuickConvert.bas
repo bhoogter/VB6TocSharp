@@ -517,13 +517,13 @@ Public Function ConvertIf(ByVal L As String) As String
     If ixElse > 0 Then
       MultiStatement = InStr(cElse, ":") > 0
       If MultiStatement Then
-        ConvertIf = ConvertIf & " { "
+        ConvertIf = ConvertIf & " else { "
         For Each St In Split(cElse, ":")
           ConvertIf = ConvertIf & ConvertStatement(Trim(St))
         Next
         ConvertIf = ConvertIf & " }"
       Else
-        ConvertIf = ConvertIf & ConvertStatement(cElse)
+        ConvertIf = ConvertIf & " else " & ConvertStatement(cElse)
       End If
     End If
   End If
