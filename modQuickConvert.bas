@@ -231,10 +231,10 @@ Public Function ConvertContents(ByVal Contents As String, ByVal vCodeType As Cod
       NewLine = NewLine & ConvertIf(L)
       If InStr(L, " Then ") = 0 Then Indent = Indent + Idnt
     Else
-      Dim Statements() As String, SS As Variant, St As String
+      Dim Statements() As String, SSI As Long, St As String
       Statements = Split(Trim(L), ": ")
-      For Each SS In Statements
-        St = SS
+      For SSI = LBound(Statements) To UBound(Statements)
+        St = Statements(SSI)
         
         If RegExTest(St, "^[ ]*ElseIf .*$") Then
           NewLine = NewLine & ConvertIf(St)
@@ -302,8 +302,12 @@ Public Function ConvertContents(ByVal Contents As String, ByVal vCodeType As Cod
         ElseIf RegExTest(St, "^((Private|Public|Friend) )?Property (Get|Let|Set) ") Then
           CurrentFunctionArgs = ""
           NewLine = NewLine & ConvertProperty(St, Contents, vCodeType)
-          InProperty = True
-          Indent = Indent + Idnt
+          InProperty = Not EndsWith(L, "End Property")
+          If InProperty Then
+            Indent = Indent + Idnt
+          Else
+            GoTo NextLine
+          End If
         ElseIf RegExTest(St, "^[ ]*(Public |Private )?Enum ") Then
           NewLine = NewLine & ConvertEnum(St)
           Indent = Indent + Idnt
@@ -403,6 +407,10 @@ End Function
   
 Public Function StartsWith(ByVal L As String, ByVal Find As String) As Boolean
   StartsWith = Left(L, Len(Find)) = Find
+End Function
+
+Public Function EndsWith(ByVal L As String, ByVal Find As String) As Boolean
+  EndsWith = Right(L, Len(Find)) = Find
 End Function
 
 Public Function StripLeft(ByVal L As String, ByVal Find As String) As String
