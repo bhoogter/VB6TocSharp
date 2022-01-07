@@ -5,6 +5,7 @@ using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using VB2CS.Forms;
 
 namespace VB2CS
 {
@@ -13,5 +14,10 @@ namespace VB2CS
   /// </summary>
   public partial class App : Application
     {
+        [STAThread()]
+        static void Main()
+        {
+            frm.instance.ShowDialog();
+        }
     }
 }

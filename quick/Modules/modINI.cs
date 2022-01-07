@@ -4,6 +4,7 @@ using System.Runtime.InteropServices;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.Information;
 using static Microsoft.VisualBasic.Strings;
+using static VBExtension;
 
 
 
@@ -19,18 +20,16 @@ static class modINI
     private static extern int GetPrivateProfileSection(string lpAppName, string lpReturnedString, int nSize, string lpFileName);
     public static bool INIWrite(string sSection, string sKeyName, string sNewString, string sINIFileName)
     {
-        bool _INIWrite = false;
         // TODO: (NOT SUPPORTED): On Error Resume Next
         WritePrivateProfileString(sSection, sKeyName, sNewString, sINIFileName);
-        _INIWrite = (Err().Number == 0);
-        return _INIWrite;
+        return Err().Number == 0;
     }
     public static string INIRead(string sSection, string sKeyName, string sINIFileName)
     {
         string _INIRead = "";
         // TODO: (NOT SUPPORTED): On Error Resume Next
         string sRet = "";
-        sRet = String(255, Chr(0));
+        sRet = RepeatString(255, "\0");
         _INIRead = Left(sRet, GetPrivateProfileString(sSection, sKeyName, "", sRet, Len(sRet), sINIFileName));
         return _INIRead;
     }
@@ -48,7 +47,7 @@ static class modINI
             }
             else
             {
-                strBuffer = String(Len(strBuffer) * 2, 0);
+                strBuffer = RepeatString(Len(strBuffer) * 2, "0");
             }
             intLen = GetPrivateProfileSectionNames(strBuffer, Len(strBuffer), tFileName);
         }
@@ -74,7 +73,7 @@ static class modINI
             }
             else
             {
-                strBuffer = String(Len(strBuffer) * 2, 0);
+                strBuffer = RepeatString(Len(strBuffer) * 2, "0");
             }
             intLen = GetPrivateProfileSection(Section, strBuffer, Len(strBuffer), tFileName);
             if (intLen == 0) return _INISectionKeys;

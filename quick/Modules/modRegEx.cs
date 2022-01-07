@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using static Microsoft.VisualBasic.Interaction;
 using static VBExtension;
@@ -21,94 +22,114 @@ static class modRegEx
     public static bool RegExTest(string Src, string Find)
     {
         bool _RegExTest = false;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        RegEx.Pattern = Find;
-        _RegExTest = RegEx.test(Src);
+        try
+        {
+            RegEx.Pattern = Find;
+            _RegExTest = RegEx.test(Src);
+        }
+        catch (Exception e) { }
         return _RegExTest;
     }
     public static int RegExCount(string Src, string Find)
     {
         int _RegExCount = 0;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        RegEx.Pattern = Find;
-        RegEx.Global = true;
-        _RegExCount = RegEx.Execute(Src).Count;
+        try
+        {
+            RegEx.Pattern = Find;
+            RegEx.Global = true;
+            _RegExCount = RegEx.Execute(Src).Count;
+        }
+        catch (Exception e) { }
         return _RegExCount;
     }
     public static int RegExNPos(string Src, string Find, int N = 0)
     {
         int _RegExNPos = 0;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        dynamic RegM = null;
-        string tempStr = "";
-        string tempStr2 = "";
-        RegEx.Pattern = Find;
-        RegEx.Global = true;
-        _RegExNPos = RegEx.Execute(Src).Item(N).FirstIndex + 1;
+        try
+        {
+            dynamic RegM = null;
+            string tempStr = "";
+            string tempStr2 = "";
+            RegEx.Pattern = Find;
+            RegEx.Global = true;
+            _RegExNPos = RegEx.Execute(Src).Item(N).FirstIndex + 1;
+        }
+        catch (Exception e) { }
         return _RegExNPos;
     }
     public static string RegExNMatch(string Src, string Find, int N = 0)
     {
         string _RegExNMatch = "";
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        dynamic RegM = null;
-        string tempStr = "";
-        string tempStr2 = "";
-        RegEx.Pattern = Find;
-        RegEx.Global = true;
-        _RegExNMatch = RegEx.Execute(Src).Item(N).Value;
+        try
+        {
+            dynamic RegM = null;
+            string tempStr = "";
+            string tempStr2 = "";
+            RegEx.Pattern = Find;
+            RegEx.Global = true;
+            _RegExNMatch = RegEx.Execute(Src).Item(N).Value;
+        }
+        catch (Exception e) { }
         return _RegExNMatch;
     }
     public static string RegExReplace(string Src, string Find, string Repl)
     {
         string _RegExReplace = "";
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        dynamic RegM = null;
-        string tempStr = "";
-        string tempStr2 = "";
-        RegEx.Pattern = Find;
-        RegEx.Global = true;
-        _RegExReplace = RegEx.Replace(Src, Repl);
+        try
+        {
+            dynamic RegM = null;
+            string tempStr = "";
+            string tempStr2 = "";
+            RegEx.Pattern = Find;
+            RegEx.Global = true;
+            _RegExReplace = RegEx.Replace(Src, Repl);
+        }
+        catch (Exception e) { }
         return _RegExReplace;
     }
-    public static dynamic RegExSplit(string szStr, string szPattern)
+    public static List<string> RegExSplit(string szStr, string szPattern)
     {
-        dynamic _RegExSplit = null;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        dynamic oAl = null;
-        dynamic oRe = null;
-        dynamic oMatches = null;
-        oRe = RegEx;
-        oRe.Pattern = "^(.*)(" + szPattern + ")(.*)$";
-        oRe.IgnoreCase = true;
-        oRe.Global = true;
-        oAl = CreateObject("System.Collections.ArrayList");
-        while (true)
+        List<string> _RegExSplit = null;
+        try
         {
-            oMatches = oRe.Execute(szStr);
-            if (oMatches.Count > 0)
+            dynamic oAl = null;
+            dynamic oRe = null;
+            dynamic oMatches = null;
+            oRe = RegEx;
+            oRe.Pattern = "^(.*)(" + szPattern + ")(.*)$";
+            oRe.IgnoreCase = true;
+            oRe.Global = true;
+            oAl = CreateObject("System.Collections.ArrayList");
+            while (true)
             {
-                oAl.Add(oMatches(0).SubMatches(2));
-                szStr = oMatches(0).SubMatches(0);
+                oMatches = oRe.Execute(szStr);
+                if (oMatches.Count > 0)
+                {
+                    oAl.Add(oMatches(0).SubMatches(2));
+                    szStr = oMatches(0).SubMatches(0);
+                }
+                else
+                {
+                    oAl.Add(szStr);
+                    break;
+                }
             }
-            else
-            {
-                oAl.Add(szStr);
-                break;
-            }
+            oAl.Reverse();
+            _RegExSplit = oAl.ToArray;
         }
-        oAl.Reverse();
-        _RegExSplit = oAl.ToArray;
+        catch (Exception e) { }
         return _RegExSplit;
     }
     public static int RegExSplitCount(string szStr, string szPattern)
     {
         int _RegExSplitCount = 0;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        List<dynamic> T = new List<dynamic>();
-        T = RegExSplit(szStr, szPattern);
-        _RegExSplitCount = T.Count - 0 + 1;
+        try
+        {
+            List<string> T;
+            T = RegExSplit(szStr, szPattern);
+            _RegExSplitCount = T.Count - 0 + 1;
+        }
+        catch (Exception e) { }
         return _RegExSplitCount;
     }
-
 }

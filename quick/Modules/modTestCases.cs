@@ -37,12 +37,12 @@ static class modTestCases
         B = HasGit();
         B = modGit.HasGit();
         B = modGit.HasGit();
-        B = !HasGit;
+        //B = !HasGit;
         B = !HasGit();
         B = !modGit.HasGit();
         B = !modGit.HasGit();
         TestCallWithBooleanFunction(HasGit());
-        TestCallWithBooleanFunction(!HasGit);
+        //TestCallWithBooleanFunction(!HasGit);
         TestCallWithBooleanFunction(modGit.HasGit());
         TestCallWithBooleanFunction(!modGit.HasGit());
         TestCallWithBooleanFunction(HasGit());
@@ -51,12 +51,12 @@ static class modTestCases
         TestCallWithBooleanFunction(!modGit.HasGit());
         if (HasGit()) Console.WriteLine("");
         if (HasGit()) Console.WriteLine("");
-        if (modGit.HasGit()) Debug.Print();
-        if (modGit.HasGit()) Debug.Print();
-        if (!HasGit) Console.WriteLine("");
+        if (modGit.HasGit()) Console.WriteLine();
+        if (modGit.HasGit()) Console.WriteLine();
+        //if (!HasGit) Console.WriteLine("");
         if (!HasGit()) Console.WriteLine("");
-        if (!modGit.HasGit()) Debug.Print();
-        if (!modGit.HasGit()) Debug.Print();
+        if (!modGit.HasGit()) Console.WriteLine();
+        if (!modGit.HasGit()) Console.WriteLine();
     }
     public static bool TestCallWithBooleanFunction(bool B)
     {
@@ -68,13 +68,13 @@ static class modTestCases
     public static List<string> testFunctionWithPropertyInName()
     {
         List<string> _testFunctionWithPropertyInName = null;
-        _testFunctionWithPropertyInName = Array();
+        //_testFunctionWithPropertyInName = Array();
         return _testFunctionWithPropertyInName;
     }
     public static void TestPrivateLocalFunctionCall()
     {
         PrivateLocalFunctionCall();
-        Call(PrivateLocalFunctionCall());
+        PrivateLocalFunctionCall();
     }
     private static void PrivateLocalFunctionCall()
     {

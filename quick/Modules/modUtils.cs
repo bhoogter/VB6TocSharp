@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using VB2CS.Forms;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
-using static Microsoft.VisualBasic.Information;
 using static Microsoft.VisualBasic.Interaction;
 using static Microsoft.VisualBasic.Strings;
 using static Microsoft.VisualBasic.VBMath;
@@ -28,11 +27,7 @@ static class modUtils
     public const string STR_CHR_DIGIT = "1234567890"; // eol comment
                                                       // block comment
                                                       // again
-    public static bool IsInStr(string Src, string Find)
-    {
-        bool _IsInStr = false; _IsInStr = InStr(Src, Find) > 0; return _IsInStr;
-    }
-    // after
+                                                      // after
     public static bool IsNotInStr(string S, string Fnd)
     {
         bool _IsNotInStr = false; _IsNotInStr = !IsInStr(S, Fnd); return _IsNotInStr;
@@ -81,10 +76,12 @@ static class modUtils
     {
         bool _tLMatch = false; _tLMatch = Left(LTrim(Src), Len(tMatch)) == tMatch; return _tLMatch;
     }
+    public static int Px(string Twips) => Px(ValI(Twips));
     public static int Px(int Twips)
     {
         int _Px = 0; _Px = Twips / 14; return _Px;
     }
+    public static string Quote(int S) => Quote("" + S);
     public static string Quote(string S)
     {
         string _Quote = ""; _Quote = "\"" + S + "\""; return _Quote;
@@ -101,43 +98,19 @@ static class modUtils
     {
         string _DevelopmentFolder = ""; _DevelopmentFolder = AppContext.BaseDirectory + "\\"; return _DevelopmentFolder;
     }
-    public static bool IsIDE()
-    {
-        bool _IsIDE = false;
-        // IsIDE = False
-        // Exit Function
-        // works on a very simple princicple... debug statements don't get compiled...
-        // TODO: (NOT SUPPORTED): On Error GoTo IDEInUse
-        Console.WriteLine(1 / 0); // division by zero error
-        _IsIDE = false;
-        return _IsIDE;
-    IDEInUse:;
-        _IsIDE = true;
-        return _IsIDE;
-    }
-    public static bool IsIn(string S, ref List<dynamic> K)
-    {
-        bool _IsIn = false;
-        dynamic L = null;
-        foreach (var iterL in K)
-        {
-            L = iterL;
-            if (S == L) { _IsIn = true; return _IsIn; }
-        }
-        return _IsIn;
-    }
+    public static bool IsIDE() => false;
+    public static bool IsIn(string S, ref List<string> K) => K.Contains(S);
     public static bool WriteOut(string F, string S, string O = "")
     {
-        bool _WriteOut = false;
         if (!IsConverted(F, O))
         {
-            _WriteOut = WriteFile(OutputFolder(O) + F, S, true);
+            return WriteFile(OutputFolder(O) + F, S, true);
         }
         else
         {
             Console.WriteLine("Already converted: " + F);
+            return false;
         }
-        return _WriteOut;
     }
     public static bool IsConverted(string F, string O = "")
     {
@@ -187,13 +160,7 @@ static class modUtils
         _nlTrim = Str;
         return _nlTrim;
     }
-    public static string sSpace(int N)
-    {
-        string _sSpace = "";
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        _sSpace = Space(N);
-        return _sSpace;
-    }
+    public static string sSpace(int N) => Space(N);
     public static string nextBy(string Src, string Del = "\"", int Ind = 1, bool ProcessVBComments = false)
     {
         string _nextBy = "";
@@ -207,7 +174,7 @@ static class modUtils
         }
         else
         {
-            _nextBy = _nextBy(Mid(Src, L + Len(Del)), Del, Ind - 1);
+            _nextBy = nextBy(Mid(Src, L + Len(Del)), Del, Ind - 1);
         }
         return _nextBy;
     }
@@ -286,13 +253,16 @@ static class modUtils
         }
         else
         {
-            _nextByP = _nextByP(Mid(Src, Len(R) + Len(Del) + 1), Del, Ind - 1);
+            _nextByP = nextByP(Mid(Src, Len(R) + Len(Del) + 1), Del, Ind - 1);
         }
         return _nextByP;
     }
-    public static string NextByOp(string Src, int Ind = 1, ref string Op = "")
+
+    public static string NextByOp(string Src, int Ind = 1) => NextByOp(Src, Ind, out _);
+    public static string NextByOp(string Src, int Ind, out string Op)
     {
         string _NextByOp = "";
+        Op = "";
         string A = "";
         string S = "";
         string D = "";
@@ -360,7 +330,7 @@ static class modUtils
         }
         else
         {
-            _NextByOp = _NextByOp(Trim(Mid(Src, Len(P) + 3)), Ind - 1, Op);
+            _NextByOp = NextByOp(Trim(Mid(Src, Len(P) + 3)), Ind - 1, out Op);
         }
         return _NextByOp;
     }
@@ -442,73 +412,15 @@ static class modUtils
         }
         return _CountWords;
     }
-    public static dynamic ArrSlice(ref dynamic sourceArray, int fromIndex, int toIndex)
-    {
-        dynamic _ArrSlice = null;
-        int Idx = 0;
-        List<dynamic> tempList = new List<dynamic>();
-        if (!IsArray(sourceArray)) return _ArrSlice;
-        fromIndex = FitRange(0, fromIndex, sourceArray.Count);
-        toIndex = FitRange(fromIndex, toIndex, sourceArray.Count);
-        for (Idx = fromIndex; Idx <= toIndex; Idx += 1)
-        {
-            ArrAdd(ref tempList, ref sourceArray(Idx));
-        }
-        _ArrSlice = tempList;
-        return _ArrSlice;
-    }
-    public static void ArrAdd(ref List<dynamic> Arr, ref dynamic Item)
-    {
-        int X = 0;
-        // TODO: (NOT SUPPORTED): Err.Clear
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        X = Arr.Count;
-        if (Err().Number != 0)
-        {
-            Arr = new List<dynamic>() { Item };
-            return;
-        }
-        // TODO: (NOT SUPPORTED): ReDim Preserve Arr(UBound(Arr) + 1)
-        Arr[Arr.Count] = Item;
-    }
-    public static dynamic SubArr(dynamic sourceArray, int fromIndex, int copyLength)
-    {
-        dynamic _SubArr = null;
-        _SubArr = ArrSlice(ref sourceArray, fromIndex, fromIndex + copyLength - 1);
-        return _SubArr;
-    }
-    public static bool InRange(dynamic LBnd, dynamic CHK, dynamic UBnd, bool IncludeBounds = true)
-    {
-        bool _InRange = false;
-        // TODO: (NOT SUPPORTED): On Error Resume Next // because we're doing this as variants..
-        if (IncludeBounds)
-        {
-            _InRange = (CHK >= LBnd) && (CHK <= UBnd);
-        }
-        else
-        {
-            _InRange = (CHK > LBnd) && (CHK < UBnd);
-        }
-        return _InRange;
-    }
-    public static dynamic FitRange(dynamic LBnd, dynamic CHK, dynamic UBnd)
-    {
-        dynamic _FitRange = null;
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        if (CHK < LBnd)
-        {
-            _FitRange = LBnd;
-        }
-        else if (CHK > UBnd)
-        {
-            _FitRange = UBnd;
-        }
-        else
-        {
-            _FitRange = CHK;
-        }
-        return _FitRange;
-    }
+    public static dynamic ArrSlice(List<dynamic> sourceArray, int fromIndex, int toIndex) => sourceArray.GetRange(fromIndex, toIndex);
+
+    public static void ArrAdd(List<dynamic> Arr, dynamic Item) { Arr += Item; }
+
+    public static dynamic SubArr(dynamic sourceArray, int fromIndex, int copyLength) => ArrSlice(sourceArray, fromIndex, fromIndex + copyLength - 1);
+
+    public static bool InRange(dynamic LBnd, dynamic CHK, dynamic UBnd, bool IncludeBounds = true) =>
+        IncludeBounds ? (CHK >= LBnd) && (CHK <= UBnd) : (CHK > LBnd) && (CHK < UBnd);
+    public static dynamic FitRange(dynamic LBnd, dynamic CHK, dynamic UBnd) => CHK < LBnd ? LBnd : (CHK > UBnd ? UBnd : CHK);
     public static int CodeSectionLoc(string S)
     {
         int _CodeSectionLoc = 0;
@@ -582,39 +494,22 @@ static class modUtils
         if (!Found) return;
         frm.instance.Prg(Val, Max, Cap);
     }
-    public static string cVal(ref Collection Coll, string Key, string Def = "")
-    {
-        string _cVal = "";
-        // TODO: (NOT SUPPORTED): On Error Resume Next
-        _cVal = Def;
-        _cVal = Coll.Item(LCase(Key));
-        return _cVal;
-    }
-    public static string cValP(ref Collection Coll, string Key, string Def = "")
-    {
-        string _cValP = "";
-        _cValP = P(deQuote(cVal(ref Coll, Key, Def)));
-        return _cValP;
-    }
+    public static string cVal(Collection Coll, string Key, string Def = "") => Coll.Contains(Key) ? Coll.Item(Key) : Def;
+    public static string cValP(Collection Coll, string Key, string Def = "") => P(deQuote(cVal(Coll, Key, Def)));
     public static string P(string Str)
     {
         string _P = "";
         Str = Replace(Str, "&", "&amp;");
         Str = Replace(Str, "<", "&lt;");
         Str = Replace(Str, ">", "&gt;");
-        _P = Str;
         return _P;
     }
-    public static string ModuleName(string S)
+    public static string ModuleName(string S = "")
     {
-        string _ModuleName = "";
-        int J = 0;
-        int K = 0;
         string NameTag = "Attribute VB_Name = \"";
-        J = InStr(S, NameTag) + Len(NameTag);
-        K = InStr(J, S, "\"") - J;
-        _ModuleName = Mid(S, J, K);
-        return _ModuleName;
+        int J = InStr(S, NameTag) + Len(NameTag);
+        int K = InStr(J, S, "\"") - J;
+        return Mid(S, J, K);
     }
     public static bool IsInCode(string Src, int N)
     {
@@ -661,7 +556,7 @@ static class modUtils
     {
         int _Random = 0;
         Randomize();
-        _Random = ((Rnd() * Max) + 1);
+        _Random = ((int)((Rnd() * Max) + 1));
         return _Random;
     }
     public static string Stack(ref string Src, string Val = "##REM##", bool Peek = false)

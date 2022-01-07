@@ -70,7 +70,7 @@ static class modQuickConvert
         if (FileName == "") FileName = "prj.vbp";
         if (FileName == "forms")
         {
-            _ResolveSources = VBPForms(true);
+            _ResolveSources = VBPForms("true");
         }
         else if (FileName == "modules")
         {
@@ -122,10 +122,10 @@ static class modQuickConvert
             }
             else
             {
-                Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) == "cls", "x", true, "."); ;
+                //Debug.Print(Switch(Right(L, 3) == "frm", "o", Right(L, 3) == "cls", "x", true, "."));
             }
             X = X + 1;
-            if (X >= lintDotsPerRow) { X = 0; Debug.Print(); }
+            if (X >= lintDotsPerRow) { X = 0; }
             DoEvents();
         }
         Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now) + "s).");
@@ -134,7 +134,7 @@ static class modQuickConvert
     }
     public static CodeType CodeFileType(string File)
     {
-        CodeType _CodeFileType = null;
+        CodeType _CodeFileType = CodeType.CODE_MODULE;
         switch (Right(LCase(File), 4))
         {
             case ".bas":
@@ -444,7 +444,7 @@ static class modQuickConvert
                     }
                     else if (RegExTest(St, "^[ ]*(Dim|Private|Public|Const|Global|Static) "))
                     {
-                        NewLine = NewLine + ConvertDeclaration(St, IIf(CurrentFunctionName == "", DeclarationType.DECL_GLOBAL, DeclarationType.DECL_LOCAL), vCodeType);
+                        NewLine = NewLine + ConvertDeclaration(St, CurrentFunctionName == "" ? DeclarationType.DECL_GLOBAL : DeclarationType.DECL_LOCAL, vCodeType);
                     }
                     else
                     {
@@ -650,7 +650,7 @@ static class modQuickConvert
         Expression = Trim(Left(L, ixThen - 1));
         Expression = StripLeft(Expression, "If ");
         Expression = StripLeft(Expression, "ElseIf ");
-        _ConvertIf = (IsInStr(L, "ElseIf") == 0 ? "if" : "} else if");
+        _ConvertIf = InStr(L, "ElseIf") == 0 ? "if" : "} else if";
         _ConvertIf = _ConvertIf + "(" + ConvertExpression(Expression) + ")";
         if (!WithThen)
         {
@@ -1044,7 +1044,7 @@ static class modQuickConvert
             }
             if (InStr(ArgType, " * ") > 0)
             {
-                FixedLength = Val(Trim(Mid(ArgType, InStr(ArgType, " * ") + 3)));
+                FixedLength = ValI(Trim(Mid(ArgType, InStr(ArgType, " * ") + 3)));
                 ArgType = RemoveUntil(ref ArgType, " * ");
                 LineComment = LineComment + "TODO: (NOT SUPPORTED) Fixed Length String not supported: " + ArgName + "(" + FixedLength + ")";
             }
@@ -1365,7 +1365,7 @@ static class modQuickConvert
         _ConvertDeclare = _ConvertDeclare + IIf(isPrivate, "private ", "public ") + "static extern ";
         _ConvertDeclare = _ConvertDeclare + IIf(Ret == "", "void", ConvertArgType("return", Ret)) + " ";
         _ConvertDeclare = _ConvertDeclare + Name + "(";
-        _ConvertDeclare = _ConvertDeclare + ConvertDeclaration(Args, DeclarationType.DECL_EXTERN, true);
+        _ConvertDeclare = _ConvertDeclare + ConvertDeclaration(Args, DeclarationType.DECL_EXTERN, CodeType.CODE_MODULE);
         _ConvertDeclare = _ConvertDeclare + ");";
         return _ConvertDeclare;
     }
@@ -1596,7 +1596,7 @@ static class modQuickConvert
                 }
                 FunctionName = ExpandToken(FunctionName, true);
                 S = ExpandFunctionCall(FunctionName, FunctionArgs);
-                _ParseAndExpandExpression = _ParseAndExpandExpression(Src);
+                _ParseAndExpandExpression =ParseAndExpandExpression(Src);
                 _ParseAndExpandExpression = Replace(_ParseAndExpandExpression, Token, S);
                 // Debug.Print __S1 & S
                 return _ParseAndExpandExpression;
@@ -1612,9 +1612,9 @@ static class modQuickConvert
                 else
                 {
                     Y = InStr(X + 2, T, " ");
-                    S = ExpandToken(Left(T, X - 1)) + Mid(T, X, Y - X + 1) + _ParseAndExpandExpression(Mid(T, Y + 1));
+                    S = ExpandToken(Left(T, X - 1)) + Mid(T, X, Y - X + 1) + ParseAndExpandExpression(Mid(T, Y + 1));
                 }
-                _ParseAndExpandExpression = _ParseAndExpandExpression(Src);
+                _ParseAndExpandExpression = ParseAndExpandExpression(Src);
                 _ParseAndExpandExpression = Replace(_ParseAndExpandExpression, Token, "(" + S + ")");
                 // Debug.Print __S1 & S
                 return _ParseAndExpandExpression;
@@ -1631,7 +1631,7 @@ static class modQuickConvert
         else
         {
             Y = InStr(X + 2, Src, " ");
-            _ParseAndExpandExpression = _ParseAndExpandExpression(Left(Src, X - 1)) + Mid(Src, X, Y - X + 1) + _ParseAndExpandExpression(Mid(Src, Y + 1));
+            _ParseAndExpandExpression = ParseAndExpandExpression(Left(Src, X - 1)) + Mid(Src, X, Y - X + 1) + ParseAndExpandExpression(Mid(Src, Y + 1));
             // Debug.Print __S1 & S
             return _ParseAndExpandExpression;
         }
@@ -1705,7 +1705,7 @@ static class modQuickConvert
         {
             T = Left(T, Len(T) - 1);
         }
-        else if (InStr(T, "."))
+        else if (IsInStr(T, "."))
         {
             List<string> Parts = new List<string>();
             int I = 0;
@@ -1720,7 +1720,7 @@ static class modQuickConvert
                 Part = Parts[I];
                 IsLast = I == Parts.Count;
                 if (TOut != "") TOut = TOut + ".";
-                TOut = TOut + _ExpandToken(Part, WillAddParens, IsLast);
+                TOut = TOut + ExpandToken(Part, WillAddParens, IsLast);
             }
             T = TOut;
         }
@@ -1798,7 +1798,7 @@ static class modQuickConvert
                     }
                 }
             }
-            cValP(ref null, "", "");
+            cValP(null, "", "");
             _ProcessFunctionArgs = _ProcessFunctionArgs + ConvertExpression(Arg);
         }
         return _ProcessFunctionArgs;

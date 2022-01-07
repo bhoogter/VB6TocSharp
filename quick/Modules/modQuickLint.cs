@@ -1,7 +1,6 @@
 using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.DateAndTime;
 using static Microsoft.VisualBasic.FileSystem;
@@ -70,7 +69,7 @@ static class modQuickLint
         if (FileName == "") FileName = "prj.vbp";
         if (FileName == "forms")
         {
-            _ResolveSources = VBPForms(true);
+            _ResolveSources = VBPForms("true");
         }
         else if (FileName == "modules")
         {
@@ -121,7 +120,7 @@ static class modQuickLint
             L = iterL;
             string Result = "";
             Result = QuickLintFile(L, MaxErrors, AutoFix);
-            if (!Result == "")
+            if (Result != "")
             {
                 string S = "";
                 Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now) + "s).  To re-run for failing file, hit enter on the line below:");
@@ -131,10 +130,10 @@ static class modQuickLint
             }
             else
             {
-                Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) == "cls", "x", true, "."); ;
+                //Debug.Print(Switch(Right(L, 3) == "frm", "o", Right(L, 3) == "cls", "x", true, "."));
             }
             X = X + 1;
-            if (X >= lintDotsPerRow) { X = 0; Debug.Print(); }
+            if (X >= lintDotsPerRow) { X = 0; }
             DoEvents();
         }
         Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now) + "s).");
@@ -426,7 +425,7 @@ static class modQuickLint
                 Y = InStr(Y + 2, Line, Q);
             }
             if (Y == 0) break;
-            Line = Left(Line, X - 1) + String(Y - X + 1, "S") + Mid(Line, Y + 1);
+            Line = Left(Line, X - 1) + RepeatString(Y - X + 1, "S") + Mid(Line, Y + 1);
         }
         X = InStr(Line, A);
         if (X > 0) Line = RTrim(Left(Line, X - 1));
@@ -438,7 +437,7 @@ static class modQuickLint
         string eLine = "";
         if (InStr(UCase(ErrorIgnore), UCase(Typ)) > 0 || InStr(ErrorIgnore, TY_ALLTY) > 0) return;
         if (Len(Errors) != 0) Errors = Errors + vbCrLf;
-        if (InStr(Join(ErrorTypes(), ","), Typ) == 0)
+        if (InStr(Join(ErrorTypes().ToArray(), ","), Typ) == 0)
         {
             Errors = Errors + ErrorPrefix + "[" + TY_ERROR + "] Line " + Right(Space(5) + LineN, 5) + ": Unknown error type in linter (add to ErrorTypes): " + Typ;
         }
@@ -510,11 +509,11 @@ static class modQuickLint
         // TODO: (NOT SUPPORTED): On Error Resume Next
         string Value = "";
         Value = "";
-        Value = Options("Explicit");
+        Value = Options.Item("Explicit");
         if (Value != "") RecordError(ref Errors, ref ErrorCount, TY_EXPLI, 0, "Option Explicit not set on file");
         Value = "";
-        Value = Options("Compare Binary");
-        Value = Options("Compare Database");
+        Value = Options.Item("Compare Binary");
+        Value = Options.Item("Compare Database");
         if (Value != "") RecordError(ref Errors, ref ErrorCount, TY_COMPA, 0, "Use of Option Compare not recommended");
     }
     public static void TestArgName(ref string Errors, ref int ErrorCount, int LineN, string Name)
@@ -569,7 +568,7 @@ static class modQuickLint
         // TODO: (NOT SUPPORTED): On Error Resume Next
         InitWellKnownNames();
         _WellKnownName = "";
-        _WellKnownName = WellKnownNames(LCase(Str));
+        _WellKnownName = (string)WellKnownNames[LCase(Str)];
         if (_WellKnownName == "") _WellKnownName = Capitalize(Str);
         return _WellKnownName;
     }
@@ -840,7 +839,7 @@ static class modQuickLint
         int _GetFixCount = 0;
         // TODO: (NOT SUPPORTED): On Error Resume Next
         _GetFixCount = 0;
-        _GetFixCount = IIf(RestOfFile, AutofixFindRestOfFile, AutofixFind).Count;
+        _GetFixCount = (RestOfFile ? AutofixFindRestOfFile : AutofixFind).Count;
         return _GetFixCount;
     }
     public static string PerformAutofix(string Line)

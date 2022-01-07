@@ -977,4 +977,10 @@ public static class VBExtension
         }
         return null;
     }
+
+    // Comment out if not using ADODB
+    public static dynamic Field(this ADODB.Recordset R, String fName)
+    {
+        return R.Fields[fName].Value;
+    }
 }

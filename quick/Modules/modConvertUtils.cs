@@ -52,7 +52,7 @@ static class modConvertUtils
         }
         else
         {
-            _ReComment = Replace(Str, vbCrLf, C + vbCrLf, , 1); // Always leave on end of first line...
+            _ReComment = Replace(Str, vbCrLf, C + vbCrLf, 1 , 1); // Always leave on end of first line...
         }
         if (Left(LTrim(_ReComment), 2) == Pr) _ReComment = LTrim(_ReComment);
         return _ReComment;
@@ -97,7 +97,7 @@ static class modConvertUtils
                 K = Mid(S, A, B - A + 1);
                 mStrings.Add(K, Token);
                 S = Left(S, A - 1) + Token + Mid(S, B + 1);
-                _DeString = _DeString(S);
+                _DeString = DeString(S);
                 return _DeString;
             }
         }

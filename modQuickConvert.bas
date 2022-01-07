@@ -517,13 +517,13 @@ Public Function ConvertIf(ByVal L As String) As String
     If ixElse > 0 Then
       MultiStatement = InStr(cElse, ":") > 0
       If MultiStatement Then
-        ConvertIf = ConvertIf & " { "
+        ConvertIf = ConvertIf & " else { "
         For Each St In Split(cElse, ":")
           ConvertIf = ConvertIf & ConvertStatement(Trim(St))
         Next
         ConvertIf = ConvertIf & " }"
       Else
-        ConvertIf = ConvertIf & ConvertStatement(cElse)
+        ConvertIf = ConvertIf & " else " & ConvertStatement(cElse)
       End If
     End If
   End If
@@ -1138,7 +1138,7 @@ Public Function ConvertStatement(ByVal L As String) As String
     If CurrentFunctionReturnValue <> "" Then ConvertStatement = ConvertStatement & " " & CurrentFunctionReturnValue
   ElseIf RegExTest(L, "^[ ]*Exit (Do|Loop|For|While)$") Then
     ConvertStatement = ConvertStatement & "break"
-  ElseIf InStr(L, " = ") > 0 Then
+  ElseIf RegExTest(L, "^[ ]*[^ ]+ = ") Then
     Dim IX As Long, AssignmentTarget As String, AssignmentValue As String
     IX = InStr(L, " = ")
     AssignmentTarget = Trim(Left(L, IX - 1))
