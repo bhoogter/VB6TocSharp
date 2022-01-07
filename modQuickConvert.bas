@@ -703,7 +703,7 @@ Public Function ConvertProperty(ByVal L As String, ByVal FullContents As String,
   ConvertProperty = ConvertProperty & PropertyType & " " & Name & "{ " & vbCrLf
   If GetContents <> "" Then
     ConvertProperty = ConvertProperty & "get {" & vbCrLf
-    ConvertProperty = ConvertProperty & PropertyType & " " & CurrentFunctionReturnValue & ";" & vbCrLf
+    ConvertProperty = ConvertProperty & PropertyType & " " & CurrentFunctionReturnValue & " = default(" & PropertyType & ");" & vbCrLf
     ConvertProperty = ConvertProperty & GetContents
     ConvertProperty = ConvertProperty & "return " & CurrentFunctionReturnValue & ";" & vbCrLf
     ConvertProperty = ConvertProperty & "}" & vbCrLf
@@ -741,6 +741,9 @@ Public Function FindPropertyBody(ByVal FullContents As String, ByVal Typ As Stri
   End If
   Do While StartsWith(FindPropertyBody, vbCrLf): FindPropertyBody = Mid(FindPropertyBody, 3): Loop
   Do While Right(FindPropertyBody, 2) = vbCrLf: FindPropertyBody = Left(FindPropertyBody, Len(FindPropertyBody) - 2): Loop
+
+  If StartsWith(FindPropertyBody, ":") Then FindPropertyBody = Trim(Mid(FindPropertyBody, 2))
+  If Right(FindPropertyBody, 1) = ":" Then FindPropertyBody = Trim(Left(FindPropertyBody, Len(FindPropertyBody) - 1))
 End Function
 
 Public Function ConvertDeclaration(ByVal L As String, ByVal declType As DeclarationType, ByVal vCodeType As CodeType) As String

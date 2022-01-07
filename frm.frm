@@ -22,6 +22,7 @@ Begin VB.Form frm
          Left            =   2648
          TabIndex        =   17
          Top             =   1080
+         Value           =   -1  'True
          Width           =   615
       End
       Begin VB.OptionButton optVersion 
@@ -31,7 +32,6 @@ Begin VB.Form frm
          Left            =   1928
          TabIndex        =   16
          Top             =   1080
-         Value           =   -1  'True
          Width           =   615
       End
       Begin VB.CommandButton cmdSupport 
