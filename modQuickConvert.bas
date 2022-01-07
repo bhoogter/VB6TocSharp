@@ -1138,7 +1138,7 @@ Public Function ConvertStatement(ByVal L As String) As String
     If CurrentFunctionReturnValue <> "" Then ConvertStatement = ConvertStatement & " " & CurrentFunctionReturnValue
   ElseIf RegExTest(L, "^[ ]*Exit (Do|Loop|For|While)$") Then
     ConvertStatement = ConvertStatement & "break"
-  ElseIf InStr(L, " = ") > 0 Then
+  ElseIf RegExTest(L, "^[ ]*[^ ]+ = ") Then
     Dim IX As Long, AssignmentTarget As String, AssignmentValue As String
     IX = InStr(L, " = ")
     AssignmentTarget = Trim(Left(L, IX - 1))
