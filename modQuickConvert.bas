@@ -915,7 +915,7 @@ Public Function ConvertArgType(ByVal Name As String, ByVal Typ As String) As Str
     Case "Date"
       ConvertArgType = "DateTime"
     Case "Double", "Float", "Single"
-      ConvertArgType = "double"
+      ConvertArgType = "decimal"
     Case "String":
       ConvertArgType = "string"
     Case "Boolean"
@@ -1315,11 +1315,12 @@ Public Function ExpandToken(ByVal T As String, Optional ByVal WillAddParens As B
     T = FormControlRepl(T, ModuleName)
   ElseIf modRefScan.IsEnumRef(T) Then
     T = modRefScan.EnumRefRepl(T)
-  ElseIf Left(T, 2) = "&H" Then
+  ElseIf Left(T, 2) = "&H" Then  ' hex number
     T = "0x" & Mid(T, 3)
     If Right(T, 1) = "&" Then T = Left(T, Len(T) - 1)
-  ElseIf RegExTest(T, "^[0-9.-]+&$") Then
-    T = Left(T, Len(T) - 1)
+  ElseIf RegExTest(T, "^[0-9.-]+[%&@!#]?$") Then ' plain number.  Maybe:  negative, decimals, or typed
+    If RegExTest(T, "^[0-9.-]+[%&@!#]$") Then T = Left(T, Len(T) - 1)
+    If InStr(T, ".") Then T = T & "m"
   ElseIf InStr(T, ".") Then
     Dim Parts() As String, I As Long, Part As String, IsLast As Boolean
     Dim TOut As String

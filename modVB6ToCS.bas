@@ -4,7 +4,7 @@ Option Explicit
 Public Function ConvertDefaultDefault(ByVal DType As String) As String
   Select Case DType
     Case "Integer", "Long", "Double", "Currency", "Byte", "Single": ConvertDefaultDefault = 0
-    Case "Date":      ConvertDefaultDefault = "DateTime.MinValue"
+    Case "Date":      ConvertDefaultDefault = "default(DateTime)"
     Case "String":    ConvertDefaultDefault = """"""
     Case "Boolean":   ConvertDefaultDefault = "false"
     Case Else:        ConvertDefaultDefault = "null"
