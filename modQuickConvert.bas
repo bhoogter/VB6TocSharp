@@ -774,7 +774,7 @@ Public Function ConvertDeclaration(ByVal L As String, ByVal declType As Declarat
 
   Dim Item As Variant, LL As String
   For Each Item In Split(L, ", ")
-    Dim IX As Long, ArgName As String, ArgType As String, ArgDefault As String, IsArray As Boolean
+    Dim IX As Long, ArgName As String, ArgType As String, ArgDefault As String, IsArray As Boolean, IsReferencableType As Boolean
     Dim ArgTargetType As String
     Dim StandardEvent As Boolean
     If ConvertDeclaration <> "" And declType <> DECL_SIGNATURE And declType <> DECL_EXTERN Then ConvertDeclaration = ConvertDeclaration & vbCrLf
@@ -815,6 +815,8 @@ Public Function ConvertDeclaration(ByVal L As String, ByVal declType As Declarat
       LineComment = LineComment & "TODO: (NOT SUPPORTED) Fixed Length String not supported: " & ArgName & "(" & FixedLength & ")"
     End If
 
+    ArgTargetType = ConvertArgType(ArgName, ArgType)
+    
     ArgName = LL
     If Right(ArgName, 2) = "()" Then
       IsArray = True
@@ -826,6 +828,8 @@ Public Function ConvertDeclaration(ByVal L As String, ByVal declType As Declarat
     Else
       IsArray = False
     End If
+    
+    IsReferencableType = ArgTargetType = "Recordset" Or ArgTargetType = "Collection"
     
     ArgTargetType = ConvertArgType(ArgName, ArgType)
     
@@ -858,7 +862,7 @@ Public Function ConvertDeclaration(ByVal L As String, ByVal declType As Declarat
           ConvertDeclaration = ConvertDeclaration & " = " & ArgTypeDefault(ArgTargetType, IsArray, IsNewable) ' VB6 always initializes variables on declaration
         End If
         ConvertDeclaration = ConvertDeclaration & ";"
-        If IsArray Then CurrentFunctionArrays = CurrentFunctionArrays & "[" & ArgName & "]"
+        If IsArray Or IsReferencableType Then CurrentFunctionArrays = CurrentFunctionArrays & "[" & ArgName & "]"
         CurrentFunctionArgs = CurrentFunctionArgs & "[" & ArgName & "]"
       Case DECL_SIGNATURE ' sig def
         If ConvertDeclaration <> "" Then ConvertDeclaration = ConvertDeclaration & ", "
@@ -866,7 +870,7 @@ Public Function ConvertDeclaration(ByVal L As String, ByVal declType As Declarat
         ConvertDeclaration = ConvertDeclaration & IIf(IsArray, "List<" & ArgTargetType & ">", ArgTargetType) & " "
         ConvertDeclaration = ConvertDeclaration & ArgName
         If ArgDefault <> "" Then ConvertDeclaration = ConvertDeclaration & " = " & ConvertExpression(ArgDefault) ' default on method sig means optional param
-        If IsArray Then CurrentFunctionArrays = CurrentFunctionArrays & "[" & ArgName & "]"
+        If IsArray Or IsReferencableType Then CurrentFunctionArrays = CurrentFunctionArrays & "[" & ArgName & "]"
         CurrentFunctionArgs = CurrentFunctionArgs & "[" & ArgName & "]"
       Case DECL_TYPE
         ConvertDeclaration = ConvertDeclaration & "public " & ArgTargetType & " " & ArgName & ";"
