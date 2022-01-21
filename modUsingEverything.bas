@@ -87,12 +87,12 @@ Public Function UsingEverything(Optional ByVal PackageName As String = "") As St
         E = E & N & "using static " & AssemblyName & ".Forms." & Name & ";"
       End If
     Next
-'    For Each L In Split(VBPClasses(vbpFile), vbCrLf)  ' controls?
-'      If L <> "" Then
-'        Name = ModuleName(ReadEntireFile(Path & L))
-'        E = E & N & "using " & PackagePrefix & Name & ";"
-'      End If
-'    Next
+    For Each L In Split(VBPClasses(vbpFile), vbCrLf)
+      If L <> "" Then
+        Name = ModuleName(ReadEntireFile(Path & L))
+        E = E & N & "using static " & AssemblyName & ".Classes." & Name & ";"
+      End If
+    Next
     Everything = E
   End If
   

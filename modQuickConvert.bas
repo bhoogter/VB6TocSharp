@@ -85,7 +85,7 @@ Public Function QuickConvertFiles(ByVal List As String) As String
       QuickConvertFiles = S
       Exit Function
     Else
-      Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) = "cls", "x", True, ".");
+      Debug.Print Switch(Right(L, 3) = "frm", "o", Right(L, 3) = "cls", "x", Right(L, 3) = "ctl", "+", True, ".");
     End If
     X = X + 1
     If X >= lintDotsPerRow Then X = 0: Debug.Print

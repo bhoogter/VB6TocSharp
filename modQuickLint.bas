@@ -89,6 +89,7 @@ Public Function QuickLintFiles(ByVal List As String, Optional ByVal MaxErrors As
   
   For Each L In Split(List, vbCrLf)
     Dim Result As String
+    If Trim(L) = "" Then GoTo NextFile
     Result = QuickLintFile(L, MaxErrors, AutoFix)
     If Not Result = "" Then
       Dim S As String
@@ -101,6 +102,7 @@ Public Function QuickLintFiles(ByVal List As String, Optional ByVal MaxErrors As
     End If
     X = X + 1
     If X >= lintDotsPerRow Then X = 0: Debug.Print
+NextFile:
     DoEvents
   Next
   Debug.Print vbCrLf & "Done (" & DateDiff("s", StartTime, Now) & "s)."
@@ -111,7 +113,11 @@ Public Function QuickLintFile(ByVal File As String, Optional ByVal MaxErrors As 
   If InStr(File, "\") = 0 Then File = App.Path & "\" & File
   Dim fName As String, Contents As String, GivenName As String, CheckName As String
   fName = Mid(File, InStrRev(File, "\") + 1)
-  CheckName = Replace(Replace(Replace(fName, ".bas", ""), ".cls", ""), ".frm", "")
+  CheckName = fName
+  CheckName = Replace(CheckName, ".bas", "")
+  CheckName = Replace(CheckName, ".frm", "")
+  CheckName = Replace(CheckName, ".cls", "")
+  CheckName = Replace(CheckName, ".ctl", "")
   ErrorPrefix = Right(Space(18) & fName, 18) & " "
   Contents = ReadEntireFile(File)
   GivenName = RegExNMatch(Contents, "Attribute VB_Name = ""([^""]+)""", 0)
@@ -126,7 +132,7 @@ End Function
 Public Function QuickLintContents(ByVal Contents As String, Optional ByVal MaxErrors As Long = MAX_ERRORS_DEFAULT, Optional ByVal AutoFix As String = "") As String
   Dim Lines() As String, ActualLine As Variant, LL As String, L As String
 On Error GoTo LintError
-  ErrorIgnore = DISABLED_LINT_TYPES
+  DisableLintType DISABLED_LINT_TYPES, True
   Lines = Split(Replace(Contents, vbCr, ""), vbLf)
   Erase AutofixFind
   Erase AutofixRepl
@@ -207,6 +213,8 @@ On Error GoTo LintError
     Dim LineIndent As Long
     LineIndent = 0
     Do While Mid(RTrim(L), LineIndent + 1, 1) = S: LineIndent = LineIndent + 1: Loop
+    
+'    If LineN = 210 Then Stop
     TestIndent Errors, ErrorCount, LineN, L, LineIndent, IIf(Not RegExTest(L, "^[ ]*Case "), Indent, Indent - Idnt)
     
     Dim Statements() As String, SS As Variant, St As String
@@ -219,7 +227,17 @@ On Error GoTo LintError
       ElseIf RegExTest(St, "^[ ]*(End (If|Function|Sub|Property)|Loop|Loop .*|Enum|Type|Select)$") Then
         If Not UnindentedAlready Then Indent = Indent - Idnt
       ElseIf RegExTest(St, "^[ ]*If ") Then
-        If Not RegExTest(St, "\bThen ") Then Indent = Indent + Idnt
+        If Not RegExTest(St, "\bThen ") Then
+          Indent = Indent + Idnt
+        Else
+          Dim IfStatementBody As String
+          IfStatementBody = Mid(L, InStr(L, " Then "))
+          If RegExTest(IfStatementBody, "\b(While |For )\b") Then
+            RecordError Errors, ErrorCount, TY_STYLE, LineN, "Place For/While on separate line from If.  Indent check disabled.", TY_INDNT
+          Else
+            TestCodeLine Errors, ErrorCount, LineN, IfStatementBody
+          End If
+        End If
       ElseIf RegExTest(St, "^[ ]*For ") Then
         Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*Next$") Then
@@ -244,7 +262,7 @@ On Error GoTo LintError
       ElseIf RegExTest(St, "^[ ]*Select Case ") Then
         Indent = Indent + Idnt + Idnt
       ElseIf RegExTest(St, "^[ ]*With ") Then
-        RecordError Errors, ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists."
+        RecordError Errors, ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists.  Indent check disabled.", TY_INDNT
       ElseIf RegExTest(St, "^[ ]*(Private |Public )?Declare (Function |Sub )") Then
         ' External Api
       ElseIf RegExTest(St, "^((Private|Public|Friend) )?Function ") Then
@@ -289,8 +307,9 @@ NextLineWithoutRecord:
   QuickLintContents = Errors
   Exit Function
 LintError:
-  RecordError Errors, ErrorCount, TY_ERROR, 0, "Linter Error [" & Err.Number & "]: " & Err.Description
+  RecordError Errors, ErrorCount, TY_ERROR, 0, "Linter Error [" & Err.Number & "]: " & Err.Description & ".  Actual Line [" & LineN & "]: " & ActualLine
   QuickLintContents = Errors
+  Resume Next
 End Function
 
 Private Function ReadEntireFile(ByVal tFileName As String) As String
@@ -325,9 +344,9 @@ Public Function CleanLine(ByVal Line As String) As String
   CleanLine = Line
 End Function
   
-Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Typ As String, ByVal LineN As Long, ByVal Error As String)
+Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Typ As String, ByVal LineN As Long, ByVal Error As String, Optional ByVal DisableLintOnError As String = "")
   Dim eLine As String
-  If InStr(UCase(ErrorIgnore), UCase(Typ)) > 0 Or InStr(ErrorIgnore, TY_ALLTY) > 0 Then Exit Sub
+  If IsLintTypeDisabled(Typ) Then Exit Sub
 
   If Len(Errors) <> 0 Then Errors = Errors & vbCrLf
   If InStr(Join(ErrorTypes, ","), Typ) = 0 Then
@@ -340,6 +359,8 @@ Public Sub RecordError(ByRef Errors As String, ByRef ErrorCount As Long, ByVal T
     Errors = Errors & eLine
     ErrorCount = ErrorCount + 1
   End If
+  
+  If DisableLintOnError <> "" Then DisableLintType DisableLintOnError
 End Sub
 
 Public Function StartsWith(ByVal L As String, ByVal Find As String) As Boolean
@@ -362,9 +383,11 @@ Public Sub TestIndent(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Li
   If RegExTest(L, "#(If|End If|Else|Const)") Then Exit Sub
   If StartsWith(L, "Debug.") Then Exit Sub
     
-  If LineIndent <> ExpectedIndent Then
-    RecordError Errors, ErrorCount, TY_INDNT, LineN, "Incorrect Indent -- expected " & ExpectedIndent & ", got " & LineIndent
-    AddFix TY_INDNT, "^[ ]*", Space(ExpectedIndent)
+  If Not IsLintTypeDisabled(TY_INDNT) Then
+    If LineIndent <> ExpectedIndent Then
+      RecordError Errors, ErrorCount, TY_INDNT, LineN, "Incorrect Indent -- expected " & ExpectedIndent & ", got " & LineIndent
+      AddFix TY_INDNT, "^[ ]*", Space(ExpectedIndent)
+    End If
   End If
 End Sub
 
@@ -381,9 +404,28 @@ Public Sub TestLintControl(ByVal L As String)
   Dim LL As Variant
   If InStr(L, LintKey) = 0 Then Exit Sub
   Dim Match As String, Typ As String
-  Match = RegExNMatch(L, LintKey & "(-.....)?", 0)
+  Match = RegExNMatch(L, LintKey & "(-.....)?$", 0)
+  If Match = "" Then Exit Sub
   Typ = IIf(Match = LintKey, TY_ALLTY, Replace(Match, LintKey & "-", ""))
-  ErrorIgnore = ErrorIgnore & "," & Typ
+  DisableLintType Typ
+End Sub
+
+Public Function IsLintTypeDisabled(ByVal Typ As String) As Boolean
+  IsLintTypeDisabled = InStr(UCase(ErrorIgnore), UCase(Typ)) > 0 Or InStr(ErrorIgnore, TY_ALLTY) > 0
+End Function
+
+Public Sub DisableLintType(ByVal Typ As String, Optional ByVal Reset As Boolean = False)
+  If Reset Then ErrorIgnore = ""
+  If Typ = "" Then Exit Sub
+  If IsNotInStr(Typ, ",") Then
+    If IsLintTypeDisabled(Typ) Then Exit Sub
+    ErrorIgnore = ErrorIgnore & "," & Typ
+  Else
+    Dim L As Variant
+    For Each L In Split(Typ, ",")
+      DisableLintType L
+    Next
+  End If
 End Sub
 
 Public Sub TestModuleOptions(ByRef Errors As String, ByRef ErrorCount As Long, ByVal Options As Collection)
@@ -619,6 +661,7 @@ End Sub
 Public Sub TestDefaultControlNames(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal Contents As String)
   Dim vTypes() As Variant, vType As Variant
   Dim Matcher As String, Results As String, N As Long, I As Long
+  If IsInStr(Contents, "@NO-LINT-DFCTL") Then Exit Sub
   vTypes = Array("CheckBox", "Command", "Option", "Frame", "Label", "TextBox", "RichTextBox", "RichTextBoxNew", "ComboBox", "ListBox", "Timer", "UpDown", "HScrollBar", "Image", "Picture", "MSFlexGrid", "DBGrid", "Line", "Shape", "DTPicker")
   
   For Each vType In vTypes
@@ -674,7 +717,7 @@ End Function
 
 Public Function PerformAutofix(ByVal Line As String) As String
   Dim I As Long, N As Long
-    Dim Find As String, Repl As String
+  Dim Find As String, Repl As String
   N = GetFixCount(False)
   If N > 0 Then
     For I = LBound(AutofixFind) To UBound(AutofixFind)

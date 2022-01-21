@@ -26,6 +26,9 @@ Public Function ScanRefs() As Long
 On Error Resume Next
   OutRes = ""
   ScanRefs = 0
+  
+  OutRes = OutRes & ExtensionRefs()
+  
   For Each L In Split(VBPModules(vbpFile), vbCrLf)
     If L = "" Then GoTo SkipMod
     LL = Replace(L, ".bas", "")
@@ -55,6 +58,23 @@ SkipForm:
   RefList KillRef:=True
   WriteFile RefList, OutRes
   OutRes = ""
+End Function
+
+Private Function ExtensionRefs() As String
+  Dim OutRes As String
+'    public enum AlignConstants { vbAlignNone = 0, vbAlignTop = 1, vbAlignBottom = 2, vbAlignLeft = 3, vbAlignRight = 4, vbLeftJustify = 5, vbRightJustify = 6, vbCenter = 7 }
+  OutRes = OutRes & vbCrLf & "VBConstants:vbAlignNone:Enum:AlignConstants.vbAlignNone"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbAlignTop:Enum:AlignConstants.vbAlignTop"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbAlignBottom:Enum:AlignConstants.vbAlignBottom"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbAlignLeft:Enum:AlignConstants.vbAlignLeft"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbAlignRight:Enum:AlignConstants.vbAlignRight"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbLeftJustify:Enum:AlignConstants.vbLeftJustify"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbLeftJustify:Enum:AlignConstants.vbLeftJustify"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbRightJustify:Enum:AlignConstants.vbRightJustify"
+  OutRes = OutRes & vbCrLf & "VBConstants:vbCenter:Enum:AlignConstants.vbCenter"
+
+'    public enum AlignmentConstants : byte { vbLeftJustify = 0, vbRightJustify = 1, vbCenter = 2 }
+'  Can't really represent these..  The names conflict with above.
 End Function
 
 Private Function ScanRefsFile(ByVal FN As String) As Long

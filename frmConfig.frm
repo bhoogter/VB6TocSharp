@@ -111,6 +111,13 @@ Private Sub cmdOK_Click()
   Unload Me
 End Sub
 
+Private Sub fraConfig_DblClick()
+  If MsgBox("Reset to default?", vbOKCancel, "Config Reset") = vbCancel Then Exit Sub
+  txtVBPFile = App.Path & "\prj.vbp"
+  txtOutput = App.Path & "\quick"
+  txtAssemblyName = "VB2CS"
+End Sub
+
 Private Sub txtOutput_Validate(ByRef Cancel As Boolean)
   If Dir(txtOutput, vbDirectory) = "" Then
     MsgBox "Output folder does not exist.  Please create to prevent errors."
