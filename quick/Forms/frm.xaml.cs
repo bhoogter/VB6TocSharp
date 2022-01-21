@@ -27,19 +27,15 @@ namespace VB2CS.Forms
 
         public List<RadioButton> optVersion { get => VBExtension.controlArray<RadioButton>(this, "optVersion"); }
 
+        // Main form
         public int pMax = 0;
         public string ConverterVersion
         {
             get
             {
-                string _ConverterVersion;
-                int I = 0;
-                for (I = optVersion.LBound(); I <= optVersion.UBound(); I += 1)
-                {
-                    if (optVersion[I].IsChecked==true) { _ConverterVersion = optVersion[I].Content.ToString(); return _ConverterVersion; }
-                }
-                _ConverterVersion = CONVERTER_VERSION_1;
-                return _ConverterVersion;
+                for (int I = 0; I < optVersion.Count; I += 1)
+                    if (optVersion[I].IsChecked == true) return optVersion[I].Content.ToString();
+                return CONVERTER_VERSION_1;
             }
         }
 
@@ -146,9 +142,9 @@ namespace VB2CS.Forms
             // TODO: (NOT SUPPORTED): On Error Resume Next
             if (Max >= 0) pMax = Max;
             lblPrg.Content = (_Prg == "#" ? "" : Cap);
-            //shpPrg.Width = Val / pMax * 2415;
-            //shpPrg.Visibility = Val >= 0;
-            //lblPrg.Visibility = shpPrg.Visibility;
+            shpPrg.Width = Val / pMax * 2415;
+            shpPrg.Visibility = Val >= 0;
+            lblPrg.Visibility = shpPrg.Visibility;
             return _Prg;
         }
         private void cmdLint_Click(object sender, RoutedEventArgs e) { cmdLint_Click(); }

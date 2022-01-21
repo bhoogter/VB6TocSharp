@@ -9,12 +9,14 @@ using static VBExtension;
 
 static class modConvertUtils
 {
+    // Basic conversion utilities
     public static string EOLComment = "";
     public static Collection mStrings = null;
     public static int nStringCnt = 0;
     public const string DeStringToken_Base1 = "STRING_";
     public const string DeStringToken_Base2 = "TOKEN_";
     public const string DeStringToken_Base = DeStringToken_Base1 + DeStringToken_Base2;
+    // remove any comment from line
     public static string DeComment(string Str, bool Discard = false)
     {
         string _DeComment = "";
@@ -37,6 +39,7 @@ static class modConvertUtils
         _DeComment = RTrim(Left(Str, A - 1));
         return _DeComment;
     }
+    // replace comments on line
     public static string ReComment(string Str, bool KeepVBComments = false)
     {
         string _ReComment = "";
@@ -52,22 +55,25 @@ static class modConvertUtils
         }
         else
         {
-            _ReComment = Replace(Str, vbCrLf, C + vbCrLf, 1 , 1); // Always leave on end of first line...
+            _ReComment = Replace(Str, vbCrLf, C + vbCrLf,1 , 1); // Always leave on end of first line...
         }
         if (Left(LTrim(_ReComment), 2) == Pr) _ReComment = LTrim(_ReComment);
         return _ReComment;
     }
+    // initialize de stringing
     public static void InitDeString()
     {
         mStrings = new Collection();
         nStringCnt = 0;
     }
+    // token for destringing
     private static string DeStringToken(int N)
     {
         string _DeStringToken = "";
         _DeStringToken = DeStringToken_Base + Format(N, "00000");
         return _DeStringToken;
     }
+    // destring a line.  destringing before
     public static string DeString(string S)
     {
         string _DeString = "";
@@ -113,7 +119,7 @@ static class modConvertUtils
         for (I = 1; I <= nStringCnt; I += 1)
         {
             T = DeStringToken(I);
-            V = mStrings.Item(T);
+            V = (string)mStrings[T];
             if (V != "" && doConvertString)
             {
                 if (Left(V, 1) == "\"" && Right(V, 1) == "\"")

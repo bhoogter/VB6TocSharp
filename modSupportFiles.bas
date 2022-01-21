@@ -1,6 +1,9 @@
 Attribute VB_Name = "modSupportFiles"
 Option Explicit
 
+' creates necessary support files for project
+
+' Creates all support files
 Public Function CreateProjectSupportFiles() As Boolean
   Dim S As String, F As String
   S = ApplicationXAML()
@@ -26,6 +29,7 @@ Public Function CreateProjectSupportFiles() As Boolean
   GeneratePropertiesFiles
 End Function
 
+' Generates all properties file.
 Public Function GeneratePropertiesFiles() As Boolean
   Dim S As String
   S = OutputFolder()
@@ -42,6 +46,7 @@ Public Function GeneratePropertiesFiles() As Boolean
   ResourcesResxFile
 End Function
 
+' Creates application XAML file
 Public Function ApplicationXAML() As String
   Dim R As String, M As String, N As String
   R = "": M = "": N = vbCrLf
@@ -59,7 +64,7 @@ Public Function ApplicationXAML() As String
 End Function
 
 
-
+' Creates main project file
 Public Function CreateProjectFile(ByVal vbpFile As String) As String
   Dim S As String, M As String, N As String
   Dim L As Variant
@@ -204,14 +209,17 @@ SkipClass:
   WriteOut ChgExt(ProjFileName(vbpFile), ".csproj"), S
 End Function
 
+' returns the contents VB Extension class file.  Actual file is in app folder.
 Public Function VBExtensionClass() As String
   VBExtensionClass = ReadEntireFile(App.Path & "\\VBExtension.cs")
 End Function
 
+' returns the contents VB Constants class file.  Actual file is in app folder.
 Public Function VBAConstantsClass() As String
   VBAConstantsClass = ReadEntireFile(App.Path & "\\VBConstants.cs")
 End Function
 
+' Returns app config file contents
 Public Function AppConfigFile() As String
   Dim R As String, M As String, N As String
   R = "": M = "": N = vbCrLf

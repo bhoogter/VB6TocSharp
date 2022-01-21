@@ -9,6 +9,7 @@ using static modUtils;
 
 static class modConfig
 {
+    // project config.  Handles reading/writing INI file, etc, and access to those values.
     public const int SpIndent = 2;
     public const string DefaultDataType = "dynamic";
     public const string PackagePrefix = "";
@@ -28,7 +29,7 @@ static class modConfig
     {
         get
         {
-            string _vbpFile;
+            string _vbpFile = default(string);
             LoadSettings();
             if (mVBPFile == "") mVBPFile = def_vbpFile;
             _vbpFile = mVBPFile;
@@ -40,7 +41,7 @@ static class modConfig
     {
         get
         {
-            string _vbpPath;
+            string _vbpPath = default(string);
             _vbpPath = FilePath(vbpFile);
             return _vbpPath;
         }
@@ -50,7 +51,7 @@ static class modConfig
     {
         get
         {
-            string _INIFile;
+            string _INIFile = default(string);
             _INIFile = AppContext.BaseDirectory + "\\VB6toCS.INI";
             return _INIFile;
         }

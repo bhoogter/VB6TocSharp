@@ -1,6 +1,8 @@
 Attribute VB_Name = "frmTest"
 Option Explicit
 
+' various test cases
+
 
 Public Function TestCase() As String
   Dim A As String, N As String, M As String

@@ -10,6 +10,13 @@ using static modUtils;
 
 static class modGit
 {
+    // Module to provide 'git' access form Immediate window.
+    // Usage:  Type something like:  git __S1
+    // Note:  `git` is a function.  Everything after that is passed as a single string.  To put quotes in that, double them.  e.g.
+    // git __S1
+    // Also note that you cannot do interactive git commands, such as `git commit -p`
+    // For simple commands, such as status and push, the constants below allow the general syntax:  `git push`, `git status`.  Just dont be
+    // confused and think this is a terminal.  It's still just a VB6 function running, and it only takes VB6 arguments.
     public const string Status = "status ";
     public const string St = "status ";
     public const string Commit = "commit -m ";

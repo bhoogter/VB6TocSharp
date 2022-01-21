@@ -8,11 +8,12 @@ using static modUtils;
 
 
 
-
 static class modUsingEverything
 {
+    // Provide a mechanism to add a using for everything pertinent to every CS file.
     public static string Everything = "";
     public const string VB6Compat = "Microsoft.VisualBasic.Compatibility.VB6";
+    // Returns preamble for every CS file generated.
     public static string UsingEverything(string PackageName = "")
     {
         string _UsingEverything = "";
@@ -101,12 +102,15 @@ static class modUsingEverything
                     E = E + N + "using static " + AssemblyName() + ".Forms." + Name + ";";
                 }
             }
-            // For Each L In Split(VBPClasses(vbpFile), vbCrLf)  ' controls?
-            // If L <> __S1 Then
-            // Name = ModuleName(ReadEntireFile(Path & L))
-            // E = E & N & __S1 & PackagePrefix & Name & __S2
-            // End If
-            // Next
+            foreach (var iterL in new List<string>(Split(VBPClasses(vbpFile), vbCrLf)))
+            {
+                L = iterL;
+                if (L != "")
+                {
+                    Name = ModuleName(ReadEntireFile(Path + L));
+                    E = E + N + "using static " + AssemblyName() + ".Classes." + Name + ";";
+                }
+            }
             Everything = E;
         }
         R = Everything + N + R;

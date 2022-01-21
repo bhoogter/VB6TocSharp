@@ -82,6 +82,7 @@ Attribute VB_Creatable = False
 Attribute VB_PredeclaredId = True
 Attribute VB_Exposed = False
 Option Explicit
+' Linting Form
 
 Private Sub Form_Load()
   txtVBPFile = modConfig.vbpFile

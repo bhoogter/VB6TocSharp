@@ -354,6 +354,7 @@ On Error Resume Next
   End If
 End Function
 
+' de string and decomment a given line (before conversion)
 Public Function CleanLine(ByVal Line As String) As String
   Dim X As Long, Y As Long, Token As String, Value As String
   
@@ -389,6 +390,7 @@ Public Function CleanLine(ByVal Line As String) As String
   CleanLine = Line
 End Function
 
+' re-string and re-comment a given line (after conversion)
 Public Function Decorate(ByVal Line As String) As String
   Dim I As Long
   For I = LineStringsCount To 1 Step -1
@@ -491,7 +493,7 @@ Public Function ConvertIf(ByVal L As String) As String
   Expression = StripLeft(Expression, "If ")
   Expression = StripLeft(Expression, "ElseIf ")
   
-  ConvertIf = IIf(IsInStr(L, "ElseIf") = 0, "if", "} else if")
+  ConvertIf = IIf(Not IsInStr(L, "ElseIf"), "if", "} else if")
   ConvertIf = ConvertIf & "(" & ConvertExpression(Expression) & ")"
   
   If Not WithThen Then
@@ -1335,8 +1337,8 @@ Public Function ExpandToken(ByVal T As String, Optional ByVal WillAddParens As B
     If Right(T, 1) = "&" Then T = Left(T, Len(T) - 1)
   ElseIf RegExTest(T, "^[0-9.-]+[%&@!#]?$") Then ' plain number.  Maybe:  negative, decimals, or typed
     If RegExTest(T, "^[0-9.-]+[%&@!#]$") Then T = Left(T, Len(T) - 1)
-    If InStr(T, ".") Then T = T & "m"
-  ElseIf InStr(T, ".") Then
+    If IsInStr(T, ".") Then T = T & "m"
+  ElseIf IsInStr(T, ".") Then
     Dim Parts() As String, I As Long, Part As String, IsLast As Boolean
     Dim TOut As String
 '    Debug.Print "Reference: " & T

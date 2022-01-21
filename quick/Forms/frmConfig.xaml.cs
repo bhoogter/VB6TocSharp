@@ -1,3 +1,4 @@
+using System;
 using System.Windows;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
@@ -17,6 +18,7 @@ namespace VB2CS.Forms
         public frmConfig() { InitializeComponent(); }
 
 
+        // Config form
         private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }
         private void Form_Load()
         {
@@ -39,6 +41,14 @@ namespace VB2CS.Forms
             modINI.INIWrite(INISection_Settings, INIKey_AssemblyName, txtAssemblyName.Text, INIFile);
             modConfig.LoadSettings(true);
             Unload();
+        }
+        private void fraConfig_DblClick(object sender, RoutedEventArgs e) { fraConfig_DblClick(); }
+        private void fraConfig_DblClick()
+        {
+            if (MsgBox("Reset to default?", vbOKCancel, "Config Reset") == vbCancel) return;
+            txtVBPFile.Text = AppContext.BaseDirectory + "\\prj.vbp";
+            txtOutput.Text = AppContext.BaseDirectory + "\\quick";
+            txtAssemblyName.Text = "VB2CS";
         }
         private void txtOutput_Validate(ref bool Cancel)
         {

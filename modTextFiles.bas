@@ -25,11 +25,13 @@ Option Explicit
 ':    - modXML, modCSV, modPath
 
 Private mFSO As Object
+' Just returns the basic File System Object.
 Private Property Get FSO() As Object
   If mFSO Is Nothing Then Set mFSO = CreateObject("Scripting.FileSystemObject")
   Set FSO = mFSO
 End Property
 
+' Delete file if it exists.  Otherwise, does nothing.  Eliminates extraneous error checking.
 Public Function DeleteFileIfExists(ByVal sFIle As String, Optional ByVal bNoAttributeClearing As Boolean = False) As Boolean
 On Error Resume Next
   If Not FileExists(sFIle) Then Exit Function

@@ -1,11 +1,11 @@
 using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using static Microsoft.VisualBasic.Constants;
 using static Microsoft.VisualBasic.FileSystem;
+using static Microsoft.VisualBasic.Interaction;
 using static Microsoft.VisualBasic.Strings;
 using static modUtils;
 using static VBExtension;
+
 
 
 static class modTextFiles
@@ -34,27 +34,58 @@ static class modTextFiles
     // :::SEE ALSO
     // :    - modXML, modCSV, modPath
     public static dynamic mFSO = null;
+    // Just returns the basic File System Object.
     private static dynamic FSO
     {
         get
         {
-            dynamic _FSO;
+            dynamic _FSO = default(dynamic);
             if (mFSO == null) mFSO = CreateObject("Scripting.FileSystemObject");
             _FSO = mFSO;
             return _FSO;
         }
     }
 
+    // Delete file if it exists.  Otherwise, does nothing.  Eliminates extraneous error checking.
     public static bool DeleteFileIfExists(string sFIle, bool bNoAttributeClearing = false)
     {
+        bool _DeleteFileIfExists = false;
+        // TODO: (NOT SUPPORTED): On Error Resume Next
         if (!FileExists(sFIle)) return _DeleteFileIfExists;
-        if (!bNoAttributeClearing) File.SetAttributes(sFIle, 0);
-        if (FileExists(sFIle)) File.Delete(sFIle);
+        if (!bNoAttributeClearing) SetAttr(sFIle, 0);
+        if (FileExists(sFIle)) Kill(sFIle);
         // DeleteFileIfExists = FileExists(sFile)
-        return true;
+        _DeleteFileIfExists = true;
+        return _DeleteFileIfExists;
     }
-    public static string ReadEntireFile(string tFileName) => File.ReadAllText(tFileName);
-
+    public static string ReadEntireFile(string tFileName)
+    {
+        string _ReadEntireFile = "";
+        // ::::ReadEntireFile
+        // :::SUMMARY
+        // :Read an entire file.
+        // :::DESCRIPTION
+        // :Reads  the full contents of a file and returns the value as a string (without modification).
+        // :::PARAMETERS
+        // :- tFileName - The name of the file to read.
+        // :::RETURN
+        // :  String - The string contents of the file.
+        // :::SEE ALSO
+        // :  ReadFile, WriteFile, ReadEntireFileAndDelete
+        // TODO: (NOT SUPPORTED): On Error Resume Next
+        _ReadEntireFile = FSO.OpenTextFile(tFileName, 1).ReadAll;
+        if (FileLen(tFileName) / 10 != Len(_ReadEntireFile) / 10)
+        {
+            MsgBox("ReadEntireFile was short: " + FileLen(tFileName) + " vs " + Len(_ReadEntireFile));
+        }
+        // Dim intFile As Long
+        // intFile = FreeFile
+        // On Error Resume Next
+        // Open tFileName For Input As #intFile
+        // ReadEntireFile = Input$(LOF(intFile), #intFile)  '  LOF returns Length of File
+        // Close #intFile
+        return _ReadEntireFile;
+    }
     public static string ReadEntireFileAndDelete(string tFileName)
     {
         string _ReadEntireFileAndDelete = "";
@@ -71,11 +102,81 @@ static class modTextFiles
         // :  String - The string contents of the file.
         // :::SEE ALSO
         // :  ReadEntireFile
+        // TODO: (NOT SUPPORTED): On Error Resume Next
         _ReadEntireFileAndDelete = ReadEntireFile(tFileName);
-        File.Delete(tFileName);
+        Kill(tFileName);
         return _ReadEntireFileAndDelete;
     }
-    public static string ReadFile(string tFileName, int Startline = 1, int NumLines = 0) => File.ReadLines(tFileName).Skip(Startline).Take(NumLines).First();
+    public static string ReadFile(string tFileName, int Startline = 1, int NumLines = 0)
+    {
+        string _ReadFile = ""; // , Optional ByRef WasEOF As Boolean = False)
+                               // ::::ReadFile
+                               // :::SUMMARY
+                               // :Random Access Read a given file based on line number.
+                               // :::DESCRIPTION
+                               // :Reads the specified lines from a given file.
+                               // :
+                               // :If the file does not exist, no error is thrown, and an empty string is returned.
+                               // :::PARAMETERS
+                               // :- tFileName - The name of the file to read.
+                               // :- StartLine - The line number to begin reading (the first line is 1).  If you try to read beyond the end of the file, an empty string is returned.
+                               // :- NumLines - If passed, attempts to read the specified number of lines.  Reading beyond the end of the file simply returns as many lines as possible.  Zero means read rest of file.  Default is zero.
+                               // :- WasEOF - If EOF checking is required, this ByRef parameter can be passed and checked later.  True if the file's EOF was reached.  False otherwise.
+                               // :::RETURN
+                               // :  String - The string contents of the file.
+                               // :::SEE ALSO
+                               // :  ReadEntireFile, WriteFile, CountLines, TailFile, HeadFile
+        int FNum = 0;
+        string Line = "";
+        int LineNum = 0;
+        int Count = 0;
+        string CacheFileName = ""; //  TODO: (NOT SUPPORTED) C# Does not support static local variables.
+        string CacheFileDate = ""; //  TODO: (NOT SUPPORTED) C# Does not support static local variables.
+        List<string> CacheFileLoad = new List<string>(); //  TODO: (NOT SUPPORTED) C# Does not support static local variables.
+        if (tFileName == "" || !FileExists(tFileName))
+        {
+            // WasEOF = True
+            return _ReadFile;
+        }
+        if (tFileName == CacheFileName)
+        {
+            if (FileDateTime(tFileName) != DateValue(CacheFileDate)) CacheFileName = "";
+        }
+        if (tFileName != CacheFileName)
+        {
+            CacheFileName = tFileName;
+            CacheFileDate = FileDateTime(tFileName).ToString();
+            CacheFileLoad = new List<string>(Split(Replace(ReadEntireFile(tFileName), vbLf, ""), vbCr));
+        }
+        if (Startline == 1 && NumLines == 0)
+        {
+            _ReadFile = Join(CacheFileLoad.ToArray(), vbCrLf);
+        }
+        else
+        {
+            _ReadFile = Join(SubArr(CacheFileLoad, Startline - 1, NumLines), vbCrLf);
+            // ReadFile = LineByNumber(CacheFileLoad, Startline, NumLines)
+        }
+        return _ReadFile;
+        // If Startline < 1 Then Startline = 1
+        // LineNum = 0
+        // FNum = FreeFile
+        // Open tFileName For Input As #FNum
+        // Do While Not EOF(FNum)
+        // LineNum = LineNum + 1
+        // Line Input #FNum, Line
+        // If LineNum >= Startline Then
+        // ReadFile = ReadFile & IIf(Len(ReadFile) > 0, vbCrLf, __S1) & Line
+        // Count = Count + 1
+        // End If
+        // If NumLines > 0 And Count >= NumLines Then GoTo Done
+        // '    DoEvents
+        // Loop
+        // '  WasEOF = True
+        // Done:
+        // Close #FNum
+        return _ReadFile;
+    }
     public static int CountFileLines(string SourceFile, bool IgnoreBlank = false, string IgnorePrefix = "")
     {
         int _CountFileLines = 0;
@@ -227,12 +328,15 @@ static class modTextFiles
         Code = 0;
         Blnk = 0;
         Cmnt = 0;
-
-        if (!FileExists(tFileName)) return _VBFileCountLines;
+        // TODO: (NOT SUPPORTED): On Error Resume Next
+        if (!FileExists(tFileName))
+        {
+            return _VBFileCountLines;
+        }
         S = ReadEntireFile(tFileName);
         Totl = CountLines(S, false, "");
         Code = CountLines(S);
-        N = CountLines(S, true, "");
+        N = CountLines(S, true , "");
         Cmnt = N - Code;
         Blnk = Totl - N;
         _VBFileCountLines = true;
@@ -256,11 +360,11 @@ static class modTextFiles
         int M = 0;
         if (VBFileCountLines(tFileName, out T, out C, out B, out M))
         {
-            //MsgBox("File Line Stat: " + vbCrLf + " Totl: " + T + vbCrLf + "Code: " + C + vbCrLf + "Blnk: " + B + vbCrLf + "Cmnt: " + M, vbMsgBoxRtlReading);
+            MsgBox("File Line Stat: " + vbCrLf + " Totl: " + T + vbCrLf + "Code: " + C + vbCrLf + "Blnk: " + B + vbCrLf + "Cmnt: " + M, vbMsgBoxRtlReading);
         }
         else
         {
-            //MsgBox("File Not Found: " + tFileName);
+            MsgBox("File Not Found: " + tFileName);
         }
     }
     public static bool WriteFile(string File, string Str, bool OverWrite = false, bool PreventNL = false)
@@ -285,26 +389,28 @@ static class modTextFiles
         // :::SEE ALSO
         // :  ReadEntireFile, WriteFile, CountLines
         int FNo = 0;
-        //FNo = FreeFile;
+        // TODO: (NOT SUPPORTED): On Error Resume Next
+        FNo = FreeFile;
         if (OverWrite)
         {
             Kill(File);
-            //VBOpenFile(File, "Output", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Output As #FNo
+            VBOpenFile(File, "Output", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Output As #FNo
         }
         else
         {
-            //VBOpenFile(File, "Append", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Append As #FNo
+            VBOpenFile(File, "Append", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Append As #FNo
         }
         if (PreventNL || Right(Str, 2) == vbCrLf)
         {
-            //VBWriteFile("Print #FNo, Str;"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str;
+            VBWriteFile("Print #FNo, Str;"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str;
         }
         else
         {
-            //VBWriteFile("Print #FNo, Str"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str
+            VBWriteFile("Print #FNo, Str"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str
         }
         VBCloseFile(FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Close #FNo
-        return true;
+        _WriteFile = true;
+        return _WriteFile;
     }
 
 }

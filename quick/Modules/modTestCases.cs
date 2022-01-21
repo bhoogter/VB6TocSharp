@@ -6,6 +6,7 @@ using static modGit;
 
 static class modTestCases
 {
+    // @NO-LINT
     // This module exists solely to list test conversion caess to make sure the converter can convert itself containing them.
     // There should be no active and/or used code in this module.
     // These tests are not run, they are conversion tests.  They should be converted correctly when this project is converted.
@@ -37,12 +38,12 @@ static class modTestCases
         B = HasGit();
         B = modGit.HasGit();
         B = modGit.HasGit();
-        //B = !HasGit;
+        B = !HasGit();
         B = !HasGit();
         B = !modGit.HasGit();
         B = !modGit.HasGit();
         TestCallWithBooleanFunction(HasGit());
-        //TestCallWithBooleanFunction(!HasGit);
+        TestCallWithBooleanFunction(!HasGit());
         TestCallWithBooleanFunction(modGit.HasGit());
         TestCallWithBooleanFunction(!modGit.HasGit());
         TestCallWithBooleanFunction(HasGit());
@@ -53,7 +54,7 @@ static class modTestCases
         if (HasGit()) Console.WriteLine("");
         if (modGit.HasGit()) Console.WriteLine();
         if (modGit.HasGit()) Console.WriteLine();
-        //if (!HasGit) Console.WriteLine("");
+        if (!HasGit()) Console.WriteLine("");
         if (!HasGit()) Console.WriteLine("");
         if (!modGit.HasGit()) Console.WriteLine();
         if (!modGit.HasGit()) Console.WriteLine();
@@ -68,7 +69,7 @@ static class modTestCases
     public static List<string> testFunctionWithPropertyInName()
     {
         List<string> _testFunctionWithPropertyInName = null;
-        //_testFunctionWithPropertyInName = Array();
+        _testFunctionWithPropertyInName = new List<string>();
         return _testFunctionWithPropertyInName;
     }
     public static void TestPrivateLocalFunctionCall()

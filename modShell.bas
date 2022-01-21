@@ -59,6 +59,7 @@ Private Declare Function CloseHandle Lib "kernel32" (hObject As Long) As Boolean
 Private Declare Function GetDesktopWindow Lib "USER32" () As Long
 Private Declare Function ShellExecute Lib "shell32" Alias "ShellExecuteA" (ByVal hwnd As Long, ByVal lpOperation As String, ByVal lpFile As String, ByVal lpParameters As String, ByVal lpDirectory As String, ByVal nShowCmd As Long) As Long
 
+' Run a given command and return stdout as a string.
 Public Function RunCmdToOutput(ByVal Cmd As String, Optional ByRef ErrStr As String = "", Optional ByVal AsAdmin As Boolean = False) As String
 On Error GoTo RunError
   Dim A As String, B As String, C As String
@@ -117,6 +118,7 @@ ErrorRoutineErr:
   Resume Next
 End Sub
 
+' Generic temporary file.  Clean up is your responsibility.  Various configs available.
 Public Function TempFile(Optional ByVal UseFolder As String = "", Optional ByVal UsePrefix As String = "tmp_", Optional ByVal Extension As String = ".tmp", Optional ByVal TestWrite As Boolean = True) As String
   Dim FN As String, Res As String
   If UseFolder <> "" And Not DirExists(UseFolder) Then UseFolder = ""
@@ -159,12 +161,14 @@ TestClearFailed:
   Exit Function
 End Function
 
+' run as admin
 Public Sub RunShellExecuteAdmin(ByVal App As String, Optional ByVal nHwnd As Long = 0, Optional ByVal WindowState As Long = SW_SHOWNORMAL)
   If nHwnd = 0 Then nHwnd = GetDesktopWindow()
   LastProcessID = ShellExecute(nHwnd, "runas", App, vbNullString, vbNullString, WindowState)
 '  ShellExecute nHwnd, "runas", App, Command & " /admin", vbNullString, SW_SHOWNORMAL
 End Sub
 
+' Run as admin 2
 Public Function RunFileAsAdmin(ByVal App As String, Optional ByVal nHwnd As Long = 0, Optional ByVal WindowState As Long = SW_SHOWNORMAL) As Boolean
 '  If Not IsWinXP Then
   RunShellExecuteAdmin App, nHwnd, WindowState

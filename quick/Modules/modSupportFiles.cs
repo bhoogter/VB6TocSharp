@@ -13,6 +13,8 @@ using static modUtils;
 
 static class modSupportFiles
 {
+    // creates necessary support files for project
+    // Creates all support files
     public static bool CreateProjectSupportFiles()
     {
         bool _CreateProjectSupportFiles = false;
@@ -36,6 +38,7 @@ static class modSupportFiles
         GeneratePropertiesFiles();
         return _CreateProjectSupportFiles;
     }
+    // Generates all properties file.
     public static bool GeneratePropertiesFiles()
     {
         bool _GeneratePropertiesFiles = false;
@@ -51,6 +54,7 @@ static class modSupportFiles
         ResourcesResxFile();
         return _GeneratePropertiesFiles;
     }
+    // Creates application XAML file
     public static string ApplicationXAML()
     {
         string _ApplicationXAML = "";
@@ -69,6 +73,7 @@ static class modSupportFiles
         _ApplicationXAML = R;
         return _ApplicationXAML;
     }
+    // Creates main project file
     public static string CreateProjectFile(string vbpFile)
     {
         string _CreateProjectFile = "";
@@ -213,18 +218,21 @@ static class modSupportFiles
         WriteOut(ChgExt(ProjFileName(vbpFile), ".csproj"), S);
         return _CreateProjectFile;
     }
+    // returns the contents VB Extension class file.  Actual file is in app folder.
     public static string VBExtensionClass()
     {
         string _VBExtensionClass = "";
         _VBExtensionClass = ReadEntireFile(AppContext.BaseDirectory + "\\\\VBExtension.cs");
         return _VBExtensionClass;
     }
+    // returns the contents VB Constants class file.  Actual file is in app folder.
     public static string VBAConstantsClass()
     {
         string _VBAConstantsClass = "";
         _VBAConstantsClass = ReadEntireFile(AppContext.BaseDirectory + "\\\\VBConstants.cs");
         return _VBAConstantsClass;
     }
+    // Returns app config file contents
     public static string AppConfigFile()
     {
         string _AppConfigFile = "";

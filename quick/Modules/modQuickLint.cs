@@ -17,14 +17,16 @@ using static VBExtension;
 
 static class modQuickLint
 {
-    public const int Idnt = 2;
+    // Define some constants for easier access.
     public const int MAX_ERRORS_DEFAULT = 50;
     public const string Attr = "Attribute";
     public const string Q = "\"";
     public const string A = "'";
     public const string S = " ";
     public const string LintKey = "'@NO-LINT";
+    // Represents all lint types.  If this is disabled, all are disabled.
     public const string TY_ALLTY = "AllTy";
+    // Lint Types
     public const string TY_ERROR = "Error";
     public const string TY_INDNT = "Indnt";
     public const string TY_ARGNA = "ArgNa";
@@ -47,21 +49,21 @@ static class modQuickLint
     public const string TY_OPDEF = "OpDef";
     public const string TY_OPBYR = "OpByR";
     public const string TY_DFCTL = "DfCtl";
+    // Basic Lint customization here.  Just a comma-separated list of the types above.
+    public const int Idnt = 2; // Set to your preferred indent.  Default is 4.  We always used 2.
     public const string DISABLED_LINT_TYPES = TY_OPBYR; // TY_ARGTY & __S1 & TY_OPDEF
     public const string WARNING_LINT_TYPES = "";
     public const string AUTOFIX_LINT_TYPES = TY_INDNT + "," + TY_ARGNA + "," + TY_OPDEF + "," + TY_NOTYP + "," + TY_STYLE;
-    public static string ErrorPrefix = "";
-    public static string ErrorIgnore = "";
+    public static string ErrorPrefix = ""; // Just a module global to not have to calculate this each time.  Prepends each lint error.
+    public static string ErrorIgnore = ""; // Any error types in this string are ignored.
     public static List<string> AutofixFind = new List<string>();
     public static List<string> AutofixRepl = new List<string>();
     public static List<string> AutofixFindRestOfFile = new List<string>();
     public static List<string> AutofixReplRestOfFile = new List<string>();
-    public static Collection WellKnownNames = new Collection(); // TODO: (NOT SUPPORTED) Dimmable 'New' not supported on variable declaration.  Instantiated only on declaration.  Please ensure usages
-    public static List<dynamic> ErrorTypes()
+    public static Collection WellKnownNames = new Collection(); // Used for lint fixing.  Define well known name to always have `cmd` lint to `Cmd`, or whatever other definitions.TODO: (NOT SUPPORTED) Dimmable 'New' not supported on variable declaration.  Instantiated only on declaration.  Please ensure usages
+    public static List<String> ErrorTypes()
     {
-        List<dynamic> _ErrorTypes = null;
-        _ErrorTypes = new List<dynamic>() { TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_OPBYR, TY_DFCTL };
-        return _ErrorTypes;
+        return new List<String>() { TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_OPBYR, TY_DFCTL };
     }
     private static string ResolveSources(string FileName)
     {
@@ -69,7 +71,7 @@ static class modQuickLint
         if (FileName == "") FileName = "prj.vbp";
         if (FileName == "forms")
         {
-            _ResolveSources = VBPForms("true");
+            _ResolveSources = VBPForms("");
         }
         else if (FileName == "modules")
         {
@@ -119,21 +121,23 @@ static class modQuickLint
         {
             L = iterL;
             string Result = "";
+            if (Trim(L) == "") goto NextFile;
             Result = QuickLintFile(L, MaxErrors, AutoFix);
             if (Result != "")
             {
                 string S = "";
-                Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now) + "s).  To re-run for failing file, hit enter on the line below:");
+                Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now) + "s).   To re-run for failing file, hit enter on the line below:");
                 S = "LINT FAILED: " + L + vbCrLf + Result + vbCrLf + "?Lint(\"" + L + "\")";
                 _QuickLintFiles = S;
                 return _QuickLintFiles;
             }
             else
             {
-                //Debug.Print(Switch(Right(L, 3) == "frm", "o", Right(L, 3) == "cls", "x", true, "."));
+                Console.WriteLine(Switch(Right(L, 3) == "frm", "o", Right(L, 3) == "cls", "x", true, "."));
             }
             X = X + 1;
-            if (X >= lintDotsPerRow) { X = 0; }
+            if (X >= lintDotsPerRow) { X = 0; Console.WriteLine(); }
+        NextFile:;
             DoEvents();
         }
         Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now) + "s).");
@@ -149,7 +153,11 @@ static class modQuickLint
         string GivenName = "";
         string CheckName = "";
         fName = Mid(File, InStrRev(File, "\\") + 1);
-        CheckName = Replace(Replace(Replace(fName, ".bas", ""), ".cls", ""), ".frm", "");
+        CheckName = fName;
+        CheckName = Replace(CheckName, ".bas", "");
+        CheckName = Replace(CheckName, ".frm", "");
+        CheckName = Replace(CheckName, ".cls", "");
+        CheckName = Replace(CheckName, ".ctl", "");
         ErrorPrefix = Right(Space(18) + fName, 18) + " ";
         Contents = ReadEntireFile(File);
         GivenName = RegExNMatch(Contents, "Attribute VB_Name = \"([^\"]+)\"", 0);
@@ -170,7 +178,7 @@ static class modQuickLint
         string LL = "";
         string L = "";
         // TODO: (NOT SUPPORTED): On Error GoTo LintError
-        ErrorIgnore = DISABLED_LINT_TYPES;
+        DisableLintType(DISABLED_LINT_TYPES, true);
         Lines = new List<string>(Split(Replace(Contents, vbCr, ""), vbLf));
         AutofixFind.Clear();
         AutofixRepl.Clear();
@@ -264,6 +272,7 @@ static class modQuickLint
             int LineIndent = 0;
             LineIndent = 0;
             while (Mid(RTrim(L), LineIndent + 1, 1) == S) { LineIndent = LineIndent + 1; }
+            // If LineN = 210 Then Stop
             TestIndent(ref Errors, ref ErrorCount, LineN, L, LineIndent, (!RegExTest(L, "^[ ]*Case ") ? Indent : Indent - Idnt));
             List<string> Statements = new List<string>();
             dynamic SS = null;
@@ -283,7 +292,23 @@ static class modQuickLint
                 }
                 else if (RegExTest(St, "^[ ]*If "))
                 {
-                    if (!RegExTest(St, "\\bThen ")) Indent = Indent + Idnt;
+                    if (!RegExTest(St, "\\bThen "))
+                    {
+                        Indent = Indent + Idnt;
+                    }
+                    else
+                    {
+                        string IfStatementBody = "";
+                        IfStatementBody = Mid(L, InStr(L, " Then "));
+                        if (RegExTest(IfStatementBody, "\\b(While |For )\\b"))
+                        {
+                            RecordError(ref Errors, ref ErrorCount, TY_STYLE, LineN, "Place For/While on separate line from If.  Indent check disabled.", TY_INDNT);
+                        }
+                        else
+                        {
+                            TestCodeLine(ref Errors, ref ErrorCount, LineN, IfStatementBody);
+                        }
+                    }
                 }
                 else if (RegExTest(St, "^[ ]*For "))
                 {
@@ -330,7 +355,7 @@ static class modQuickLint
                 }
                 else if (RegExTest(St, "^[ ]*With "))
                 {
-                    RecordError(ref Errors, ref ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists.");
+                    RecordError(ref Errors, ref ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists.  Indent check disabled.", TY_INDNT);
                 }
                 else if (RegExTest(St, "^[ ]*(Private |Public )?Declare (Function |Sub )"))
                 {
@@ -393,8 +418,9 @@ static class modQuickLint
         _QuickLintContents = Errors;
         return _QuickLintContents;
     LintError:;
-        RecordError(ref Errors, ref ErrorCount, TY_ERROR, 0, "Linter Error [" + Err().Number + "]: " + Err().Description);
+        RecordError(ref Errors, ref ErrorCount, TY_ERROR, 0, "Linter Error [" + Err().Number + "]: " + Err().Description + ".  Actual Line [" + LineN + "]: " + ActualLine);
         _QuickLintContents = Errors;
+        // TODO: (NOT SUPPORTED): Resume Next
         return _QuickLintContents;
     }
     private static string ReadEntireFile(string tFileName)
@@ -425,17 +451,17 @@ static class modQuickLint
                 Y = InStr(Y + 2, Line, Q);
             }
             if (Y == 0) break;
-            Line = Left(Line, X - 1) + RepeatString(Y - X + 1, "S") + Mid(Line, Y + 1);
+            Line = Left(Line, X - 1) + String(Y - X + 1, "S") + Mid(Line, Y + 1);
         }
         X = InStr(Line, A);
         if (X > 0) Line = RTrim(Left(Line, X - 1));
         _CleanLine = Line;
         return _CleanLine;
     }
-    public static void RecordError(ref string Errors, ref int ErrorCount, string Typ, int LineN, string Error)
+    public static void RecordError(ref string Errors, ref int ErrorCount, string Typ, int LineN, string Error, string DisableLintOnError = "")
     {
         string eLine = "";
-        if (InStr(UCase(ErrorIgnore), UCase(Typ)) > 0 || InStr(ErrorIgnore, TY_ALLTY) > 0) return;
+        if (IsLintTypeDisabled(Typ)) return;
         if (Len(Errors) != 0) Errors = Errors + vbCrLf;
         if (InStr(Join(ErrorTypes().ToArray(), ","), Typ) == 0)
         {
@@ -451,6 +477,7 @@ static class modQuickLint
             Errors = Errors + eLine;
             ErrorCount = ErrorCount + 1;
         }
+        if (DisableLintOnError != "") DisableLintType(DisableLintOnError);
     }
     public static bool StartsWith(string L, string Find)
     {
@@ -461,7 +488,7 @@ static class modQuickLint
     public static string StripLeft(string L, string Find)
     {
         string _StripLeft = "";
-        if (StartsWith(L, Find)) _StripLeft = Mid(L, Len(Find) + 1); _StripLeft = L;
+        if (StartsWith(L, Find)) _StripLeft = Mid(L, Len(Find) + 1); else _StripLeft = L;
         return _StripLeft;
     }
     public static bool RecordLeft(ref string L, string Find)
@@ -478,10 +505,13 @@ static class modQuickLint
         if (RegExTest(L, "^[a-zA-Z][a-zA-Z0-9]*:$")) return;
         if (RegExTest(L, "#(If|End If|Else|Const)")) return;
         if (StartsWith(L, "Debug.")) return;
-        if (LineIndent != ExpectedIndent)
+        if (!IsLintTypeDisabled(TY_INDNT))
         {
-            RecordError(ref Errors, ref ErrorCount, TY_INDNT, LineN, "Incorrect Indent -- expected " + ExpectedIndent + ", got " + LineIndent);
-            AddFix(TY_INDNT, "^[ ]*", Space(ExpectedIndent));
+            if (LineIndent != ExpectedIndent)
+            {
+                RecordError(ref Errors, ref ErrorCount, TY_INDNT, LineN, "Incorrect Indent -- expected " + ExpectedIndent + ", got " + LineIndent);
+                AddFix(TY_INDNT, "^[ ]*", Space(ExpectedIndent));
+            }
         }
     }
     public static void TestBlankLines(ref string Errors, ref int ErrorCount, int LineN, string L, ref int BlankLineCount)
@@ -500,20 +530,46 @@ static class modQuickLint
         if (InStr(L, LintKey) == 0) return;
         string Match = "";
         string Typ = "";
-        Match = RegExNMatch(L, LintKey + "(-.....)?", 0);
+        Match = RegExNMatch(L, LintKey + "(-.....)?$", 0);
+        if (Match == "") return;
         Typ = (Match == LintKey ? TY_ALLTY : Replace(Match, LintKey + "-", ""));
-        ErrorIgnore = ErrorIgnore + "," + Typ;
+        DisableLintType(Typ);
+    }
+    public static bool IsLintTypeDisabled(string Typ)
+    {
+        bool _IsLintTypeDisabled = false;
+        _IsLintTypeDisabled = InStr(UCase(ErrorIgnore), UCase(Typ)) > 0 || InStr(ErrorIgnore, TY_ALLTY) > 0;
+        return _IsLintTypeDisabled;
+    }
+    public static void DisableLintType(string Typ, bool Reset = false)
+    {
+        if (Reset) ErrorIgnore = "";
+        if (Typ == "") return;
+        if (IsNotInStr(Typ, ","))
+        {
+            if (IsLintTypeDisabled(Typ)) return;
+            ErrorIgnore = ErrorIgnore + "," + Typ;
+        }
+        else
+        {
+            dynamic L = null;
+            foreach (var iterL in new List<string>(Split(Typ, ",")))
+            {
+                L = iterL;
+                DisableLintType(L);
+            }
+        }
     }
     public static void TestModuleOptions(ref string Errors, ref int ErrorCount, Collection Options)
     {
         // TODO: (NOT SUPPORTED): On Error Resume Next
         string Value = "";
         Value = "";
-        Value = Options.Item("Explicit");
+        Value = (string)Options["Explicit"];
         if (Value != "") RecordError(ref Errors, ref ErrorCount, TY_EXPLI, 0, "Option Explicit not set on file");
         Value = "";
-        Value = Options.Item("Compare Binary");
-        Value = Options.Item("Compare Database");
+        Value = (string)Options["Compare Binary"];
+        Value = (string)Options["Compare Database"];
         if (Value != "") RecordError(ref Errors, ref ErrorCount, TY_COMPA, 0, "Use of Option Compare not recommended");
     }
     public static void TestArgName(ref string Errors, ref int ErrorCount, int LineN, string Name)
@@ -737,10 +793,16 @@ static class modQuickLint
     }
     public static void TestArgType(ref string Errors, ref int ErrorCount, int LineN, string Name, string Typ)
     {
-        if (Typ == "Integer") RecordError(ref Errors, ref ErrorCount, TY_ARGTY, LineN, "Arg [" + Name + "] is of type [" + Typ + "] -- use Long (or disable type linting for file)");
-        if (Typ == "Short") RecordError(ref Errors, ref ErrorCount, TY_ARGTY, LineN, "Arg [" + Name + "] is of type [" + Typ + "] -- use Long (or disable type linting for file)");
-        if (Typ == "Byte") RecordError(ref Errors, ref ErrorCount, TY_ARGTY, LineN, "Arg [" + Name + "] is of type [" + Typ + "] -- use Long (or disable type linting for file)");
-        if (Typ == "Float") RecordError(ref Errors, ref ErrorCount, TY_ARGTY, LineN, "Arg [" + Name + "] is of type [" + Typ + "] -- use Double (or disable type linting for file)");
+        string Expect = "";
+        if (Typ == "Integer") Expect = "Long";
+        if (Typ == "Short") Expect = "Long";
+        if (Typ == "Byte") Expect = "Long";
+        if (Typ == "Float") Expect = "Double";
+        if (Typ == "Any") Expect = "String";
+        if (Expect != "")
+        {
+            RecordError(ref Errors, ref ErrorCount, TY_ARGTY, LineN, "Arg [" + Name + "] is of type [" + Typ + "] -- use " + Expect + " (or disable type linting for file)");
+        }
     }
     public static void TestSignature(ref string Errors, ref int ErrorCount, int LineN, string LL)
     {
@@ -787,6 +849,7 @@ static class modQuickLint
         string Results = "";
         int N = 0;
         int I = 0;
+        if (IsInStr(Contents, "@NO-LINT-DFCTL")) return;
         vTypes = new List<dynamic>() { "CheckBox", "Command", "Option", "Frame", "Label", "TextBox", "RichTextBox", "RichTextBoxNew", "ComboBox", "ListBox", "Timer", "UpDown", "HScrollBar", "Image", "Picture", "MSFlexGrid", "DBGrid", "Line", "Shape", "DTPicker" };
         foreach (var itervType in vTypes)
         {
@@ -838,7 +901,6 @@ static class modQuickLint
     {
         int _GetFixCount = 0;
         // TODO: (NOT SUPPORTED): On Error Resume Next
-        _GetFixCount = 0;
         _GetFixCount = (RestOfFile ? AutofixFindRestOfFile : AutofixFind).Count;
         return _GetFixCount;
     }

@@ -6,12 +6,12 @@ using static modProjectFiles;
 using static modRegEx;
 using static modSubTracking;
 using static modUtils;
-using static VBExtension;
 
 
 
 static class modVB6ToCS
 {
+    // Standard conversion-related lookups
     public static string ConvertDefaultDefault(string DType)
     {
         string _ConvertDefaultDefault = "";
@@ -26,7 +26,7 @@ static class modVB6ToCS
                 _ConvertDefaultDefault = "0";
                 break;
             case "Date":
-                _ConvertDefaultDefault = "DateTime.MinValue";
+                _ConvertDefaultDefault = "default(DateTime)";
                 break;
             case "String":
                 _ConvertDefaultDefault = "\"\"";
@@ -162,7 +162,7 @@ static class modVB6ToCS
                 _ConvertDataType = S;
                 break;
             default:
-                if (IsInStr(VBPClasses("", false), S))
+                if (modUtils.IsInStr(VBPClasses("", true), S))
                 {
                     _ConvertDataType = S;
                 }
@@ -353,11 +353,9 @@ static class modVB6ToCS
                 break;
         }
     }
-    public static string ConvertVb6Specific(string S) => ConvertVb6Specific(S, out _);
     public static string ConvertVb6Specific(string S, out bool Complete)
     {
         string _ConvertVb6Specific = "";
-        Complete = false;
         string W = "";
         string R = "";
         switch (Trim(S))
@@ -473,7 +471,7 @@ static class modVB6ToCS
                 S = S + "}";
                 break;
         }
-        if (IsInStr(S, ".Print "))
+        if (modUtils.IsInStr(S, ".Print "))
         {
             if (Right(S, 1) == ";")
             {

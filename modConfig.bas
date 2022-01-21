@@ -1,6 +1,8 @@
 Attribute VB_Name = "modConfig"
 Option Explicit
 
+' project config.  Handles reading/writing INI file, etc, and access to those values.
+
 Public Const SpIndent As Long = 2
 Public Const DefaultDataType As String = "dynamic"
 

@@ -7,6 +7,8 @@ using static modUtils;
 using static modVB6ToCS;
 using static VBExtension;
 
+
+
 static class modSubTracking
 {
     public class Variable
@@ -40,7 +42,7 @@ static class modSubTracking
     {
         get
         {
-            bool _Analyze;
+            bool _Analyze = default(bool);
             _Analyze = Lockout;
             return _Analyze;
         }
@@ -181,7 +183,7 @@ static class modSubTracking
             if (LMatch(fArg, "ByVal ")) fArg = Mid(fArg, 7);
             if (LMatch(fArg, "ByRef ")) fArg = Mid(fArg, 7);
             pArgName = SplitWord(fArg, 1);
-            if (SplitWord(fArg, 2, " ") == "As") pType = SplitWord(fArg, 3, " "); pType = "Variant";
+            if (SplitWord(fArg, 2, " ") == "As") pType = SplitWord(fArg, 3, " "); else pType = "Variant";
         }
         Pro = Mid(Pro, Len(pArgs) + 1);
         if (LMatch(Pro, ")")) Pro = Trim(Mid(Pro, 2));
@@ -206,14 +208,14 @@ static class modSubTracking
         switch (GSL)
         {
             case "get":
-                Props[X].Getter = ConvertSub(S, false, vbTriState.vbFalse);
+                Props[X].Getter = ConvertSub(S,false , vbTriState.vbFalse);
                 Props[X].asType = ConvertDataType(pType);
                 Props[X].asFunc = asFunc;
                 Props[X].funcArgs = pArgs;
                 break;
             case "set":
             case "let":
-                Props[X].Setter = ConvertSub(S, false, vbTriState.vbFalse);
+                Props[X].Setter = ConvertSub(S, , vbFalse);
                 Props[X].origArgName = pArgName;
                 if (pType != "") Props[X].asType = ConvertDataType(pType);
                 if (asFunc) Props[X].asFunc = true;

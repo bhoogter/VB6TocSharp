@@ -2,7 +2,6 @@ using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
-using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Controls.Primitives;
@@ -11,6 +10,7 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+//using static System.Drawing.Printing.PrinterSettings;
 using static Microsoft.VisualBasic.Constants;
 
 public static class VBExtension
@@ -38,7 +38,7 @@ public static class VBExtension
 
     //public static List<string> PrinterNames()
     //{
-    //    System.Drawing.Printing.PrinterSettings.StringCollection col = System.Drawing.Printing.PrinterSettings.InstalledPrinters;
+    //    StringCollection col = System.Drawing.Printing.PrinterSettings.InstalledPrinters;
     //    string[] arr = new string[col.Count];
     //    col.CopyTo(arr, 0);
     //    return new List<string>(arr);
@@ -104,13 +104,6 @@ public static class VBExtension
         }
         if (f == "") return 0;
         return double.Parse(f);
-    }
-
-    public static string RepeatString(int X, string S)
-    {
-        string R = "";
-        for (int i = 0; i < X; i++) R += S;
-        return R;
     }
 
     public static decimal ValD(string A) { return (decimal)ValDouble((A ?? "").Replace(",", "")); }
@@ -196,7 +189,6 @@ public static class VBExtension
         return CDate(A);
     }
 
-    public static dynamic Item(this Collection C, dynamic key) { return C[key]; }
     public static bool IsList(object A) { return A != null && (A is System.Collections.IList); }
     public static int LBound(object A) { return A != null && (A is System.Collections.IList) ? (((System.Collections.IList)A).Count == 0 ? -1 : 0) : 0; }
     public static int UBound(object A) { return A != null && (A is System.Collections.IList) ? ((System.Collections.IList)A).Count - 1 : 0; }
@@ -209,6 +201,7 @@ public static class VBExtension
     public static string VBReadFileLine(dynamic A, dynamic B) { return ""; }
     public static bool DoEvents(Window Frm = null)
     {
+        //if (Frm == null) Frm = MainMenu1.instance;
         Frm.Dispatcher.Invoke(new Action(delegate () { }), DispatcherPriority.ContextIdle);
         return true;
     }
@@ -230,26 +223,23 @@ public static class VBExtension
         return s;
     }
 
-    private static String FormatQuantity(decimal d) { return d.ToString("0.##"); }
-    private static String CurrencyFormat(decimal d) { return d.ToString("0.00"); }
-
     public static bool HasEmptyText(this TextBox textBox) { return string.IsNullOrEmpty(textBox.Text); }
     public static decimal getValue(this TextBox textBox) { try { return Decimal.Parse(textBox.Text); } catch { return 0; } }
-    public static decimal setValue(this TextBox textBox, decimal value) { textBox.Text = FormatQuantity(value); return getValue(textBox); }
-    public static decimal setCurrency(this TextBox c, decimal value) { c.Text = CurrencyFormat(value); return c.getCurrency(); }
+    //public static decimal setValue(this TextBox textBox, decimal value) { textBox.Text = FormatQuantity(value); return getValue(textBox); }
+    //public static decimal setCurrency(this TextBox c, decimal value) { c.Text = CurrencyFormat(value); return c.getCurrency(); }
     public static decimal getCurrency(this TextBox c) { return ValD(c.Text); }
     public static decimal getValueCurrency(this TextBox c) { return ValD(c.Text); }
-    public static decimal setValueCurrency(this TextBox c, decimal value) { c.Text = CurrencyFormat(value); return c.getCurrency(); }
+    //public static decimal setValueCurrency(this TextBox c, decimal value) { c.Text = CurrencyFormat(value); return c.getCurrency(); }
     public static int getValueLong(this TextBox textBox) { try { return int.Parse(textBox.Text); } catch { return 0; } }
     public static int setValueLong(this TextBox textBox, int value) { textBox.Text = value.ToString(); return getValueLong(textBox); }
     public static DateTime? getValueDate(this TextBox textBox, DateTime? defaultDate = null) { try { return DateValue(textBox.Text); } catch { return defaultDate; } }
     public static DateTime? setValueDate(this TextBox textBox, DateTime? value) { textBox.Text = value == null ? "" : ((DateTime)value).ToShortDateString(); return textBox.getValueDate(); }
     public static decimal getValue(this Label label) { try { return ValD(label.Content.ToString()); } catch { return 0; } }
-    public static decimal setValue(this Label label, decimal value) { label.Content = FormatQuantity(value); return getValue(label); }
-    public static decimal setCurrency(this Label c, decimal value) { c.Content = CurrencyFormat(value); return c.getCurrency(); }
+    //public static decimal setValue(this Label label, decimal value) { label.Content = FormatQuantity(value); return getValue(label); }
+    //public static decimal setCurrency(this Label c, decimal value) { c.Content = CurrencyFormat(value); return c.getCurrency(); }
     public static decimal getCurrency(this Label c) { return ValD(c.Content.ToString()); }
     public static decimal getValueCurrency(this Label c) { return ValD(c.Content.ToString()); }
-    public static decimal setValueCurrency(this Label c, decimal value) { c.Content = CurrencyFormat(value); return c.getCurrency(); }
+    //public static decimal setValueCurrency(this Label c, decimal value) { c.Content = CurrencyFormat(value); return c.getCurrency(); }
     public static int getValueLong(this Label textBox) { try { return int.Parse(textBox.Content.ToString()); } catch { return 0; } }
     public static int setValueLong(this Label textBox, int value) { textBox.Content = value.ToString(); return getValueLong(textBox); }
     public static DateTime? getValueDate(this Label textBox, DateTime? defaultDate = null) { try { return DateValue(textBox.Content.ToString()); } catch { return defaultDate; } }
@@ -419,12 +409,10 @@ public static class VBExtension
         return SanitizeNls(s, vbLf);
     }
 
-    public static bool IsInStr(string src, string find) { return Strings.InStr(src, find) != 0; }
-
     public static string SanitizeNls(string s, string desired)
     {
-        bool hCr = IsInStr(s, vbCr);
-        bool hLf = IsInStr(s, vbLf);
+        bool hCr = s.Contains(vbCr);
+        bool hLf = s.Contains(vbLf);
         if (hCr && !hLf) return s.Replace(vbCr, desired);
         if (hLf && !hCr) return s.Replace(vbLf, desired);
         return s.Replace(vbCrLf, desired);
@@ -514,7 +502,7 @@ public static class VBExtension
     public static int AddItem(this ListBox c, string C, bool Selected) { int x = c.Items.Add(new ComboboxItem(C)); return SelectItem(c, x, Selected); }
     public static int AddItem(this ListBox c, string C, int D, bool Selected) { int x = c.Items.Add(new ComboboxItem(C, D)); return SelectItem(c, x, Selected); }
     public static void RemoveItem(this ListBox c, int Index) { c.Items.RemoveAt(Index); }
-    public static string List(this ListBox c, int Index) { return (Index >= 0 && Index < c.Items.Count) ? c.Items[Index].ToString() : ""; }
+    //public static string List(this ListBox c, int Index) { return modNumbers.InRange(0, Index, c.Items.Count) ? c.Items[Index].ToString() : ""; }
 
     public static bool getSelected(this ListBox c, int I) { return c.SelectedItems.Contains(c.Items[I]); }
     public static void setSelected(this ListBox c, int I, bool V)
@@ -698,10 +686,6 @@ public static class VBExtension
         public void startTimerSeconds(int Seconds, dynamic setTag) { Tag = setTag; startTimerSeconds(Seconds); }
         public void stopTimer() { Enabled = false; }
     }
-
-    public static int LBound<T>(this List<T> FL) => 0;
-    public static int UBound<T>(this List<T> FL) => FL.Count - 1;
-
     public static List<FrameworkElement> controlArray(this Window Frm, string name)
     {
         List<FrameworkElement> res = new List<FrameworkElement>();
@@ -710,9 +694,6 @@ public static class VBExtension
             if (((FrameworkElement)C).Name.StartsWith(name + "_")) res.Add((FrameworkElement)C);
         return res;
     }
-
-    public static List<T> controlArray<T>(this Window Frm, string name) => controlArray(Frm, name).Cast<T>().ToList();
-
     public static int controlIndex(String name) { try { return ValI(Strings.Mid(name, name.LastIndexOf('_') + 1)); } catch (Exception e) { } return -1; }
     public static int controlIndex(this Control C) { try { return ValI(Strings.Mid(C.Name, C.Name.LastIndexOf('_') + 1)); } catch (Exception e) { } return -1; }
     public static FrameworkElement getControlByIndex(this Window Frm, string Name, int Idx)
@@ -812,14 +793,14 @@ public static class VBExtension
     {
         List<FrameworkElement> lst = w.Controls(T);
         if (lst.Count == 0) return null;
-        return lst[n < 0 ? 0 : n >= lst.Count ? lst.Count - 1 : n];
+        return lst[n < 0 ? 0 : n > lst.Count - 1 ? lst.Count - 1 : n];
     }
     public static FrameworkElement ControlOf(this Panel w, Type T, int n = 0)
     {
         List<FrameworkElement> lst = new List<FrameworkElement>();
         foreach (var l in w.getControls(true)) if (l.GetType() == T) lst.Add(l);
         if (lst.Count == 0) return null;
-        return lst[n < 0 ? 0 : n >= lst.Count ? lst.Count - 1 : n];
+        return lst[n < 0 ? 0 : n > lst.Count - 1 ? lst.Count - 1 : n];
     }
 
 
@@ -967,4 +948,8 @@ public static class VBExtension
         }
         return null;
     }
+
+    // Concatenating an enum yields the NAME of the enum.  This method provides the underlying value (which could be int, long, byte, etc...)
+    public static dynamic Value(this Enum item) => Convert.ChangeType(item, item.GetTypeCode());
+    public static T Value<T>(this Enum item) => (T)item.Value();
 }

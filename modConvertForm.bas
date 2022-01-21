@@ -1,6 +1,8 @@
 Attribute VB_Name = "modConvertForm"
 Option Explicit
 
+' Convert a given form to the xaml
+
 Private EventStubs As String
 Public FormControlArrays As String
 

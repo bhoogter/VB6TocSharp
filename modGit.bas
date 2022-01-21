@@ -1,6 +1,16 @@
 Attribute VB_Name = "modGit"
 Option Explicit
 
+' Module to provide 'git' access form Immediate window.
+' Usage:  Type something like:  git "status"
+'
+' Note:  `git` is a function.  Everything after that is passed as a single string.  To put quotes in that, double them.  e.g.
+'                       git "commit -am ""my commit message"""
+'
+' Also note that you cannot do interactive git commands, such as `git commit -p`
+' For simple commands, such as status and push, the constants below allow the general syntax:  `git push`, `git status`.  Just dont be
+' confused and think this is a terminal.  It's still just a VB6 function running, and it only takes VB6 arguments.
+
 Public Const Status As String = "status "
 Public Const St As String = "status "
 Public Const Commit As String = "commit -m "

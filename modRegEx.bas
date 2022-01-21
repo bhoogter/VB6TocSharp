@@ -1,18 +1,22 @@
 Attribute VB_Name = "modRegEx"
 Option Explicit
 
+' Simple regex tools for linting / converting
+
 Private mRegEx As Object
 Private Property Get RegEx() As Object
   If mRegEx Is Nothing Then Set mRegEx = CreateObject("vbscript.regexp"): mRegEx.Global = True
   Set RegEx = mRegEx
 End Property
 
+' Return true/false if regex pattern `Find` is found in `Src`.
 Public Function RegExTest(ByVal Src As String, ByVal Find As String) As Boolean
 On Error Resume Next
   RegEx.Pattern = Find
   RegExTest = RegEx.test(Src)
 End Function
 
+' Return number of instances of pattern `Find` in `Src`.
 Public Function RegExCount(ByVal Src As String, ByVal Find As String) As Long
 On Error Resume Next
   RegEx.Pattern = Find

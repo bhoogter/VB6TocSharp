@@ -1,5 +1,6 @@
 static class modControlProperties
 {
+    // control default properties
     public static string ConvertControlProperty(string Src, string vProp, string cType)
     {
         string _ConvertControlProperty = "";

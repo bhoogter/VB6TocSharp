@@ -1,6 +1,7 @@
 Attribute VB_Name = "modUtils"
 Option Explicit
 
+' Common functions for use throughout project
 
 Public Const patToken As String = "([a-zA-Z_][a-zA-Z_0-9]*)"
 Public Const patNotToken As String = "([^a-zA-Z_0-9])"
@@ -14,12 +15,7 @@ Public Const STR_CHR_LCASE As String = "abcdefghijklmnopqrstuvwxyz"
 Public Const STR_CHR_DIGIT As String = "1234567890" ' eol comment
 
 
-' block comment
-' again
-
 Public Function IsInStr(ByVal Src As String, ByVal Find As String) As Boolean: IsInStr = InStr(Src, Find) > 0: End Function
-'after
-
 Public Function IsNotInStr(ByVal S As String, ByVal Fnd As String) As Boolean: IsNotInStr = Not IsInStr(S, Fnd): End Function
 Public Function FileExists(ByVal FN As String) As Boolean: FileExists = FN <> "" And Dir(FN) <> "": End Function
 Public Function DirExists(ByVal FN As String) As Boolean: DirExists = FN <> "" And Dir(FN, vbDirectory) <> "": End Function
@@ -39,6 +35,7 @@ Public Function Capitalize(ByVal S As String) As String: Capitalize = UCase(Left
 
 Public Function DevelopmentFolder() As String: DevelopmentFolder = App.Path & "\": End Function
 
+' Determine whether you're running in the IDE.  Useful for several things tio know.
 Public Function IsIDE() As Boolean
   'IsIDE = False
   'Exit Function
@@ -52,6 +49,7 @@ IDEInUse:
   IsIDE = True
 End Function
 
+ ' True/False if `S` is in array `K`.
 Public Function IsIn(ByVal S As String, ParamArray K() As Variant) As Boolean
   Dim L As Variant
   For Each L In K

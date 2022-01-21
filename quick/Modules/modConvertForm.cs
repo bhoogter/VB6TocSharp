@@ -14,6 +14,7 @@ using static VBExtension;
 
 static class modConvertForm
 {
+    // Convert a given form to the xaml
     public static string EventStubs = "";
     public static string FormControlArrays = "";
     public static string Frm2Xml(string F)
@@ -193,7 +194,7 @@ static class modConvertForm
         TagType = "";
         cType = SplitWord(L, 2);
         oName = SplitWord(L, 3);
-        cIndex = cValP(Props, "Index");
+        cIndex = cValP( Props, "Index");
         ControlData(cType, ref tType, ref tCont, ref tDef, ref Features);
         if (cIndex != "")
         {
@@ -220,9 +221,9 @@ static class modConvertForm
             S = S + N + "    xmlns:local=\"clr-namespace:" + AssemblyName() + ".Forms\"";
             S = S + N + "    xmlns:usercontrols=\"clr-namespace:" + AssemblyName() + ".UserControls\"";
             S = S + N + "    mc:Ignorable=\"d\"";
-            S = S + N + "    Title=" + Quote(cValP(Props, "caption"));
+            S = S + N + "    Title=" + Quote(cValP( Props, "caption"));
             S = S + M + "    Height=" + Quote(Px(cValP(Props, "clientheight", "0") + 435));
-            S = S + M + "    Width=" + Quote(Px(cValP(Props, "clientwidth", "0") + 435));
+            S = S + M + "    Width=" + Quote(Px(cValP( Props, "clientwidth", "0") + 435));
             S = S + CheckControlEvents("Window", "Form", Code);
             S = S + M + ">";
             S = S + N + " <Grid";
@@ -238,7 +239,7 @@ static class modConvertForm
             S = S + " HorizontalAlignment=\"Left\"";
             S = S + " FontFamily=" + Quote(cValP(Props, "font.name", "Calibri"));
             S = S + " FontSize=" + Quote(cValP(Props, "font.size", "10"));
-            S = S + " Header=\"" + cValP(Props, "caption") + "\"";
+            S = S + " Header=\"" + cValP( Props, "caption") + "\"";
             S = S + "> <Grid Margin=\"0,-15,0,0\"";
         }
         else if (tType == "Canvas")

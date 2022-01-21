@@ -1,6 +1,8 @@
 Attribute VB_Name = "modVB6ToCS"
 Option Explicit
 
+' Standard conversion-related lookups
+
 Public Function ConvertDefaultDefault(ByVal DType As String) As String
   Select Case DType
     Case "Integer", "Long", "Double", "Currency", "Byte", "Single": ConvertDefaultDefault = 0

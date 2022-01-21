@@ -12,12 +12,14 @@ using static modRegEx;
 using static modTextFiles;
 using static modUtils;
 using static modVB6ToCS;
-using static VBExtension;
 
 
 
 static class modRefScan
 {
+    // Scans all files and builds the refs.txt file.
+    // This refs.txt file is used to determine references outside of your current module (functions, enums, etc).
+    // Always do a refscan before converting a new project
     public static string OutRes = "";
     public static string cFuncRef_Name = "";
     public static string cFuncRef_Value = "";
@@ -56,6 +58,7 @@ static class modRefScan
         // TODO: (NOT SUPPORTED): On Error Resume Next
         OutRes = "";
         _ScanRefs = 0;
+        OutRes = OutRes + ExtensionRefs();
         foreach (var iterL in new List<string>(Split(VBPModules(vbpFile), vbCrLf)))
         {
             L = iterL;
@@ -86,10 +89,28 @@ static class modRefScan
             _ScanRefs = _ScanRefs + 1;
         SkipForm:;
         }
-        RefList( true);
+        RefList(true);
         WriteFile(RefList(), OutRes);
         OutRes = "";
         return _ScanRefs;
+    }
+    private static string ExtensionRefs()
+    {
+        string _ExtensionRefs = "";
+        string OutRes = "";
+        // public enum AlignConstants { vbAlignNone = 0, vbAlignTop = 1, vbAlignBottom = 2, vbAlignLeft = 3, vbAlignRight = 4, vbLeftJustify = 5, vbRightJustify = 6, vbCenter = 7 }
+        OutRes = OutRes + vbCrLf + "VBConstants:vbAlignNone:Enum:AlignConstants.vbAlignNone";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbAlignTop:Enum:AlignConstants.vbAlignTop";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbAlignBottom:Enum:AlignConstants.vbAlignBottom";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbAlignLeft:Enum:AlignConstants.vbAlignLeft";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbAlignRight:Enum:AlignConstants.vbAlignRight";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbLeftJustify:Enum:AlignConstants.vbLeftJustify";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbLeftJustify:Enum:AlignConstants.vbLeftJustify";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbRightJustify:Enum:AlignConstants.vbRightJustify";
+        OutRes = OutRes + vbCrLf + "VBConstants:vbCenter:Enum:AlignConstants.vbCenter";
+        // public enum AlignmentConstants : byte { vbLeftJustify = 0, vbRightJustify = 1, vbCenter = 2 }
+        // Can't really represent these..  The names conflict with above.
+        return _ExtensionRefs;
     }
     private static int ScanRefsFile(string FN)
     {
@@ -240,8 +261,8 @@ static class modRefScan
         }
         InitFuncs();
         // TODO: (NOT SUPPORTED): On Error Resume Next
-        _FuncRef = Funcs.Item(fName);
-        if (_FuncRef == "") _FuncRef = LocalFuncs.Item(fName);
+        _FuncRef = (string)Funcs[fName];
+        if (_FuncRef == "") _FuncRef = (string)LocalFuncs[fName];
         cFuncRef_Name = fName;
         cFuncRef_Value = _FuncRef;
         return _FuncRef;
@@ -398,13 +419,13 @@ static class modRefScan
     public static bool FuncRefArgByRef(string fName, int N)
     {
         bool _FuncRefArgByRef = false;
-        _FuncRefArgByRef = !IsInStr(FuncRefDeclArgN(fName, N), "ByVal ");
+        _FuncRefArgByRef = !modUtils.IsInStr(FuncRefDeclArgN(fName, N), "ByVal ");
         return _FuncRefArgByRef;
     }
     public static bool FuncRefArgOptional(string fName, int N)
     {
         bool _FuncRefArgOptional = false;
-        _FuncRefArgOptional = IsInStr(FuncRefDeclArgN(fName, N), "Optional ");
+        _FuncRefArgOptional = modUtils.IsInStr(FuncRefDeclArgN(fName, N), "Optional ");
         return _FuncRefArgOptional;
     }
     public static string FuncRefArgDefault(string fName, int N)

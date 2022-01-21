@@ -1,6 +1,10 @@
 Attribute VB_Name = "modRefScan"
 Option Explicit
 
+' Scans all files and builds the refs.txt file.
+' This refs.txt file is used to determine references outside of your current module (functions, enums, etc).
+' Always do a refscan before converting a new project
+
 Private OutRes As String
 Private cFuncRef_Name As String, cFuncRef_Value As String
 Private cEnuRef_Name As String, cEnumRef_Value As String

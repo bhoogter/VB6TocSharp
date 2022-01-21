@@ -1,7 +1,8 @@
 Attribute VB_Name = "modQuickLint"
 Option Explicit
  
-Private Const Idnt As Long = 2
+
+' Define some constants for easier access.
 Private Const MAX_ERRORS_DEFAULT As Long = 50
 Private Const Attr As String = "Attribute"
 Private Const Q As String = """"
@@ -9,8 +10,10 @@ Private Const A As String = "'"
 Private Const S As String = " "
 Private Const LintKey As String = "'@NO-LINT"
 
+' Represents all lint types.  If this is disabled, all are disabled.
 Private Const TY_ALLTY As String = "AllTy"
 
+' Lint Types
 Private Const TY_ERROR As String = "Error"
 Private Const TY_INDNT As String = "Indnt"
 Private Const TY_ARGNA As String = "ArgNa"
@@ -34,18 +37,21 @@ Private Const TY_OPDEF As String = "OpDef"
 Private Const TY_OPBYR As String = "OpByR"
 Private Const TY_DFCTL As String = "DfCtl"
 
+' Basic Lint customization here.  Just a comma-separated list of the types above.
+Private Const Idnt As Long = 2      ' Set to your preferred indent.  Default is 4.  We always used 2.
 Private Const DISABLED_LINT_TYPES As String = TY_OPBYR ' TY_ARGTY & "," & TY_OPDEF
 Private Const WARNING_LINT_TYPES As String = ""
 Private Const AUTOFIX_LINT_TYPES As String = TY_INDNT & "," & TY_ARGNA & "," & TY_OPDEF & "," & TY_NOTYP & "," & TY_STYLE
 
-Public ErrorPrefix As String
-Public ErrorIgnore As String
+
+Public ErrorPrefix As String              ' Just a module global to not have to calculate this each time.  Prepends each lint error.
+Public ErrorIgnore As String              ' Any error types in this string are ignored.
 Public AutofixFind() As String
 Public AutofixRepl() As String
 Public AutofixFindRestOfFile() As String
 Public AutofixReplRestOfFile() As String
 
-Public WellKnownNames As New Collection
+Public WellKnownNames As New Collection   ' Used for lint fixing.  Define well known name to always have `cmd` lint to `Cmd`, or whatever other definitions.
 
 Public Function ErrorTypes() As Variant()
   ErrorTypes = Array(TY_ALLTY, TY_ERROR, TY_INDNT, TY_ARGNA, TY_ARGTY, TY_FSPNA, TY_DEPRE, TY_MIGRA, TY_STYLE, TY_BLANK, TY_EXPLI, TY_COMPA, TY_TYPEC, TY_NOTYP, TY_BYRFV, TY_PRIPU, TY_FNCRE, TY_CORRE, TY_GOSUB, TY_CSTOP, TY_OPDEF, TY_OPBYR, TY_DFCTL)

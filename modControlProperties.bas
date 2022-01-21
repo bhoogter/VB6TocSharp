@@ -1,6 +1,7 @@
 Attribute VB_Name = "modControlProperties"
 Option Explicit
 
+' control default properties
 Public Function ConvertControlProperty(ByVal Src As String, ByVal vProp As String, ByVal cType As String) As String
 'If IsInStr(vProp, "SetF") Then Stop
   ConvertControlProperty = vProp

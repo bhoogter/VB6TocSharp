@@ -1,7 +1,6 @@
 using System;
 using System.Collections.Generic;
 using static Microsoft.VisualBasic.Constants;
-using static Microsoft.VisualBasic.Conversion;
 using static Microsoft.VisualBasic.DateAndTime;
 using static Microsoft.VisualBasic.FileSystem;
 using static Microsoft.VisualBasic.Information;
@@ -70,7 +69,7 @@ static class modQuickConvert
         if (FileName == "") FileName = "prj.vbp";
         if (FileName == "forms")
         {
-            _ResolveSources = VBPForms("true");
+            _ResolveSources = VBPForms("");
         }
         else if (FileName == "modules")
         {
@@ -122,10 +121,10 @@ static class modQuickConvert
             }
             else
             {
-                //Debug.Print(Switch(Right(L, 3) == "frm", "o", Right(L, 3) == "cls", "x", true, "."));
+                Console.Write(Switch(Right(L, 3) == "frm", "o", Right(L, 3) == "cls", "x", Right(L, 3) == "ctl", "+", true, "."));
             }
             X = X + 1;
-            if (X >= lintDotsPerRow) { X = 0; }
+            if (X >= lintDotsPerRow) { X = 0; Console.WriteLine(); }
             DoEvents();
         }
         Console.WriteLine(vbCrLf + "Done (" + DateDiff("s", StartTime, DateTime.Now) + "s).");
@@ -187,7 +186,7 @@ static class modQuickConvert
     public static string I(int N)
     {
         string _I = "";
-        if (N <= 0) _I = ""; _I = Space(N);
+        if (N <= 0) _I = ""; else _I = Space(N);
         return _I;
     }
     public static string ConvertContents(string Contents, CodeType vCodeType, bool SubSegment = false)
@@ -267,7 +266,7 @@ static class modQuickConvert
                 }
             }
             LineN = LineN + 1;
-            // If LineN >= 8 Then Stop
+            // If LineN >= 357 Then Stop
             bool UnindentedAlready = false;
             if (RegExTest(L, "^[ ]*(Else|ElseIf .* Then)$"))
             {
@@ -317,13 +316,12 @@ static class modQuickConvert
             else
             {
                 List<string> Statements = new List<string>();
-                dynamic SS = null;
+                int SSI = 0;
                 string St = "";
                 Statements = new List<string>(Split(Trim(L), ": "));
-                foreach (var iterSS in Statements)
+                for (SSI = 0; SSI <= Statements.Count; SSI += 1)
                 {
-                    SS = iterSS;
-                    St = SS;
+                    St = Statements[SSI];
                     if (RegExTest(St, "^[ ]*ElseIf .*$"))
                     {
                         NewLine = NewLine + ConvertIf(St);
@@ -429,8 +427,15 @@ static class modQuickConvert
                     {
                         CurrentFunctionArgs = "";
                         NewLine = NewLine + ConvertProperty(St, Contents, vCodeType);
-                        InProperty = true;
-                        Indent = Indent + Idnt;
+                        InProperty = !EndsWith(L, "End Property");
+                        if (InProperty)
+                        {
+                            Indent = Indent + Idnt;
+                        }
+                        else
+                        {
+                            goto NextLine;
+                        }
                     }
                     else if (RegExTest(St, "^[ ]*(Public |Private )?Enum "))
                     {
@@ -487,6 +492,7 @@ static class modQuickConvert
         }
         return _ReadEntireFile;
     }
+    // de string and decomment a given line (before conversion)
     public static string CleanLine(string Line)
     {
         string _CleanLine = "";
@@ -523,6 +529,7 @@ static class modQuickConvert
         _CleanLine = Line;
         return _CleanLine;
     }
+    // re-string and re-comment a given line (after conversion)
     public static string Decorate(string Line)
     {
         string _Decorate = "";
@@ -549,10 +556,16 @@ static class modQuickConvert
         _StartsWith = Left(L, Len(Find)) == Find;
         return _StartsWith;
     }
+    public static bool EndsWith(string L, string Find)
+    {
+        bool _EndsWith = false;
+        _EndsWith = Right(L, Len(Find)) == Find;
+        return _EndsWith;
+    }
     public static string StripLeft(string L, string Find)
     {
         string _StripLeft = "";
-        if (StartsWith(L, Find)) _StripLeft = Mid(L, Len(Find) + 1); _StripLeft = L;
+        if (StartsWith(L, Find)) _StripLeft = Mid(L, Len(Find) + 1); else _StripLeft = L;
         return _StripLeft;
     }
     public static bool RecordLeft(ref string L, string Find)
@@ -650,7 +663,7 @@ static class modQuickConvert
         Expression = Trim(Left(L, ixThen - 1));
         Expression = StripLeft(Expression, "If ");
         Expression = StripLeft(Expression, "ElseIf ");
-        _ConvertIf = InStr(L, "ElseIf") == 0 ? "if" : "} else if";
+        _ConvertIf = !IsInStr(L, "ElseIf") ? "if" : "} else if";
         _ConvertIf = _ConvertIf + "(" + ConvertExpression(Expression) + ")";
         if (!WithThen)
         {
@@ -695,7 +708,7 @@ static class modQuickConvert
                 MultiStatement = InStr(cElse, ":") > 0;
                 if (MultiStatement)
                 {
-                    _ConvertIf = _ConvertIf + " { ";
+                    _ConvertIf = _ConvertIf + " else { ";
                     foreach (var iterSt in new List<string>(Split(cElse, ":")))
                     {
                         St = iterSt;
@@ -705,7 +718,7 @@ static class modQuickConvert
                 }
                 else
                 {
-                    _ConvertIf = _ConvertIf + ConvertStatement(cElse);
+                    _ConvertIf = _ConvertIf + " else " + ConvertStatement(cElse);
                 }
             }
         }
@@ -789,7 +802,7 @@ static class modQuickConvert
         _ConvertWhile = _ConvertWhile + ConvertExpression(Exp);
         if (Invert) _ConvertWhile = _ConvertWhile + ")";
         _ConvertWhile = _ConvertWhile + ")";
-        if (!Closing) _ConvertWhile = _ConvertWhile + " {"; _ConvertWhile = _ConvertWhile + ";";
+        if (!Closing) _ConvertWhile = _ConvertWhile + " {"; else _ConvertWhile = _ConvertWhile + ";";
         return _ConvertWhile;
     }
     public static string ConvertFor(string L)
@@ -810,7 +823,7 @@ static class modQuickConvert
         if (ForStep == "") ForStep = "1";
         ForStep = ConvertExpression(ForStep);
         ForReverse = InStr(ForStep, "-") > 0;
-        if (ForReverse) ForCheck = " >= "; ForCheck = " <= ";
+        if (ForReverse) ForCheck = " >= "; else ForCheck = " <= ";
         _ConvertFor = "";
         _ConvertFor = _ConvertFor + "for (";
         _ConvertFor = _ConvertFor + ExpandToken(Var) + " = " + ConvertExpression(ForFrom) + "; ";
@@ -878,7 +891,7 @@ static class modQuickConvert
         List<string> Parts = new List<string>();
         Parts = new List<string>(Split(L, " = "));
         Name = Trim(Parts[0]);
-        if (Parts.Count >= 1) Value = Trim(Parts[1]); Value = "";
+        if (Parts.Count >= 1) Value = Trim(Parts[1]); else Value = "";
         _ConvertEnumLine = "";
         if (Right(CurrentEnumName, 1) == "+") _ConvertEnumLine = _ConvertEnumLine + ", ";
         _ConvertEnumLine = _ConvertEnumLine + Name;
@@ -925,7 +938,7 @@ static class modQuickConvert
         if (GetContents != "")
         {
             _ConvertProperty = _ConvertProperty + "get {" + vbCrLf;
-            _ConvertProperty = _ConvertProperty + PropertyType + " " + CurrentFunctionReturnValue + ";" + vbCrLf;
+            _ConvertProperty = _ConvertProperty + PropertyType + " " + CurrentFunctionReturnValue + " = default(" + PropertyType + ");" + vbCrLf;
             _ConvertProperty = _ConvertProperty + GetContents;
             _ConvertProperty = _ConvertProperty + "return " + CurrentFunctionReturnValue + ";" + vbCrLf;
             _ConvertProperty = _ConvertProperty + "}" + vbCrLf;
@@ -967,6 +980,8 @@ static class modQuickConvert
         }
         while (StartsWith(_FindPropertyBody, vbCrLf)) { _FindPropertyBody = Mid(_FindPropertyBody, 3); }
         while (Right(_FindPropertyBody, 2) == vbCrLf) { _FindPropertyBody = Left(_FindPropertyBody, Len(_FindPropertyBody) - 2); }
+        if (StartsWith(_FindPropertyBody, ":")) _FindPropertyBody = Trim(Mid(_FindPropertyBody, 2));
+        if (Right(_FindPropertyBody, 1) == ":") _FindPropertyBody = Trim(Left(_FindPropertyBody, Len(_FindPropertyBody) - 1));
         return _FindPropertyBody;
     }
     public static string ConvertDeclaration(string L, DeclarationType declType, CodeType vCodeType)
@@ -1006,6 +1021,7 @@ static class modQuickConvert
             string ArgType = "";
             string ArgDefault = "";
             bool IsArray = false;
+            bool IsReferencableType = false;
             string ArgTargetType = "";
             bool StandardEvent = false;
             if (_ConvertDeclaration != "" && declType != DeclarationType.DECL_SIGNATURE && declType != DeclarationType.DECL_EXTERN) _ConvertDeclaration = _ConvertDeclaration + vbCrLf;
@@ -1048,6 +1064,7 @@ static class modQuickConvert
                 ArgType = RemoveUntil(ref ArgType, " * ");
                 LineComment = LineComment + "TODO: (NOT SUPPORTED) Fixed Length String not supported: " + ArgName + "(" + FixedLength + ")";
             }
+            ArgTargetType = ConvertArgType(ArgName, ArgType);
             ArgName = LL;
             if (Right(ArgName, 2) == "()")
             {
@@ -1064,6 +1081,7 @@ static class modQuickConvert
             {
                 IsArray = false;
             }
+            IsReferencableType = ArgTargetType == "Recordset" || ArgTargetType == "Collection";
             ArgTargetType = ConvertArgType(ArgName, ArgType);
             StandardEvent = IsStandardEvent(ArgName, ArgType);
             switch (((declType)))
@@ -1104,7 +1122,7 @@ static class modQuickConvert
                         _ConvertDeclaration = _ConvertDeclaration + " = " + ArgTypeDefault(ArgTargetType, IsArray, IsNewable); // VB6 always initializes variables on declaration
                     }
                     _ConvertDeclaration = _ConvertDeclaration + ";";
-                    if (IsArray) CurrentFunctionArrays = CurrentFunctionArrays + "[" + ArgName + "]";
+                    if (IsArray || IsReferencableType) CurrentFunctionArrays = CurrentFunctionArrays + "[" + ArgName + "]";
                     CurrentFunctionArgs = CurrentFunctionArgs + "[" + ArgName + "]";
                     break;
                 case DeclarationType.DECL_SIGNATURE:  // sig def
@@ -1113,7 +1131,7 @@ static class modQuickConvert
                     _ConvertDeclaration = _ConvertDeclaration + IIf(IsArray, "List<" + ArgTargetType + ">", ArgTargetType) + " ";
                     _ConvertDeclaration = _ConvertDeclaration + ArgName;
                     if (ArgDefault != "") _ConvertDeclaration = _ConvertDeclaration + " = " + ConvertExpression(ArgDefault); // default on method sig means optional param
-                    if (IsArray) CurrentFunctionArrays = CurrentFunctionArrays + "[" + ArgName + "]";
+                    if (IsArray || IsReferencableType) CurrentFunctionArrays = CurrentFunctionArrays + "[" + ArgName + "]";
                     CurrentFunctionArgs = CurrentFunctionArgs + "[" + ArgName + "]";
                     break;
                 case DeclarationType.DECL_TYPE:
@@ -1194,7 +1212,7 @@ static class modQuickConvert
             case "Double":
             case "Float":
             case "Single":
-                _ConvertArgType = "double";
+                _ConvertArgType = "decimal";
                 break;
             case "String":
                 _ConvertArgType = "string";
@@ -1212,10 +1230,10 @@ static class modQuickConvert
         }
         return _ConvertArgType;
     }
-    public static string ArgTypeDefault(string ArgType, bool AsArray = false, bool IsNewable = false)
+    public static string ArgTypeDefault(string ArgType, bool asArray = false, bool IsNewable = false)
     {
         string _ArgTypeDefault = "";
-        if (!AsArray)
+        if (!asArray)
         {
             switch (LCase(ArgType))
             {
@@ -1315,6 +1333,7 @@ static class modQuickConvert
         {
             _ConvertSignature = _ConvertSignature + vbCrLf + RetTargetType + " " + CurrentFunctionReturnValue + " = " + ArgTypeDefault(RetTargetType) + ";";
         }
+        if (IsEvent(Name)) _ConvertSignature = EventStub(Name) + _ConvertSignature;
         return _ConvertSignature;
     }
     public static string ConvertDeclare(string L)
@@ -1368,6 +1387,29 @@ static class modQuickConvert
         _ConvertDeclare = _ConvertDeclare + ConvertDeclaration(Args, DeclarationType.DECL_EXTERN, CodeType.CODE_MODULE);
         _ConvertDeclare = _ConvertDeclare + ");";
         return _ConvertDeclare;
+    }
+    public static string ConvertFileOpen(string L)
+    {
+        string _ConvertFileOpen = "";
+        // Open pathname For mode [ Access access ] [ lock ] As [ # ] filenumber [ Len = reclength ]
+        string vPath = "";
+        string vMode = "";
+        string vAccess = "";
+        bool vLock = false;
+        string vNumber = "";
+        string vLen = "";
+        L = Trim(L);
+        RecordLeft(ref L, "Open ");
+        vPath = RemoveUntil(ref L, " ", true);
+        RecordLeft(ref L, "For ");
+        vMode = RemoveUntil(ref L, " ", true);
+        if (RecordLeft(ref L, "Access ")) vAccess = RemoveUntil(ref L, " ", true);
+        vLock = RecordLeft(ref L, "Lock ");
+        RecordLeft(ref L, "As #");
+        vNumber = L;
+        // If RecordLeft(L, __S1) Then vLen = L
+        _ConvertFileOpen = "VBOpenFile(" + vPath + ", \"" + vMode + "\", " + vNumber + ")";
+        return _ConvertFileOpen;
     }
     public static List<string> SplitByComma(string L)
     {
@@ -1469,7 +1511,7 @@ static class modQuickConvert
         {
             _ConvertStatement = _ConvertStatement + "break";
         }
-        else if (InStr(L, " = ") > 0)
+        else if (RegExTest(L, "^[ ]*[^ ]+ = "))
         {
             int IX = 0;
             string AssignmentTarget = "";
@@ -1477,10 +1519,10 @@ static class modQuickConvert
             IX = InStr(L, " = ");
             AssignmentTarget = Trim(Left(L, IX - 1));
             if (InStr(AssignmentTarget, "(") > 0) AssignmentTarget = ConvertExpression(AssignmentTarget);
-            if (IsControlRef(AssignmentTarget, ModuleName()))
+            if (IsControlRef(AssignmentTarget, ModuleName))
             {
                 // If InStr(AssignmentTarget, __S1) > 0 Then Stop
-                AssignmentTarget = modRefScan.FormControlRepl(AssignmentTarget, ModuleName());
+                AssignmentTarget = modRefScan.FormControlRepl(AssignmentTarget, ModuleName);
             }
             if (AssignmentTarget == CurrentFunctionName) AssignmentTarget = CurrentFunctionReturnValue;
             AssignmentValue = Mid(L, IX + 3);
@@ -1515,6 +1557,21 @@ static class modQuickConvert
         else if (RegExTest(L, "^[ ]*(([a-zA-Z_()0-9.]\\.)*)?[a-zA-Z_0-9.]+$"))
         { // Method call without parens or args (statement, not expression)
             _ConvertStatement = _ConvertStatement + L + "()";
+        }
+        else if (RegExTest(L, "^[ ]*Close #"))
+        {
+            _ConvertStatement = "VBCloseFile(" + Replace(Trim(L), "Close #", "") + ")";
+            LineComment = LineComment + "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " + L;
+        }
+        else if (RegExTest(L, "^[ ]*Open .* As #"))
+        {
+            _ConvertStatement = ConvertFileOpen(L);
+            LineComment = LineComment + "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " + L;
+        }
+        else if (RegExTest(L, "^[ ]*Print #"))
+        {
+            _ConvertStatement = "VBWriteFile(\"" + Replace(Trim(L), "\"", "\"\"") + "\")";
+            LineComment = LineComment + "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " + L;
         }
         else if (RegExTest(L, "^[ ]*(([a-zA-Z_()0-9.]\\.)*)?[a-zA-Z_0-9.]+ .*"))
         { // Method call without parens but with args (statement, not expression)
@@ -1582,21 +1639,21 @@ static class modQuickConvert
         {
             X = InStr(Src, S);
             Src = Replace(Src, S, Token, 1, 1);
-            if (X > 1) C = Mid(Src, X - 1, 1); C = "";
+            if (X > 1) C = Mid(Src, X - 1, 1); else C = "";
             if (X > 1 && C != "(" && C != ")" && C != " ")
             {
                 Y = SearchLeft(X - 1, Src, "() ", false, true);
                 FunctionName = Mid(Src, Y + 1, X - Y - 1);
                 Src = Replace(Src, FunctionName + Token, Token, 1, 1);
                 FunctionArgs = Mid(S, 2, Len(S) - 2);
-                if (modRefScan.IsControlRef(FunctionName, ModuleName()))
+                if (modRefScan.IsControlRef(FunctionName, ModuleName))
                 {
-                    _ParseAndExpandExpression = FunctionName + "[" + FunctionArgs + "]" + "." + ConvertControlProperty("", "", FormControlRefDeclType(FunctionName, ModuleName()));
+                    _ParseAndExpandExpression = FunctionName + "[" + FunctionArgs + "]" + "." + ConvertControlProperty("", "", FormControlRefDeclType(FunctionName, ModuleName));
                     return _ParseAndExpandExpression;
                 }
                 FunctionName = ExpandToken(FunctionName, true);
                 S = ExpandFunctionCall(FunctionName, FunctionArgs);
-                _ParseAndExpandExpression =ParseAndExpandExpression(Src);
+                _ParseAndExpandExpression = ParseAndExpandExpression(Src);
                 _ParseAndExpandExpression = Replace(_ParseAndExpandExpression, Token, S);
                 // Debug.Print __S1 & S
                 return _ParseAndExpandExpression;
@@ -1688,22 +1745,23 @@ static class modQuickConvert
         {
             T = FormRefRepl(T);
         }
-        else if (modRefScan.IsControlRef(T, ModuleName()))
+        else if (modRefScan.IsControlRef(T, ModuleName))
         {
-            T = FormControlRepl(T, ModuleName());
+            T = FormControlRepl(T, ModuleName);
         }
         else if (modRefScan.IsEnumRef(T))
         {
             T = modRefScan.EnumRefRepl(T);
         }
         else if (Left(T, 2) == "&H")
-        {
+        { // hex number
             T = "0x" + Mid(T, 3);
             if (Right(T, 1) == "&") T = Left(T, Len(T) - 1);
         }
-        else if (RegExTest(T, "^[0-9.-]+&$"))
-        {
-            T = Left(T, Len(T) - 1);
+        else if (RegExTest(T, "^[0-9.-]+[%&@!#]?$"))
+        { // plain number.  Maybe:  negative, decimals, or typed
+            if (RegExTest(T, "^[0-9.-]+[%&@!#]$")) T = Left(T, Len(T) - 1);
+            if (IsInStr(T, ".")) T = T + "m";
         }
         else if (IsInStr(T, "."))
         {
@@ -1798,7 +1856,6 @@ static class modQuickConvert
                     }
                 }
             }
-            cValP(null, "", "");
             _ProcessFunctionArgs = _ProcessFunctionArgs + ConvertExpression(Arg);
         }
         return _ProcessFunctionArgs;

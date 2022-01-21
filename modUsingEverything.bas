@@ -1,10 +1,13 @@
 Attribute VB_Name = "modUsingEverything"
 Option Explicit
 
+' Provide a mechanism to add a using for everything pertinent to every CS file.
+
 Private Everything As String
 Private Const VB6Compat As String = "Microsoft.VisualBasic.Compatibility.VB6"
 
 
+' Returns preamble for every CS file generated.
 Public Function UsingEverything(Optional ByVal PackageName As String = "") As String
   Dim List As String, Path As String, Name As String
   Dim E As String, L As Variant

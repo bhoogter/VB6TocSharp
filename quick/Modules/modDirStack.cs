@@ -1,8 +1,7 @@
 using Microsoft.VisualBasic;
-using static Microsoft.VisualBasic.Conversion;
 using static Microsoft.VisualBasic.FileSystem;
 
-
+using static VBExtension;
 
 static class modDirStack
 {
@@ -30,12 +29,12 @@ static class modDirStack
             DirStack = new Collection();
             DirStack.Add(0, "n");
         }
-        N = Val(DirStack.Item("n")) + 1;
+        N = ValI((string)DirStack["n"]) + 1;
         DirStack.Remove("n");
         DirStack.Add(N, "n");
-        DirStack.Add(CurDir(), "_" + N);
+        DirStack.Add(System.IO.Directory.GetCurrentDirectory(), "_" + N);
         if (doSet) ChDir(NewDir);
-        _PushDir = CurDir();
+        _PushDir = System.IO.Directory.GetCurrentDirectory();
         return _PushDir;
     }
     public static string PopDir(bool doSet = true)
@@ -57,8 +56,8 @@ static class modDirStack
         string V = "";
         // TODO: (NOT SUPPORTED): On Error Resume Next
         if (DirStack == null) return _PopDir;
-        N = Val(DirStack.Item("n"));
-        _PopDir = DirStack.Item("_" + N);
+        N = ValI((string)DirStack[N]);
+        _PopDir = (string)DirStack["_" + N];
         if (N > 1)
         {
             N = N - 1;
@@ -91,8 +90,8 @@ static class modDirStack
         string V = "";
         // TODO: (NOT SUPPORTED): On Error Resume Next
         if (DirStack == null) return _PeekDir;
-        N = Val(DirStack.Item("n"));
-        _PeekDir = DirStack.Item("_" + N);
+        N = ValI((string)DirStack["n"]);
+        _PeekDir = (string)DirStack["_" + N];
         if (doSet) ChDir(_PeekDir);
         return _PeekDir;
     }

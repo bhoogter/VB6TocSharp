@@ -13,6 +13,7 @@ namespace VB2CS.Forms
         public frmLinter() { InitializeComponent(); }
 
 
+        // Linting Form
         private void Form_Load(object sender, RoutedEventArgs e) { Form_Load(); }
         private void Form_Load()
         {
