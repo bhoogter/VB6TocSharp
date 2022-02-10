@@ -22,6 +22,7 @@ Enum enSW
   enSW_NORMAL = 1
   enSW_MAXIMIZE = 3
   enSW_MINIMIZE = 6
+'' try with comment ' and a second comment
 End Enum
 
 Type STARTUPINFO

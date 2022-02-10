@@ -30,6 +30,7 @@ static class modShell
     , enSW_NORMAL = 1
     , enSW_MAXIMIZE = 3
     , enSW_MINIMIZE = 6
+        // ' try with comment ' and a second comment
     }
     public class STARTUPINFO
     {
@@ -74,13 +75,12 @@ static class modShell
     // Run a given command and return stdout as a string.
     public static string RunCmdToOutput(string Cmd, out string ErrStr, bool AsAdmin = false)
     {
-        ErrStr = "";
         string _RunCmdToOutput = "";
         // TODO: (NOT SUPPORTED): On Error GoTo RunError
         string A = "";
         string B = "";
         string C = "";
-        int tLen = 0;
+        long tLen = 0;
         int Iter = 0;
         A = TempFile();
         B = TempFile();
@@ -92,13 +92,13 @@ static class modShell
         {
             C = TempFile(".bat");
             WriteFile(C, Cmd + " 1> " + A + " 2> " + B, true);
-            RunFileAsAdmin(C, 0, enSW.enSW_HIDE.Value());
+            RunFileAsAdmin(C, 0, enSW.enSW_HIDE.Value<int>());
         }
         Iter = 0;
         int MaxIter = 10;
         while (true)
         {
-            tLen = (int)FileLen(A);
+            tLen = FileLen(A);
             Sleep(800);
             if (Iter > MaxIter || FileLen(A) == tLen) break;
             Iter = Iter + 1;
@@ -124,15 +124,15 @@ static class modShell
         NameStart.Cb = Len(NameStart);
         if (SW == enSW.enSW_HIDE)
         {
-            RC = CreateProcessA(0, AppToRun, 0, 0, SW.Value(), CREATE_NO_WINDOW, 0, 0, ref NameStart, ref NameOfProc);
+            RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), CREATE_NO_WINDOW, 0, 0, ref NameStart, ref NameOfProc);
         }
         else
         {
-            RC = CreateProcessA(0, AppToRun, 0, 0, SW.Value(), NORMAL_PRIORITY_CLASS, 0, 0, ref NameStart, ref NameOfProc);
+            RC = CreateProcessA(0, AppToRun, 0, 0, CInt(SW), NORMAL_PRIORITY_CLASS, 0, 0, ref NameStart, ref NameOfProc);
         }
         LastProcessID = NameOfProc.dwProcessId;
         RC = WaitForSingleObject(NameOfProc.hProcess, INFINITE);
-        CloseHandle(ref NameOfProc.hProcess);
+        RC = CloseHandle(ref NameOfProc.hProcess) ? 1 : 0;
     ErrorRoutineResume:;
         return;
     ErrorRoutineErr:;
@@ -148,7 +148,7 @@ static class modShell
         if (UseFolder != "" && !DirExists(UseFolder)) UseFolder = "";
         if (UseFolder == "") UseFolder = AppContext.BaseDirectory + DIRSEP;
         if (Right(UseFolder, 1) != DIRSEP) UseFolder = UseFolder + DIRSEP;
-        FN = Replace(UsePrefix + CDbl(DateTime.Now) + "_" + System.Threading.Thread.CurrentThread + "_" + Random(999999), ".", "_");
+        FN = Replace(UsePrefix + CDbl(DateTime.Now) + "_" + AppDomain.GetCurrentThreadId() + "_" + Random(999999), ".", "_");
         while (FileExists(UseFolder + FN + ".tmp"))
         {
             FN = FN + Chr(Random(25) + Asc("a"));

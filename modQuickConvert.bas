@@ -667,6 +667,8 @@ End Function
 Public Function ConvertEnumLine(ByVal L As String) As String
   Dim Name As String, Value As String
   Dim Parts() As String
+  
+  If Trim(L) = "" Then Exit Function
   Parts = Split(L, " = ")
   Name = Trim(Parts(0))
   If UBound(Parts) >= 1 Then Value = Trim(Parts(1)) Else Value = ""
