@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.Data;
@@ -15,6 +15,7 @@ namespace WinCDS.Classes
     public class Recordset
     {
         public string Source = "";
+        public Dictionary<dynamic, dynamic> Parameters = null;
         public string Database = "";
         public bool QuietErrors = false;
 
@@ -27,12 +28,6 @@ namespace WinCDS.Classes
         DataTable filteredTable;
         string mFilter;
 
-
-        ~Recordset()
-        {
-            Close();
-        }
-
         public Recordset() { }
 
         public Recordset(DataTable table, OleDbDataAdapter adapter, OleDbConnection connection)
@@ -43,9 +38,10 @@ namespace WinCDS.Classes
         }
 
 
-        public Recordset(string SQL, string File, bool QuietErrors = false)
+        public Recordset(string SQL, string File, bool QuietErrors = false, Dictionary<dynamic, dynamic> Parameters = null)
         {
             Source = SQL;
+            this.Parameters = Parameters;
             Database = File;
             this.QuietErrors = QuietErrors;
 
@@ -177,6 +173,12 @@ namespace WinCDS.Classes
             DataSet result = new DataSet();
             connection = new OleDbConnection(ConnectionString(Database));
             OleDbCommand command = new OleDbCommand(Source, connection);
+            foreach(var key in Parameters.Keys)
+            {
+                OleDbParameter param = command.CreateParameter();
+                param.ParameterName = key;
+                param.Value = Parameters[key];
+            }
             adapter = new OleDbDataAdapter(command);
             try
             {
