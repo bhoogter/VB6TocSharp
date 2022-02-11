@@ -5,6 +5,7 @@ Imports System.Data.OleDb
 
 Public Class Recordset
     Public Source As String = ""
+    Public Parameters As Dictionary(Of Object, Object)
     Public Database As String = ""
     Public QuietErrors As Boolean = False
 
@@ -21,25 +22,19 @@ Public Class Recordset
     Private filteredTable As DataTable
     Private mFilter As String
 
-    Overloads Sub Finalize()
-        Close()
-    End Sub
-
     Public Sub New()
 
     End Sub
-
-
     Public Sub New(table As DataTable, adapter As OleDbDataAdapter, connection As OleDbConnection)
         Me.connection = connection
         Me.adapter = adapter
         Me.table = table
     End Sub
 
-
-    Public Sub New(SQL As String, File As String, Optional QuietErrors As Boolean = False)
-        Source = SQL
-        Database = File
+    Public Sub New(SQL As String, File As String, Optional QuietErrors As Boolean = False, Optional Parameters As Dictionary(Of Object, Object) = Nothing)
+        Me.Source = SQL
+        Me.Parameters = Parameters
+        Me.Database = File
         Me.QuietErrors = QuietErrors
 
         Open()
@@ -49,7 +44,7 @@ Public Class Recordset
         Try
             connection?.Close()
         Catch
-            ' just suppression
+            ' just suppress
         End Try
 
         connection = Nothing
@@ -223,6 +218,12 @@ Public Class Recordset
         Dim result As DataSet = New DataSet()
         connection = New OleDbConnection(ConnectionString(Database))
         Dim Command As OleDbCommand = New OleDbCommand(Source, connection)
+        For Each Key In Parameters.Keys
+            Dim param As OleDbParameter = Command.CreateParameter()
+            param.ParameterName = Key
+            param.Value = Parameters(Key)
+        Next
+
         adapter = New OleDbDataAdapter(Command)
         Try
             connection.Open()
