@@ -82,7 +82,7 @@ NOTE:  Most of the places the converter knows there will be a problem it will an
 - Do the whole thing or just one file at a time.
 - It's a lot better than doing it all by hand.
 - It will give you a good insight into what's going on, without having to ALL of the manual effort to do a simple conversion.
-- Not the fastest conversion, but a strightforward one (but v2 just got a whole lot better.  Inspect functions such as `ConvertSub` or `ConvertPrototype`.  
+- Not the fastest conversion, but a strightforward one (but v2 just got a whole lot better).  Inspect functions such as `ConvertSub` or `ConvertPrototype`.  
     - But think about it...  You're looking to convert in a one-off, not run over and over during converted exectution.
 - Allows inspection of how something is being converted.  Don't like the output?  Change it.
     - You can put a VB6 breakpoint anywhere you like and stop.  Additionally, just add a line like `If LineN = 387 Then Stop`, and the converter will stop right there.
