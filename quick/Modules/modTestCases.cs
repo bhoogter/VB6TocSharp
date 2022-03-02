@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
+using static Microsoft.VisualBasic.FileSystem;
 using static modGit;
+using static VBExtension;
 
 
 
@@ -38,12 +40,12 @@ static class modTestCases
         B = HasGit();
         B = modGit.HasGit();
         B = modGit.HasGit();
-        B = !HasGit();
+        B = !HasGit;
         B = !HasGit();
         B = !modGit.HasGit();
         B = !modGit.HasGit();
         TestCallWithBooleanFunction(HasGit());
-        TestCallWithBooleanFunction(!HasGit());
+        TestCallWithBooleanFunction(!HasGit);
         TestCallWithBooleanFunction(modGit.HasGit());
         TestCallWithBooleanFunction(!modGit.HasGit());
         TestCallWithBooleanFunction(HasGit());
@@ -52,12 +54,12 @@ static class modTestCases
         TestCallWithBooleanFunction(!modGit.HasGit());
         if (HasGit()) Console.WriteLine("");
         if (HasGit()) Console.WriteLine("");
-        if (modGit.HasGit()) Console.WriteLine();
-        if (modGit.HasGit()) Console.WriteLine();
+        if (modGit.HasGit()) Debug.Print();
+        if (modGit.HasGit()) Debug.Print();
+        if (!HasGit) Console.WriteLine("");
         if (!HasGit()) Console.WriteLine("");
-        if (!HasGit()) Console.WriteLine("");
-        if (!modGit.HasGit()) Console.WriteLine();
-        if (!modGit.HasGit()) Console.WriteLine();
+        if (!modGit.HasGit()) Debug.Print();
+        if (!modGit.HasGit()) Debug.Print();
     }
     public static bool TestCallWithBooleanFunction(bool B)
     {
@@ -69,13 +71,13 @@ static class modTestCases
     public static List<string> testFunctionWithPropertyInName()
     {
         List<string> _testFunctionWithPropertyInName = null;
-        _testFunctionWithPropertyInName = new List<string>();
+        _testFunctionWithPropertyInName = Array();
         return _testFunctionWithPropertyInName;
     }
     public static void TestPrivateLocalFunctionCall()
     {
         PrivateLocalFunctionCall();
-        PrivateLocalFunctionCall();
+        Call(PrivateLocalFunctionCall());
     }
     private static void PrivateLocalFunctionCall()
     {
@@ -87,6 +89,21 @@ static class modTestCases
         bool _TestFileFinishesWell = false;
         _TestFileFinishesWell = true;
         return _TestFileFinishesWell;
+    }
+    public static void VB6FileAccess()
+    {
+        int F = 0;
+        dynamic ReadResult = null;
+        string ReadResult2 = "";
+        int ReadResult3 = 0;
+        F = FreeFile();
+        FileOpen(F, "C:\\abc.txt", VBFileMode("Binary")); // TODO: (VERIFY) Verify File Access: Open __S1 For Binary As #F
+        FileGet(F, ReadResult); // TODO: (VERIFY) Verify File Access: Get #F, , ReadResult
+        FilePut(F, ReadResult); // TODO: (VERIFY) Verify File Access: Put #F, , ReadResult
+        Input(F, ReadResult); // TODO: (VERIFY) Verify File Access: Input #F, ReadResult
+        ReadResult = LineInput(F); // TODO: (VERIFY) Verify File Access: Line Input #F, ReadResult
+        FileClose(F); // TODO: (VERIFY) Verify File Access: Close #F
+                      // '''''''''''''
     }
 
 }

@@ -527,3 +527,19 @@ Public Function ReduceString( _
   If bLCase Then ReduceString = LCase(ReduceString)
 End Function
 
+Public Function ReorderParams(ByVal S As String, ByRef Adjustments) As String
+  Dim Parts() As String, NewParts() As String
+  Dim I As Long
+  ReorderParams = S
+On Error GoTo Failure
+
+  Parts = Split(S, ",")
+  ReDim NewParts(LBound(Adjustments) To UBound(Adjustments))
+  For I = 0 To UBound(Adjustments)
+    NewParts(I) = Parts(Adjustments(I))
+  Next
+  
+  ReorderParams = Join(NewParts, ",")
+Failure:
+End Function
+

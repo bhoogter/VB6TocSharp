@@ -195,10 +195,19 @@ public static class VBExtension
 
     public static bool IsLike(string A, string B) { return Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(A, B, Microsoft.VisualBasic.CompareMethod.Binary); }
 
-    public static bool VBOpenFile(dynamic A, dynamic B) { return false; }
-    public static bool VBWriteFile(dynamic A, dynamic B) { return false; }
-    public static bool VBCloseFile(dynamic A) { return false; }
-    public static string VBReadFileLine(dynamic A, dynamic B) { return ""; }
+    public static bool VBOpenFile(dynamic FileName, dynamic Mode, out dynamic FileHandle) { FileHandle = null; return false; }
+    public static bool VBWriteFile(dynamic FileHandle, string Content, bool Append = true) { return false; }
+    public static string VBReadFileLine(dynamic FileHandle, dynamic LineNo, dynamic NumLines = null) { return ""; }
+    public static OpenMode VBFileMode(string descriptor) {
+        OpenMode result = 0;
+        if (descriptor.Contains("Binary")) result |= OpenMode.Binary;
+        if (descriptor.Contains("Append")) result |= OpenMode.Append;
+        if (descriptor.Contains("Input")) result |= OpenMode.Input;
+        if (descriptor.Contains("Output")) result |= OpenMode.Output;
+        if (descriptor.Contains("Random")) result |= OpenMode.Random;
+        return result;
+    }
+
     public static bool DoEvents(Window Frm = null)
     {
         //if (Frm == null) Frm = MainMenu1.instance;

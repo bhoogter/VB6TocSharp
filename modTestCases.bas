@@ -83,3 +83,17 @@ End Sub
 Public Function TestFileFinishesWell() As Boolean
   TestFileFinishesWell = True
 End Function
+
+Public Sub VB6FileAccess()
+  Dim F As Long
+  Dim ReadResult As Variant, ReadResult2 As String, ReadResult3 As Long
+  F = FreeFile
+  Open "C:\abc.txt" For Binary As #F
+  Get #F, , ReadResult
+  Put #F, , ReadResult
+  Input #F, ReadResult
+  Line Input #F, ReadResult
+  Close #F
+''''''''''''''
+End Sub
+

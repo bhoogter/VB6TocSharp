@@ -1078,7 +1078,7 @@ Public Function ConvertFileOpen(ByVal L As String) As String
   vNumber = L
 '  If RecordLeft(L, "Len = ") Then vLen = L
   
-  ConvertFileOpen = "VBOpenFile(" & vPath & ", """ & vMode & """, " & vNumber & ")"
+  ConvertFileOpen = "FileOpen(" & vNumber & ", " & vPath & ", VBFileMode(""" & vMode & """))"
 End Function
 
 Public Function SplitByComma(ByVal L As String) As String()
@@ -1187,12 +1187,29 @@ Public Function ConvertStatement(ByVal L As String) As String
     NonCodeLine = True
   ElseIf RegExTest(L, "^[ ]*(([a-zA-Z_()0-9.]\.)*)?[a-zA-Z_0-9.]+$") Then ' Method call without parens or args (statement, not expression)
     ConvertStatement = ConvertStatement & L & "()"
-  ElseIf RegExTest(L, "^[ ]*Close #") Then
-    ConvertStatement = "VBCloseFile(" & Replace(Trim(L), "Close #", "") & ")"
-    LineComment = LineComment & "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " & L
+  ElseIf RegExTest(L, "^[ ]*(Close|Put|Get|Seek|Input|Line Input) [#]") Then
+    Dim FileOp As String, FileOpRest As String
+    FileOp = RegExNMatch(L, "^[ ]*(Close|Put|Get|Seek|Input|Line Input) [#]", 0)
+    FileOp = Trim(Replace(FileOp, "#", ""))
+    
+    FileOpRest = Trim(Mid(L, InStr(L, "#") + 1))
+    FileOpRest = Replace(FileOpRest, ", ,", ", _,")
+    
+    If FileOp = "Put" Then FileOp = "FilePut": FileOpRest = ReorderParams(FileOpRest, Array(0, 2, 1))
+    If FileOp = "Get" Then FileOp = "FileGet": FileOpRest = ReorderParams(FileOpRest, Array(0, 2, 1))
+    If FileOp = "Close" Then FileOp = "FileClose"
+    If FileOp = "Input" Then FileOp = "Input"
+    If FileOp = "Line Input" Then
+      ConvertStatement = ReorderParams(FileOpRest, Array(1)) & " = LineInput(" & ReorderParams(FileOpRest, Array(0)) & ")"
+    Else
+      Do While (EndsWith(FileOpRest, ", _")): FileOpRest = Left(FileOpRest, Len(FileOpRest) - 3): Loop
+      
+      ConvertStatement = FileOp & "(" & FileOpRest & ")"
+    End If
+      LineComment = LineComment & "TODO: (VERIFY) Verify File Access: " & L
   ElseIf RegExTest(L, "^[ ]*Open .* As #") Then
     ConvertStatement = ConvertFileOpen(L)
-    LineComment = LineComment & "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " & L
+    LineComment = LineComment & "TODO: (VERIFY) Verify File Access: " & L
   ElseIf RegExTest(L, "^[ ]*Print #") Then
     ConvertStatement = "VBWriteFile(""" & Replace(Trim(L), """", """""") & """)"
     LineComment = LineComment & "TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: " & L
@@ -1304,14 +1321,16 @@ Public Function ExpandToken(ByVal T As String, Optional ByVal WillAddParens As B
   Dim WithNot As Boolean
   WithNot = Left(T, 1) = "!"
   If WithNot Then T = Mid(T, 2)
-'  If InStr(T, "modConfig") > 0 Then Stop
-'  If InStr(T, "ConfigValid") > 0 Then Stop
-'    If InStr(T, "txtSrc") > 0 Then Stop
+'  If IsInStr(T, "modConfig") Then Stop
+'  If IsInStr(T, "ConfigValid") Then Stop
+'  If IsInStr(T, "FreeFile") Then Stop
   
 '  Debug.Print "ExpandToken: " & T
   If T = CurrentFunctionName Then
     T = CurrentFunctionReturnValue
   ElseIf T = "Rnd" Then
+    T = T & "()"
+  ElseIf T = "FreeFile" Then
     T = T & "()"
   ElseIf T = "Me" Then
     T = "this"
