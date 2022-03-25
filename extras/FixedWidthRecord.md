@@ -2,7 +2,10 @@
 
 A Fixed width record utility class using reflection for defined fields.
 
-See Also:  [CsvRecord.md](CsvRecord.md)
+See Also:  
+
+ - [FieldInfoListSource.cs](FieldInfoListSource.cs)
+ - [CsvRecord.md](CsvRecord.md)
 
 ## Example
 
