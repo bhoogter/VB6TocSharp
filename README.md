@@ -17,7 +17,7 @@ Free to use.  Free to fork.  Free to contribute.  Free to ask about.  Free to se
 
 If you want to convert the entire project, simply click `ALL`, and it will do the scan, support generation, and entire project conversion off the bat.  
 
-NOTE:  It might not be the fastest, but it's faster than doing it manually!
+NOTE:  It might not be the fastest, it still requires a manual effort, but it's faster than doing it ALL manually!
 
 ## Updates 2021-12-01
 
