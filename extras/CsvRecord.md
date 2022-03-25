@@ -76,14 +76,26 @@ public string RDP = "";
 
 ## Operations
 
+### With Field Definitions
+
 ```
 PayComm record = new PayComm()
-record[0] = "field1";
-record[1] = "field2 \"with quotes\"";
-record[3] = "Field4";
-string CsvLine = record.ToString(); // ==> field1,"field2 ""withquotes""",,field4
+record.Salesman = "field1";
+record["Lease"] = "field2 \"with quotes\"";
+record.Style = "Field4";
+string CsvLine = record.ToString(); // ==> field1,"field2 ""withquotes""",,field4 // ...
 PayComm recordCopy = new PayComm(record.ToString());
 
 List<PayComm> fileContents = CsvRecord.FromCsvFile(csvFileContents); // static method call.  File IO is up to you.
 String newCsvFileContents = ToCsvFile(fileContents); // Renders list of records as a string.  File IO is up to you.
+```
+
+### Without Field Definitions
+
+```
+CsvRecord record = new CsvRecord()
+record[0] = "field1";
+record[1] = "field2 \"with quotes\"";
+record[3] = "Field4";
+string CsvLine = record.ToString(); // ==> field1,"field2 ""withquotes""",,field4 // ...
 ```
