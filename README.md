@@ -6,6 +6,8 @@ A VB6 based VB6 -> C# 2017 converter.
 
 Free to use.  Free to fork.  Free to contribute.  Free to ask about.  Free to sell.  Free to sell under your own name...  Free to do just about anything except say I can't (See [LICENSE](https://github.com/bhoogter/VB6TocSharp/blob/master/LICENSE.txt)).
 
+See below for basic information.  See the [Wiki](https://github.com/bhoogter/VB6TocSharp/wiki) for more detailed information.  Feel free to contact for support.
+
 ## Quick Start
 
 1. Open the file `prj.vbp`, start the program (Requires the VB6 IDE).
