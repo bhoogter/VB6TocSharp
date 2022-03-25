@@ -2,7 +2,7 @@
 
 A convenience handler for processing CSV Records.
 
-See Also:  [FieldInfoListSource.cs]
+See Also:  [FieldInfoListSource.cs](FieldInfoListSource.cs)
 
 ## Example Usage
 
