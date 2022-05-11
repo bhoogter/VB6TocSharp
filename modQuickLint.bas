@@ -129,7 +129,7 @@ Public Function QuickLintFile(ByVal File As String, Optional ByVal MaxErrors As 
   GivenName = RegExNMatch(Contents, "Attribute VB_Name = ""([^""]+)""", 0)
   GivenName = Replace(Replace(GivenName, "Attribute VB_Name = ", ""), """", "")
   If LCase(CheckName) <> LCase(GivenName) Then
-    QuickLintFile = "Module name [" & GivenName & "] must match file name [" & fName & "].  Rename module or class to match the other"
+    QuickLintFile = "QuickLintFile: Module name [" & GivenName & "] must match file name [" & fName & "].  Rename module or class to match the other"
     Exit Function
   End If
   QuickLintFile = QuickLintContents(Contents, MaxErrors, IIf(AutoFix, File, ""))

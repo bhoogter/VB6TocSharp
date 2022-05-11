@@ -116,7 +116,7 @@ Public Function QuickConvertFile(ByVal File As String) As String
   Contents = ReadEntireFile(File)
   GivenName = GetModuleName(Contents)
   If LCase(CheckName) <> LCase(GivenName) Then
-    QuickConvertFile = "Module name [" & GivenName & "] must match file name [" & fName & "].  Rename module or class to match the other"
+    QuickConvertFile = "QuickConvertFile: Module name [" & GivenName & "] must match file name [" & fName & "].  Rename module or class to match the other"
     Exit Function
   End If
   QuickConvertFile = ConvertContents(Contents, CodeFileType(File))
