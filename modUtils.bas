@@ -527,7 +527,7 @@ Public Function ReduceString( _
   If bLCase Then ReduceString = LCase(ReduceString)
 End Function
 
-Public Function ReorderParams(ByVal S As String, ByRef Adjustments) As String
+Public Function ReorderParams(ByVal S As String, ByRef Adjustments As Variant) As String
   Dim Parts() As String, NewParts() As String
   Dim I As Long
   ReorderParams = S

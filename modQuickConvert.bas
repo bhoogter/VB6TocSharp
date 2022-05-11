@@ -1206,7 +1206,7 @@ Public Function ConvertStatement(ByVal L As String) As String
       
       ConvertStatement = FileOp & "(" & FileOpRest & ")"
     End If
-      LineComment = LineComment & "TODO: (VERIFY) Verify File Access: " & L
+    LineComment = LineComment & "TODO: (VERIFY) Verify File Access: " & L
   ElseIf RegExTest(L, "^[ ]*Open .* As #") Then
     ConvertStatement = ConvertFileOpen(L)
     LineComment = LineComment & "TODO: (VERIFY) Verify File Access: " & L
