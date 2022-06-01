@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using VB2CS.Forms;
 using static Microsoft.VisualBasic.FileSystem;
 using static modGit;
 using static VBExtension;
@@ -40,12 +41,12 @@ static class modTestCases
         B = HasGit();
         B = modGit.HasGit();
         B = modGit.HasGit();
-        B = !HasGit;
+        B = !HasGit();
         B = !HasGit();
         B = !modGit.HasGit();
         B = !modGit.HasGit();
         TestCallWithBooleanFunction(HasGit());
-        TestCallWithBooleanFunction(!HasGit);
+        TestCallWithBooleanFunction(!HasGit());
         TestCallWithBooleanFunction(modGit.HasGit());
         TestCallWithBooleanFunction(!modGit.HasGit());
         TestCallWithBooleanFunction(HasGit());
@@ -54,12 +55,12 @@ static class modTestCases
         TestCallWithBooleanFunction(!modGit.HasGit());
         if (HasGit()) Console.WriteLine("");
         if (HasGit()) Console.WriteLine("");
-        if (modGit.HasGit()) Debug.Print();
-        if (modGit.HasGit()) Debug.Print();
-        if (!HasGit) Console.WriteLine("");
+        if (modGit.HasGit()) Console.WriteLine("");
+        if (modGit.HasGit()) Console.WriteLine("");
         if (!HasGit()) Console.WriteLine("");
-        if (!modGit.HasGit()) Debug.Print();
-        if (!modGit.HasGit()) Debug.Print();
+        if (!HasGit()) Console.WriteLine("");
+        if (!modGit.HasGit()) Console.WriteLine("");
+        if (!modGit.HasGit()) Console.WriteLine("");
     }
     public static bool TestCallWithBooleanFunction(bool B)
     {
@@ -71,13 +72,13 @@ static class modTestCases
     public static List<string> testFunctionWithPropertyInName()
     {
         List<string> _testFunctionWithPropertyInName = null;
-        _testFunctionWithPropertyInName = Array();
+        _testFunctionWithPropertyInName = new List<string>();
         return _testFunctionWithPropertyInName;
     }
     public static void TestPrivateLocalFunctionCall()
     {
         PrivateLocalFunctionCall();
-        Call(PrivateLocalFunctionCall());
+        PrivateLocalFunctionCall();
     }
     private static void PrivateLocalFunctionCall()
     {
@@ -104,6 +105,27 @@ static class modTestCases
         ReadResult = LineInput(F); // TODO: (VERIFY) Verify File Access: Line Input #F, ReadResult
         FileClose(F); // TODO: (VERIFY) Verify File Access: Close #F
                       // '''''''''''''
+    }
+    public static frm getFrm()
+    {
+        frm _getFrm = null;
+        _getFrm = frm.instance;
+        return _getFrm;
+    }
+    public static void VerifyWith()
+    {
+        // Converted WITH statement: With frm // Should be permitted.
+        frm.instance.Caption = frm.instance.instance.Caption;
+        frm.instance.Top = 0;
+        // With getFrm() // TODO (not supported): Expression used in WITH.  Verify result: getFrm()
+        dynamic __withVar675 = getFrm(); ; // Should NOT be permitted.
+        __withVar675.Caption = "";
+        __withVar675.Top = 0;
+        // Converted WITH statement: With frm // Should be permitted.
+        // With .txtFile // TODO (not supported): Expression used in WITH.  Verify result: .txtFile
+        dynamic __withVar436 = frm.instance.txtFile; ; // Should NOT be permitted
+        __withVar436.Text = "";
+        __withVar436.Top = 0;
     }
 
 }

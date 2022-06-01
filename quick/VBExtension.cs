@@ -695,6 +695,14 @@ public static class VBExtension
         public void startTimerSeconds(int Seconds, dynamic setTag) { Tag = setTag; startTimerSeconds(Seconds); }
         public void stopTimer() { Enabled = false; }
     }
+    public static List<T> controlArray<T>(this Window Frm, string name)
+    {
+        List<T> res = new List<T>();
+        Panel G = (Panel)Frm.Content;
+        foreach (var C in G.Children)
+            if (((FrameworkElement)C).Name.StartsWith(name + "_")) res.Add((T)C);
+        return res;
+    }
     public static List<FrameworkElement> controlArray(this Window Frm, string name)
     {
         List<FrameworkElement> res = new List<FrameworkElement>();

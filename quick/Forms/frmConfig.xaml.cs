@@ -23,9 +23,10 @@ namespace VB2CS.Forms
         private void Form_Load()
         {
             modConfig.Hush = true;
-            txtVBPFile.Text = modConfig.vbpFile;
-            txtOutput.Text = modConfig.OutputFolder();
-            txtAssemblyName.Text = modConfig.AssemblyName();
+            // Converted WITH statement: With Me
+            txtVBPFile.text = modConfig.vbpFile;
+            txtOutput.text = modConfig.OutputFolder();
+            txtAssemblyName.text = modConfig.AssemblyName();
             modConfig.Hush = false;
         }
         private void cmdCancel_Click(object sender, RoutedEventArgs e) { cmdCancel_Click(); }

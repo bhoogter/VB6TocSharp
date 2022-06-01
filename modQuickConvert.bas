@@ -551,16 +551,20 @@ Public Function ConvertWith(ByVal L As String) As String
   Value = StripLeft(Value, "With ")
 
   If ValueIsSimple(Value) Then
-    WithVars = Stack(WithVars, Value)
+    WithVars = Stack(WithVars, ConvertExpression(Value))
     ConvertWith = "// Converted WITH statement: " & L
   Else
-    Dim withVar As String
-    withVar = "__withVar" & Random(1000)
-    WithVars = Stack(WithVars, withVar)
+    Dim WithVar As String
+    WithVar = "__withVar" & Random(1000)
     ConvertWith = ""
-    ConvertWith = ConvertWith & "// " & L & " // TODO (not supported): Expression used in WITH: " + Value
-    ConvertWith = ConvertWith & vbCrLf & "dynamic " & withVar & ";"
+    ConvertWith = ConvertWith & "// " & L & " // TODO (not supported): Expression used in WITH.  Verify result: " + Value
+    ConvertWith = ConvertWith & vbCrLf & "dynamic " & WithVar & " = " & ConvertStatement(Value) & ";"
+    WithVars = Stack(WithVars, WithVar)
   End If
+End Function
+
+Public Function WithVar() As String
+  WithVar = Stack(WithVars, , True)
 End Function
 
 Public Function ConvertSwitch(ByVal L As String) As String
@@ -1171,6 +1175,7 @@ Public Function ConvertStatement(ByVal L As String) As String
   L = Trim(L)
   
   If StartsWith(L, "Set ") Then L = Mid(L, 5)
+  If WithVar <> "" Then L = Replace(" " & L, " .", " " & WithVar & ".")
   
   If StartsWith(L, "Option ") Then
     ' ignore "Option" directives
@@ -1197,7 +1202,7 @@ Public Function ConvertStatement(ByVal L As String) As String
     RecordLeft L, "Unload "
     ConvertStatement = IIf(L = "Me", "Unload()", L & ".instance.Unload()")
   ElseIf RegExTest(L, "^[ ]*With") Or RegExTest(L, "^[ ]*End With") Then
-    ConvertStatement = "// TODO: (NOT SUPPORTED): " & L
+'    ConvertStatement = "// TODO: (NOT SUPPORTED): " & L
     NonCodeLine = True
   ElseIf RegExTest(L, "^[ ]*(On Error|Resume) ") Then
     ConvertStatement = "// TODO: (NOT SUPPORTED): " & L

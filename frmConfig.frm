@@ -95,9 +95,11 @@ Option Explicit
 
 Private Sub Form_Load()
   modConfig.Hush = True
-  txtVBPFile = modConfig.vbpFile
-  txtOutput = modConfig.OutputFolder
-  txtAssemblyName = modConfig.AssemblyName
+  With Me
+    .txtVBPFile = modConfig.vbpFile
+    .txtOutput = modConfig.OutputFolder
+    .txtAssemblyName = modConfig.AssemblyName
+  End With
   modConfig.Hush = False
 End Sub
 

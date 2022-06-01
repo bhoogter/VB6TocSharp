@@ -4,12 +4,11 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:local="clr-namespace:VB2CS.Forms"
-    xmlns:usercontrols="clr-namespace:VB2CS.UserControls"
     mc:Ignorable="d"
     Title="Config - VB6 To C#"    Height="265"    Width="524" Loaded="Form_Load">
     <Grid>
         <GroupBox x:Name="fraConfig" Margin="9,9,0,0" Width="472" Height="215" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Header="Configuration:">
-            <Grid Margin="0,-15,0,0" MouseDoubleClick="fraConfig_DblClick">
+            <Grid Margin="0,-15,0,0">
                 <TextBox x:Name="txtAssemblyName" Margin="120,94,0,0" Padding="2,2,2,2" Width="301" Height="20" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" GotFocus="txtAssemblyName_GotFocus" />
                 <Button x:Name="cmdCancel" Margin="266,171,0,0" Padding="2,2,2,2" Width="95" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="Ca&amp;ncel" Click="cmdCancel_Click" />
                 <Button x:Name="cmdOK" Margin="369,171,0,0" Padding="2,2,2,2" Width="95" Height="35" VerticalAlignment="Top" HorizontalAlignment="Left" FontFamily="Calibri" FontSize="10" Content="&amp;OK" Click="cmdOK_Click" />
