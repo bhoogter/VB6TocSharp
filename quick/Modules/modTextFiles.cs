@@ -388,25 +388,25 @@ static class modTextFiles
         // :  Boolean - Returns True.
         // :::SEE ALSO
         // :  ReadEntireFile, WriteFile, CountLines
-        int FNo = 0;
+        dynamic FNo = 0;
         // TODO: (NOT SUPPORTED): On Error Resume Next
-        FNo = FreeFile;
+        FNo = FreeFile();
         if (OverWrite)
         {
             Kill(File);
-            VBOpenFile(File, "Output", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Output As #FNo
+            VBOpenFile(File, "Output", out FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Output As #FNo
         }
         else
         {
-            VBOpenFile(File, "Append", FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Append As #FNo
+            VBOpenFile(File, "Append", out FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Append As #FNo
         }
         if (PreventNL || Right(Str, 2) == vbCrLf)
         {
-            VBWriteFile("Print #FNo, Str;"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str;
+            VBWriteFile(FNo, Str); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str;
         }
         else
         {
-            VBWriteFile("Print #FNo, Str"); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str
+            VBWriteFile(FNo, Str); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str
         }
         VBCloseFile(FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Close #FNo
         _WriteFile = true;

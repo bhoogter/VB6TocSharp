@@ -207,6 +207,7 @@ public static class VBExtension
         if (descriptor.Contains("Random")) result |= OpenMode.Random;
         return result;
     }
+    public static string VBCloseFile(dynamic FileHandle) { return ""; }
 
     public static bool DoEvents(Window Frm = null)
     {

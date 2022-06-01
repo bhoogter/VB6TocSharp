@@ -18,7 +18,7 @@ public static class VBExtension
     //private static Printer mPrinter = new Printer();
     //private static List<Printer> mPrinters = null;
     public enum vbTriState { vbFalse = 0, vbTrue = -1, vbUseDefault = -2 }
-
+    
     public static int MousePointer { get { return 0; } set { } }
     public static int SenderIndex(string name) { return ValI(name.Substring(name.LastIndexOf('_') + 1)); }
     public static int SenderIndex(object sender) { return SenderIndex(((FrameworkElement)sender).Name); }
@@ -198,7 +198,8 @@ public static class VBExtension
     public static bool VBOpenFile(dynamic FileName, dynamic Mode, out dynamic FileHandle) { FileHandle = null; return false; }
     public static bool VBWriteFile(dynamic FileHandle, string Content, bool Append = true) { return false; }
     public static string VBReadFileLine(dynamic FileHandle, dynamic LineNo, dynamic NumLines = null) { return ""; }
-    public static OpenMode VBFileMode(string descriptor) {
+    public static OpenMode VBFileMode(string descriptor)
+    {
         OpenMode result = 0;
         if (descriptor.Contains("Binary")) result |= OpenMode.Binary;
         if (descriptor.Contains("Append")) result |= OpenMode.Append;
@@ -208,6 +209,7 @@ public static class VBExtension
         return result;
     }
 
+    public static string VBCloseFile(dynamic FileHandle) { return ""; }
     public static bool DoEvents(Window Frm = null)
     {
         //if (Frm == null) Frm = MainMenu1.instance;
@@ -695,6 +697,7 @@ public static class VBExtension
         public void startTimerSeconds(int Seconds, dynamic setTag) { Tag = setTag; startTimerSeconds(Seconds); }
         public void stopTimer() { Enabled = false; }
     }
+
     public static List<T> controlArray<T>(this Window Frm, string name)
     {
         List<T> res = new List<T>();

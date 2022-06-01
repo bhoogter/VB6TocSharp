@@ -15,7 +15,7 @@ namespace VB2CS.Forms
         public static frmConfig instance { set { _instance = null; } get { return _instance ?? (_instance = new frmConfig()); } }
         public static void Load() { if (_instance == null) { dynamic A = frmConfig.instance; } }
         public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }
-        public frmConfig() { InitializeComponent(); }
+        public frmConfig() => InitializeComponent();
 
 
         // Config form
@@ -24,9 +24,9 @@ namespace VB2CS.Forms
         {
             modConfig.Hush = true;
             // Converted WITH statement: With Me
-            txtVBPFile.text = modConfig.vbpFile;
-            txtOutput.text = modConfig.OutputFolder();
-            txtAssemblyName.text = modConfig.AssemblyName();
+            this.txtVBPFile.Text = modConfig.vbpFile;
+            this.txtOutput.Text = modConfig.OutputFolder();
+            this.txtAssemblyName.Text = modConfig.AssemblyName();
             modConfig.Hush = false;
         }
         private void cmdCancel_Click(object sender, RoutedEventArgs e) { cmdCancel_Click(); }

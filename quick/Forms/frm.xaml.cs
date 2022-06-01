@@ -22,13 +22,13 @@ namespace VB2CS.Forms
         public static frm instance { set { _instance = null; } get { return _instance ?? (_instance = new frm()); } }
         public static void Load() { if (_instance == null) { dynamic A = frm.instance; } }
         public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }
-        public frm() { InitializeComponent(); }
+        public frm() => InitializeComponent();
 
 
         public List<RadioButton> optVersion { get => VBExtension.controlArray<RadioButton>(this, "optVersion"); }
 
         // Main form
-        int pMax = 0;
+        public int pMax = 0;
         public string ConverterVersion
         {
             get

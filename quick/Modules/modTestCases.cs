@@ -115,7 +115,7 @@ static class modTestCases
     public static void VerifyWith()
     {
         // Converted WITH statement: With frm // Should be permitted.
-        frm.instance.Caption = frm.instance.instance.Caption;
+        frm.instance.Title = frm.instance.Title;
         frm.instance.Top = 0;
         // With getFrm() // TODO (not supported): Expression used in WITH.  Verify result: getFrm()
         dynamic __withVar675 = getFrm(); ; // Should NOT be permitted.
