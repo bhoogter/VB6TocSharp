@@ -23,6 +23,7 @@ Private ModuleName As String
 Private ModuleFunctions As String
 Private ModuleArrays As String
 Private ModuleProperties As String
+Private WithVars As String
 
 Public Enum DeclarationType
   DECL_GLOBAL = 99
@@ -203,11 +204,12 @@ Public Function ConvertContents(ByVal Contents As String, ByVal vCodeType As Cod
       UnindentedAlready = True
     ElseIf RegExTest(L, "^[ ]*End Select$") Then
       Indent = Indent - Idnt - Idnt
-    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*)|ElseIf .*)$") Then
+    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type|With)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*)|ElseIf .*)$") Then
       Indent = Indent - Idnt
       UnindentedAlready = True
       CurrentEnumName = ""
       CurrentTypeName = ""
+      If RegExTest(L, "^[ ]*End With") Then Stack WithVars
     Else
       UnindentedAlready = False
     End If
@@ -282,6 +284,9 @@ Public Function ConvertContents(ByVal Contents As String, ByVal vCodeType As Cod
           Indent = Indent + Idnt
         ElseIf RegExTest(St, "^[ ]*(Loop While |Loop Until )") Then
           NewLine = NewLine & ConvertWhile(St)
+        ElseIf RegExTest(St, "^[ ]*With ") Then
+          NewLine = NewLine & ConvertWith(St)
+          Indent = Indent + Idnt
         ElseIf RegExTest(St, "^[ ]*Select Case ") Then
           NewLine = NewLine & ConvertSwitch(St)
           Indent = Indent + Idnt + Idnt
@@ -538,6 +543,24 @@ Public Function ConvertIf(ByVal L As String) As String
     End If
   End If
   
+End Function
+
+Public Function ConvertWith(ByVal L As String) As String
+  Dim Value As String
+  Value = Trim(L)
+  Value = StripLeft(Value, "With ")
+
+  If ValueIsSimple(Value) Then
+    WithVars = Stack(WithVars, Value)
+    ConvertWith = "// Converted WITH statement: " & L
+  Else
+    Dim withVar As String
+    withVar = "__withVar" & Random(1000)
+    WithVars = Stack(WithVars, withVar)
+    ConvertWith = ""
+    ConvertWith = ConvertWith & "// " & L & " // TODO (not supported): Expression used in WITH: " + Value
+    ConvertWith = ConvertWith & vbCrLf & "dynamic " & withVar & ";"
+  End If
 End Function
 
 Public Function ConvertSwitch(ByVal L As String) As String

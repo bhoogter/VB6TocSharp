@@ -766,7 +766,7 @@ Public Function ConvertFunctionCall(ByVal fCall As String) As String
     TB = TB & ".Fields["
     TB = TB & ConvertValue(Ts)
     TB = TB & "].Value"
-  ElseIf vP.AsArray <> "" Then
+  ElseIf vP.asArray <> "" Then
     TB = TB & "["
     TB = TB & ConvertValue(Ts)
     TB = TB & "]"

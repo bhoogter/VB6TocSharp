@@ -1,6 +1,6 @@
 Attribute VB_Name = "modTestCases"
 Option Explicit
-'@NO-LINT
+'@xNO-LINT
 
 ' This module exists solely to list test conversion caess to make sure the converter can convert itself containing them.
 ' There should be no active and/or used code in this module.
@@ -97,3 +97,26 @@ Public Sub VB6FileAccess()
 ''''''''''''''
 End Sub
 
+Public Function getFrm() As frm
+  Set getFrm = frm
+End Function
+
+Public Sub VerifyWith()
+  With frm   ' Should be permitted.
+    .Caption = .Caption
+    .Top = 0
+  End With
+  
+  With getFrm() ' Should NOT be permitted.
+    .Caption = ""
+    .Top = 0
+  End With
+
+  
+  With frm ' Should be permitted.
+    With .txtFile ' Should NOT be permitted
+      .Text = ""
+      .Top = 0
+    End With
+  End With
+End Sub

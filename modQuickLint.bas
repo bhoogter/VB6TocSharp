@@ -209,7 +209,7 @@ On Error GoTo LintError
       Indent = Indent - Idnt
     ElseIf RegExTest(L, "^[ ]*End Select$") Then
       Indent = Indent - Idnt - Idnt
-    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*)|ElseIf .*)$") Then
+    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type|With)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*)|ElseIf .*)$") Then
       Indent = Indent - Idnt
       UnindentedAlready = True
     Else
@@ -268,8 +268,7 @@ On Error GoTo LintError
       ElseIf RegExTest(St, "^[ ]*Select Case ") Then
         Indent = Indent + Idnt + Idnt
       ElseIf RegExTest(St, "^[ ]*With ") Then
-      
-        RecordError Errors, ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists.  Indent check disabled.", TY_INDNT
+        If TestWithStatement(Errors, ErrorCount, LineN, St) Then Indent = Indent + Idnt
       ElseIf RegExTest(St, "^[ ]*(Private |Public )?Declare (Function |Sub )") Then
         ' External Api
       ElseIf RegExTest(St, "^((Private|Public|Friend) )?Function ") Then
@@ -752,4 +751,16 @@ Finish:
   
   Erase AutofixFind
   Erase AutofixRepl
+End Function
+
+Public Function TestWithStatement(ByRef Errors As String, ByRef ErrorCount As Long, ByVal LineN As Long, ByVal L As String) As Boolean
+  Dim Value As String
+  Value = Trim(L)
+  Value = StripLeft(Value, "With ")
+
+  If Not ValueIsSimple(Value) Then
+    RecordError Errors, ErrorCount, TY_MIGRA, LineN, "Remove expression from WITH: " & Value
+  End If
+
+  TestWithStatement = True
 End Function
