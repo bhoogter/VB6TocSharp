@@ -268,6 +268,7 @@ On Error GoTo LintError
       ElseIf RegExTest(St, "^[ ]*Select Case ") Then
         Indent = Indent + Idnt + Idnt
       ElseIf RegExTest(St, "^[ ]*With ") Then
+      
         RecordError Errors, ErrorCount, TY_MIGRA, LineN, "Remove all uses of WITH.  No migration path exists.  Indent check disabled.", TY_INDNT
       ElseIf RegExTest(St, "^[ ]*(Private |Public )?Declare (Function |Sub )") Then
         ' External Api
