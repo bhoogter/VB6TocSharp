@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,8 +9,13 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6;
+using WinCDS.Forms;
 //using static System.Drawing.Printing.PrinterSettings;
 using static Microsoft.VisualBasic.Constants;
+using static modDataValidation;
+using static modStringFunctions;
 
 public static class VBExtension
 {
@@ -207,8 +211,20 @@ public static class VBExtension
         if (descriptor.Contains("Random")) result |= OpenMode.Random;
         return result;
     }
-    public static string VBCloseFile(dynamic FileHandle) { return ""; }
-
+    public static bool VBCloseFile(dynamic FileHandle) { return false; }
+    public static bool VBSeekFile(dynamic FileHandle, dynamic position) { return false; }
+    public static bool VBGetFile(dynamic FileHandle, dynamic pos = null) { return false; }
+    public static bool VBPutFile(dynamic FileHandle, dynamic Pos = null, dynamic content = null) { return false; }
+    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value) { return false; }
+    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2) { return false; }
+    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3) { return false; }
+    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4) { return false; }
+    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4, ref dynamic Value5) { return false; }
+    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value) { return false; }
+    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2) { return false; }
+    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3) { return false; }
+    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4) { return false; }
+    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4, ref dynamic Value5) { return false; }
     public static bool DoEvents(Window Frm = null)
     {
         //if (Frm == null) Frm = MainMenu1.instance;
