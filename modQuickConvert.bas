@@ -1217,7 +1217,7 @@ Public Function ConvertStatement(ByVal L As String) As String
     ConvertStatement = ConvertStatement & L & "()"
   ElseIf RegExTest(L, "^[ ]*(Close|Put|Get|Seek|Input|Print|Line Input) [#]") Then
     Dim FileOp As String, FileOpRest As String
-    FileOp = RegExNMatch(L, "^[ ]*(Close|Put|Get|Seek|Inpu|Print|Line Input) [#]", 0)
+    FileOp = RegExNMatch(L, "^[ ]*(Close|Put|Get|Seek|Input|Print|Line Input) [#]", 0)
     FileOp = Trim(Replace(FileOp, "#", ""))
     
     FileOpRest = Trim(Mid(L, InStr(L, "#") + 1))
