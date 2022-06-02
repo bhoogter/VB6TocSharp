@@ -140,7 +140,7 @@ static class modTextFiles
         }
         if (tFileName == CacheFileName)
         {
-            if (FileDateTime(tFileName) != DateValue(CacheFileDate)) CacheFileName = "";
+            if (FileDateTime(tFileName).ToString() != CacheFileDate) CacheFileName = "";
         }
         if (tFileName != CacheFileName)
         {
@@ -336,7 +336,7 @@ static class modTextFiles
         S = ReadEntireFile(tFileName);
         Totl = CountLines(S, false, "");
         Code = CountLines(S);
-        N = CountLines(S, true , "");
+        N = CountLines(S, true, "");
         Cmnt = N - Code;
         Blnk = Totl - N;
         _VBFileCountLines = true;
@@ -388,27 +388,27 @@ static class modTextFiles
         // :  Boolean - Returns True.
         // :::SEE ALSO
         // :  ReadEntireFile, WriteFile, CountLines
-        dynamic FNo = 0;
+        int FNo = 0;
         // TODO: (NOT SUPPORTED): On Error Resume Next
         FNo = FreeFile();
         if (OverWrite)
         {
             Kill(File);
-            VBOpenFile(File, "Output", out FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Output As #FNo
+            FileOpen(FNo, File, VBFileMode("Output"), VBFileAccess("Output"), VBFileShared("Output"), VBFileRecLen("Output")); // TODO: (VERIFY) Verify File Access: Open File For Output As #FNo
         }
         else
         {
-            VBOpenFile(File, "Append", out FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Open File For Append As #FNo
+            FileOpen(FNo, File, VBFileMode("Append"), VBFileAccess("Append"), VBFileShared("Append"), VBFileRecLen("Append")); // TODO: (VERIFY) Verify File Access: Open File For Append As #FNo
         }
         if (PreventNL || Right(Str, 2) == vbCrLf)
         {
-            VBWriteFile(FNo, Str); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str;
+            Print(FNo, Str); // TODO: (VERIFY) Verify File Access: Print #FNo, Str;
         }
         else
         {
-            VBWriteFile(FNo, Str); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Print #FNo, Str
+            Print(FNo, Str); // TODO: (VERIFY) Verify File Access: Print #FNo, Str
         }
-        VBCloseFile(FNo); // TODO: (NOT SUPPORTED) VB File Access Suppressed.  Convert manually: Close #FNo
+        FileClose(FNo); // TODO: (VERIFY) Verify File Access: Close #FNo
         _WriteFile = true;
         return _WriteFile;
     }

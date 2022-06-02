@@ -11,11 +11,8 @@ using System.Windows.Media.Imaging;
 using System.Windows.Threading;
 using Microsoft.VisualBasic;
 using Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6;
-using WinCDS.Forms;
 //using static System.Drawing.Printing.PrinterSettings;
 using static Microsoft.VisualBasic.Constants;
-using static modDataValidation;
-using static modStringFunctions;
 
 public static class VBExtension
 {
@@ -199,10 +196,25 @@ public static class VBExtension
 
     public static bool IsLike(string A, string B) { return Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(A, B, Microsoft.VisualBasic.CompareMethod.Binary); }
 
-    public static bool VBOpenFile(dynamic FileName, dynamic Mode, out dynamic FileHandle) { FileHandle = null; return false; }
-    public static bool VBWriteFile(dynamic FileHandle, string Content, bool Append = true) { return false; }
-    public static string VBReadFileLine(dynamic FileHandle, dynamic LineNo, dynamic NumLines = null) { return ""; }
-    public static OpenMode VBFileMode(string descriptor) {
+    public static bool VBOpenFile(int FileNumber, string FileName, string descriptor)
+    {
+        return VBOpenFile(FileNumber, FileName, VBFileMode(descriptor), VBFileAccess(descriptor), VBFileShared(descriptor), VBFileRecLen(descriptor));
+    }
+
+    public static bool VBOpenFile(int FileNumber, string FileName, OpenMode Mode, OpenAccess Access, OpenShare Share, int RecLen)
+    {
+        // Open pathname For mode [ Access access ] [ lock ] As [ # ] filenumber [ Len = reclength ]
+        FileSystem.FileOpen(FileNumber, FileName, Mode, Access, Share, RecLen);
+        return true;
+    }
+    public static bool VBWriteFile(int FileHandle, string Content)
+    {
+        FileSystem.PrintLine(FileHandle, Content);
+        return true;
+    }
+    public static string VBReadFileLine(int FileHandle, dynamic LineNo, dynamic NumLines = null) { return ""; }
+    public static OpenMode VBFileMode(string descriptor)
+    {
         OpenMode result = 0;
         if (descriptor.Contains("Binary")) result |= OpenMode.Binary;
         if (descriptor.Contains("Append")) result |= OpenMode.Append;
@@ -211,20 +223,37 @@ public static class VBExtension
         if (descriptor.Contains("Random")) result |= OpenMode.Random;
         return result;
     }
+
+    public static OpenAccess VBFileAccess(string descriptor)
+    {
+        if (descriptor.Contains("Access "))
+        {
+            if (descriptor.Contains(" Read ") && descriptor.Contains("Write")) return OpenAccess.ReadWrite;
+            if (descriptor.Contains(" Read ")) return OpenAccess.Read;
+            if (descriptor.Contains("Write")) return OpenAccess.Write;
+        }
+        return OpenAccess.Default;
+    }
+
+    public static OpenShare VBFileShared(string descriptor)
+    {
+        if (descriptor.Contains("Lock Read Write")) return OpenShare.LockReadWrite;
+        if (descriptor.Contains("Lock Read")) return OpenShare.LockRead;
+        if (descriptor.Contains("Lock Write")) return OpenShare.LockWrite;
+        if (descriptor.Contains("Shared")) return OpenShare.Shared;
+        return OpenShare.Default;
+    }
+
+    public static int VBFileRecLen(string descriptor)
+    {
+        if (descriptor.Contains(" Len "))
+        {
+            return -1;
+        }
+        return -1;
+    }
+
     public static bool VBCloseFile(dynamic FileHandle) { return false; }
-    public static bool VBSeekFile(dynamic FileHandle, dynamic position) { return false; }
-    public static bool VBGetFile(dynamic FileHandle, dynamic pos = null) { return false; }
-    public static bool VBPutFile(dynamic FileHandle, dynamic Pos = null, dynamic content = null) { return false; }
-    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value) { return false; }
-    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2) { return false; }
-    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3) { return false; }
-    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4) { return false; }
-    public static bool VBInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4, ref dynamic Value5) { return false; }
-    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value) { return false; }
-    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2) { return false; }
-    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3) { return false; }
-    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4) { return false; }
-    public static bool VBLineInputFile(dynamic FileHandle, ref dynamic Value, ref dynamic Value2, ref dynamic Value3, ref dynamic Value4, ref dynamic Value5) { return false; }
     public static bool DoEvents(Window Frm = null)
     {
         //if (Frm == null) Frm = MainMenu1.instance;

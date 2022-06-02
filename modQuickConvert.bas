@@ -1105,7 +1105,7 @@ Public Function ConvertFileOpen(ByVal L As String) As String
   vNumber = L
 '  If RecordLeft(L, "Len = ") Then vLen = L
   
-  ConvertFileOpen = "FileOpen(" & vNumber & ", " & vPath & ", VBFileMode(""" & vMode & """))"
+  ConvertFileOpen = "FileOpen(" & vNumber & ", " & vPath & ", VBFileMode(""" & vMode & """), VBFileAccess(""" & vMode & """), VBFileShared(""" & vMode & """), VBFileRecLen(""" & vMode & """))"
 End Function
 
 Public Function SplitByComma(ByVal L As String) As String()
@@ -1215,9 +1215,9 @@ Public Function ConvertStatement(ByVal L As String) As String
     NonCodeLine = True
   ElseIf RegExTest(L, "^[ ]*(([a-zA-Z_()0-9.]\.)*)?[a-zA-Z_0-9.]+$") Then ' Method call without parens or args (statement, not expression)
     ConvertStatement = ConvertStatement & L & "()"
-  ElseIf RegExTest(L, "^[ ]*(Close|Put|Get|Seek|Input|Line Input) [#]") Then
+  ElseIf RegExTest(L, "^[ ]*(Close|Put|Get|Seek|Input|Print|Line Input) [#]") Then
     Dim FileOp As String, FileOpRest As String
-    FileOp = RegExNMatch(L, "^[ ]*(Close|Put|Get|Seek|Input|Line Input) [#]", 0)
+    FileOp = RegExNMatch(L, "^[ ]*(Close|Put|Get|Seek|Inpu|Print|Line Input) [#]", 0)
     FileOp = Trim(Replace(FileOp, "#", ""))
     
     FileOpRest = Trim(Mid(L, InStr(L, "#") + 1))
@@ -1227,6 +1227,7 @@ Public Function ConvertStatement(ByVal L As String) As String
     If FileOp = "Get" Then FileOp = "FileGet": FileOpRest = ReorderParams(FileOpRest, Array(0, 2, 1))
     If FileOp = "Close" Then FileOp = "FileClose"
     If FileOp = "Input" Then FileOp = "Input"
+    If FileOp = "Print" Then FileOp = "Print"
     If FileOp = "Line Input" Then
       ConvertStatement = ReorderParams(FileOpRest, Array(1)) & " = LineInput(" & ReorderParams(FileOpRest, Array(0)) & ")"
     Else

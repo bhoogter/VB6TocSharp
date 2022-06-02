@@ -166,9 +166,12 @@ Public Function ConvertVb6Specific(ByVal S As String, Optional ByRef Complete As
     Case "Now":           Complete = True: S = "DateTime.Now;"
     Case "Kill":          S = "File.Delete(" & R & ");"
     Case "FreeFile":      S = "FreeFile();"
-    Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ");"
-    Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ");"
-    Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ");"
+    Case "Open":
+      S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ");"
+    Case "Print":
+      S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ");"
+    Case "Close":
+      S = "VBCloseFile(" & Replace(R, "#", "") & ");"
     Case "New":           Complete = True: S = "new " & R & "();"
     Case "vbAlignLeft":   S = "AlignConstants.vbAlignLeft"
     Case "vbAlignRight":  S = "AlignConstants.vbAlignRight"
@@ -223,9 +226,12 @@ Public Function ConvertVb6Syntax(ByVal S As String) As String
   W = RegExNMatch(Trim(S), patToken)
   R = SplitWord(Trim(S), 2, , , True)
   Select Case W
-    Case "Open":          S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
-    Case "Print":         S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
-    Case "Input":         S = "VBReadFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
+    Case "Open":
+      S = "VBOpenFile(" & Replace(SplitWord(R, 2, " As "), "#", "") & ", " & SplitWord(R, 1, " For ") & ")"
+    Case "Print":
+      S = "VBWriteFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
+    Case "Input":
+      S = "VBReadFile(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Line":          S = "VBReadFileLine(" & Replace(SplitWord(R, 1, ","), "#", "") & ", " & Replace(SplitWord(R, 2, ", ", , True), ";", ",") & ")"
     Case "Close":         S = "VBCloseFile(" & Replace(R, "#", "") & ")"
     Case "New":           S = "new " & R & "()"

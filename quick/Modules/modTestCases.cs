@@ -55,12 +55,12 @@ static class modTestCases
         TestCallWithBooleanFunction(!modGit.HasGit());
         if (HasGit()) Console.WriteLine("");
         if (HasGit()) Console.WriteLine("");
-        if (modGit.HasGit()) Console.WriteLine("");
-        if (modGit.HasGit()) Console.WriteLine("");
+        if (modGit.HasGit()) Console.WriteLine();
+        if (modGit.HasGit()) Console.WriteLine();
         if (!HasGit()) Console.WriteLine("");
         if (!HasGit()) Console.WriteLine("");
-        if (!modGit.HasGit()) Console.WriteLine("");
-        if (!modGit.HasGit()) Console.WriteLine("");
+        if (!modGit.HasGit()) Console.WriteLine();
+        if (!modGit.HasGit()) Console.WriteLine();
     }
     public static bool TestCallWithBooleanFunction(bool B)
     {
@@ -98,7 +98,7 @@ static class modTestCases
         string ReadResult2 = "";
         int ReadResult3 = 0;
         F = FreeFile();
-        FileOpen(F, "C:\\abc.txt", VBFileMode("Binary")); // TODO: (VERIFY) Verify File Access: Open __S1 For Binary As #F
+        FileOpen(F, "C:\\abc.txt", VBFileMode("Binary"), VBFileAccess("Binary"), VBFileShared("Binary"), VBFileRecLen("Binary")); // TODO: (VERIFY) Verify File Access: Open __S1 For Binary As #F
         FileGet(F, ReadResult); // TODO: (VERIFY) Verify File Access: Get #F, , ReadResult
         FilePut(F, ReadResult); // TODO: (VERIFY) Verify File Access: Put #F, , ReadResult
         Input(F, ReadResult); // TODO: (VERIFY) Verify File Access: Input #F, ReadResult
@@ -118,14 +118,14 @@ static class modTestCases
         frm.instance.Title = frm.instance.Title;
         frm.instance.Top = 0;
         // With getFrm() // TODO (not supported): Expression used in WITH.  Verify result: getFrm()
-        dynamic __withVar675 = getFrm(); ; // Should NOT be permitted.
-        __withVar675.Caption = "";
-        __withVar675.Top = 0;
+        dynamic __withVar962 = getFrm(); ; // Should NOT be permitted.
+        __withVar962.Caption = "";
+        __withVar962.Top = 0;
         // Converted WITH statement: With frm // Should be permitted.
         // With .txtFile // TODO (not supported): Expression used in WITH.  Verify result: .txtFile
-        dynamic __withVar436 = frm.instance.txtFile; ; // Should NOT be permitted
-        __withVar436.Text = "";
-        __withVar436.Top = 0;
+        dynamic __withVar432 = frm.instance.txtFile; ; // Should NOT be permitted
+        __withVar432.Text = "";
+        __withVar432.Top = 0;
     }
 
 }
