@@ -31,7 +31,7 @@ static class modINI
         string _INIRead = "";
         // TODO: (NOT SUPPORTED): On Error Resume Next
         string sRet = "";
-        sRet = String(255, Chr(0));
+        sRet = new string(Chr(0), 255);
         _INIRead = Left(sRet, GetPrivateProfileString(sSection, sKeyName, "", sRet, Len(sRet), sINIFileName));
         return _INIRead;
     }
@@ -49,7 +49,7 @@ static class modINI
             }
             else
             {
-                strBuffer = String(Len(strBuffer) * 2, 0);
+                strBuffer = new string((char)0, Len(strBuffer) * 2);
             }
             intLen = GetPrivateProfileSectionNames(strBuffer, Len(strBuffer), tFileName);
         }
@@ -75,7 +75,7 @@ static class modINI
             }
             else
             {
-                strBuffer = String(Len(strBuffer) * 2, 0);
+                strBuffer = new string((char)0, Len(strBuffer) * 2);
             }
             intLen = GetPrivateProfileSection(Section, strBuffer, Len(strBuffer), tFileName);
             if (intLen == 0) return _INISectionKeys;

@@ -23,6 +23,7 @@ Private ModuleName As String
 Private ModuleFunctions As String
 Private ModuleArrays As String
 Private ModuleProperties As String
+Private WithVars As String
 
 Public Enum DeclarationType
   DECL_GLOBAL = 99
@@ -116,7 +117,7 @@ Public Function QuickConvertFile(ByVal File As String) As String
   Contents = ReadEntireFile(File)
   GivenName = GetModuleName(Contents)
   If LCase(CheckName) <> LCase(GivenName) Then
-    QuickConvertFile = "QuickConvertFile: Module name [" & GivenName & "] must match file name [" & fName & "].  Rename module or class to match the other"
+    QuickConvertFile = "QuickConvertFile: Module name [" & GivenName & "] must match file name [" & RemoveUntil(fName, ".") & "].  Rename module or class to match the other"
     Exit Function
   End If
   QuickConvertFile = ConvertContents(Contents, CodeFileType(File))
@@ -203,11 +204,12 @@ Public Function ConvertContents(ByVal Contents As String, ByVal vCodeType As Cod
       UnindentedAlready = True
     ElseIf RegExTest(L, "^[ ]*End Select$") Then
       Indent = Indent - Idnt - Idnt
-    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*)|ElseIf .*)$") Then
+    ElseIf RegExTest(L, "^[ ]*(End (If|Function|Sub|Property|Enum|Type|With)|Next( .*)?|Wend|Loop|Loop (While .*|Until .*)|ElseIf .*)$") Then
       Indent = Indent - Idnt
       UnindentedAlready = True
       CurrentEnumName = ""
       CurrentTypeName = ""
+      If RegExTest(L, "^[ ]*End With") Then Stack WithVars
     Else
       UnindentedAlready = False
     End If
@@ -282,6 +284,9 @@ Public Function ConvertContents(ByVal Contents As String, ByVal vCodeType As Cod
           Indent = Indent + Idnt
         ElseIf RegExTest(St, "^[ ]*(Loop While |Loop Until )") Then
           NewLine = NewLine & ConvertWhile(St)
+        ElseIf RegExTest(St, "^[ ]*With ") Then
+          NewLine = NewLine & ConvertWith(St)
+          Indent = Indent + Idnt
         ElseIf RegExTest(St, "^[ ]*Select Case ") Then
           NewLine = NewLine & ConvertSwitch(St)
           Indent = Indent + Idnt + Idnt
@@ -538,6 +543,28 @@ Public Function ConvertIf(ByVal L As String) As String
     End If
   End If
   
+End Function
+
+Public Function ConvertWith(ByVal L As String) As String
+  Dim Value As String
+  Value = Trim(L)
+  Value = StripLeft(Value, "With ")
+
+  If ValueIsSimple(Value) Then
+    WithVars = Stack(WithVars, ConvertExpression(Value))
+    ConvertWith = "// Converted WITH statement: " & L
+  Else
+    Dim WithVar As String
+    WithVar = "__withVar" & Random(1000)
+    ConvertWith = ""
+    ConvertWith = ConvertWith & "// " & L & " // TODO (not supported): Expression used in WITH.  Verify result: " + Value
+    ConvertWith = ConvertWith & vbCrLf & "dynamic " & WithVar & " = " & ConvertStatement(Value) & ";"
+    WithVars = Stack(WithVars, WithVar)
+  End If
+End Function
+
+Public Function WithVar() As String
+  WithVar = Stack(WithVars, , True)
 End Function
 
 Public Function ConvertSwitch(ByVal L As String) As String
@@ -1078,7 +1105,7 @@ Public Function ConvertFileOpen(ByVal L As String) As String
   vNumber = L
 '  If RecordLeft(L, "Len = ") Then vLen = L
   
-  ConvertFileOpen = "FileOpen(" & vNumber & ", " & vPath & ", VBFileMode(""" & vMode & """))"
+  ConvertFileOpen = "FileOpen(" & vNumber & ", " & vPath & ", VBFileMode(""" & vMode & """), VBFileAccess(""" & vMode & """), VBFileShared(""" & vMode & """), VBFileRecLen(""" & vMode & """))"
 End Function
 
 Public Function SplitByComma(ByVal L As String) As String()
@@ -1148,6 +1175,7 @@ Public Function ConvertStatement(ByVal L As String) As String
   L = Trim(L)
   
   If StartsWith(L, "Set ") Then L = Mid(L, 5)
+  If WithVar <> "" Then L = Replace(" " & L, " .", " " & WithVar & ".")
   
   If StartsWith(L, "Option ") Then
     ' ignore "Option" directives
@@ -1174,7 +1202,7 @@ Public Function ConvertStatement(ByVal L As String) As String
     RecordLeft L, "Unload "
     ConvertStatement = IIf(L = "Me", "Unload()", L & ".instance.Unload()")
   ElseIf RegExTest(L, "^[ ]*With") Or RegExTest(L, "^[ ]*End With") Then
-    ConvertStatement = "// TODO: (NOT SUPPORTED): " & L
+'    ConvertStatement = "// TODO: (NOT SUPPORTED): " & L
     NonCodeLine = True
   ElseIf RegExTest(L, "^[ ]*(On Error|Resume) ") Then
     ConvertStatement = "// TODO: (NOT SUPPORTED): " & L
@@ -1187,9 +1215,9 @@ Public Function ConvertStatement(ByVal L As String) As String
     NonCodeLine = True
   ElseIf RegExTest(L, "^[ ]*(([a-zA-Z_()0-9.]\.)*)?[a-zA-Z_0-9.]+$") Then ' Method call without parens or args (statement, not expression)
     ConvertStatement = ConvertStatement & L & "()"
-  ElseIf RegExTest(L, "^[ ]*(Close|Put|Get|Seek|Input|Line Input) [#]") Then
+  ElseIf RegExTest(L, "^[ ]*(Close|Put|Get|Seek|Input|Print|Line Input) [#]") Then
     Dim FileOp As String, FileOpRest As String
-    FileOp = RegExNMatch(L, "^[ ]*(Close|Put|Get|Seek|Input|Line Input) [#]", 0)
+    FileOp = RegExNMatch(L, "^[ ]*(Close|Put|Get|Seek|Input|Print|Line Input) [#]", 0)
     FileOp = Trim(Replace(FileOp, "#", ""))
     
     FileOpRest = Trim(Mid(L, InStr(L, "#") + 1))
@@ -1199,6 +1227,7 @@ Public Function ConvertStatement(ByVal L As String) As String
     If FileOp = "Get" Then FileOp = "FileGet": FileOpRest = ReorderParams(FileOpRest, Array(0, 2, 1))
     If FileOp = "Close" Then FileOp = "FileClose"
     If FileOp = "Input" Then FileOp = "Input"
+    If FileOp = "Print" Then FileOp = "Print"
     If FileOp = "Line Input" Then
       ConvertStatement = ReorderParams(FileOpRest, Array(1)) & " = LineInput(" & ReorderParams(FileOpRest, Array(0)) & ")"
     Else

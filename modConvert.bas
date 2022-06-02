@@ -124,7 +124,7 @@ Public Function ConvertForm(ByVal frmFile As String, Optional ByVal UIOnly As Bo
   X = X & "  public static " & fName & " instance { set { _instance = null; } get { return _instance ?? (_instance = new " & fName & "()); }}"
   X = X & "  public static void Load() { if (_instance == null) { dynamic A = " + fName + ".instance; } }"
   X = X & "  public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }"
-  X = X & "  public " & fName & "() { InitializeComponent(); }" & vbCrLf
+  X = X & "  public " & fName & "() => InitializeComponent();" & vbCrLf
   X = X & vbCrLf
   X = X & vbCrLf
   X = X & ConvertedCode

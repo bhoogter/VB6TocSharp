@@ -215,7 +215,7 @@ static class modSubTracking
                 break;
             case "set":
             case "let":
-                Props[X].Setter = ConvertSub(S, , vbFalse);
+                Props[X].Setter = ConvertSub(S, false , vbTriState.vbFalse);
                 Props[X].origArgName = pArgName;
                 if (pType != "") Props[X].asType = ConvertDataType(pType);
                 if (asFunc) Props[X].asFunc = true;

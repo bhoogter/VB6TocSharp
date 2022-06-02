@@ -22,7 +22,7 @@ namespace VB2CS.Forms
         public static frm instance { set { _instance = null; } get { return _instance ?? (_instance = new frm()); } }
         public static void Load() { if (_instance == null) { dynamic A = frm.instance; } }
         public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }
-        public frm() { InitializeComponent(); }
+        public frm() => InitializeComponent();
 
 
         public List<RadioButton> optVersion { get => VBExtension.controlArray<RadioButton>(this, "optVersion"); }
@@ -33,9 +33,14 @@ namespace VB2CS.Forms
         {
             get
             {
-                for (int I = 0; I < optVersion.Count; I += 1)
-                    if (optVersion[I].IsChecked == true) return optVersion[I].Content.ToString();
-                return CONVERTER_VERSION_1;
+                string _ConverterVersion = default(string);
+                int I = 0;
+                for (I = LBound(optVersion); I <= UBound(optVersion); I += 1)
+                {
+                    if (optVersion[I].IsChecked == true) { _ConverterVersion = optVersion[I].IsChecked == true ? "true" : "false"; return _ConverterVersion; }
+                }
+                _ConverterVersion = CONVERTER_VERSION_1;
+                return _ConverterVersion;
             }
         }
 
@@ -142,9 +147,9 @@ namespace VB2CS.Forms
             // TODO: (NOT SUPPORTED): On Error Resume Next
             if (Max >= 0) pMax = Max;
             lblPrg.Content = (_Prg == "#" ? "" : Cap);
-            shpPrg.Width = Val / pMax * 2415;
-            shpPrg.Visibility = Val >= 0;
-            lblPrg.Visibility = shpPrg.Visibility;
+            //shpPrg.Width = Val / pMax * 2415;
+            //shpPrg.Visibility = Val >= 0;
+            //lblPrg.Visibility = shpPrg.Visibility;
             return _Prg;
         }
         private void cmdLint_Click(object sender, RoutedEventArgs e) { cmdLint_Click(); }

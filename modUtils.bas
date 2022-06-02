@@ -543,3 +543,6 @@ On Error GoTo Failure
 Failure:
 End Function
 
+Public Function ValueIsSimple(ByVal S As String) As Boolean
+  ValueIsSimple = RegExTest(Trim(S), "^[a-zA-Z][a-zA-Z0-9]*$")
+End Function

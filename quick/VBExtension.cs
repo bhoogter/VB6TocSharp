@@ -1,4 +1,3 @@
-using Microsoft.VisualBasic;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
@@ -10,6 +9,8 @@ using System.Windows.Interop;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Threading;
+using Microsoft.VisualBasic;
+using Microsoft.VisualBasic.PowerPacks.Printing.Compatibility.VB6;
 //using static System.Drawing.Printing.PrinterSettings;
 using static Microsoft.VisualBasic.Constants;
 
@@ -195,10 +196,25 @@ public static class VBExtension
 
     public static bool IsLike(string A, string B) { return Microsoft.VisualBasic.CompilerServices.LikeOperator.LikeString(A, B, Microsoft.VisualBasic.CompareMethod.Binary); }
 
-    public static bool VBOpenFile(dynamic FileName, dynamic Mode, out dynamic FileHandle) { FileHandle = null; return false; }
-    public static bool VBWriteFile(dynamic FileHandle, string Content, bool Append = true) { return false; }
-    public static string VBReadFileLine(dynamic FileHandle, dynamic LineNo, dynamic NumLines = null) { return ""; }
-    public static OpenMode VBFileMode(string descriptor) {
+    public static bool VBOpenFile(int FileNumber, string FileName, string descriptor)
+    {
+        return VBOpenFile(FileNumber, FileName, VBFileMode(descriptor), VBFileAccess(descriptor), VBFileShared(descriptor), VBFileRecLen(descriptor));
+    }
+
+    public static bool VBOpenFile(int FileNumber, string FileName, OpenMode Mode, OpenAccess Access, OpenShare Share, int RecLen)
+    {
+        // Open pathname For mode [ Access access ] [ lock ] As [ # ] filenumber [ Len = reclength ]
+        FileSystem.FileOpen(FileNumber, FileName, Mode, Access, Share, RecLen);
+        return true;
+    }
+    public static bool VBWriteFile(int FileHandle, string Content)
+    {
+        FileSystem.PrintLine(FileHandle, Content);
+        return true;
+    }
+    public static string VBReadFileLine(int FileHandle, dynamic LineNo, dynamic NumLines = null) { return ""; }
+    public static OpenMode VBFileMode(string descriptor)
+    {
         OpenMode result = 0;
         if (descriptor.Contains("Binary")) result |= OpenMode.Binary;
         if (descriptor.Contains("Append")) result |= OpenMode.Append;
@@ -208,6 +224,36 @@ public static class VBExtension
         return result;
     }
 
+    public static OpenAccess VBFileAccess(string descriptor)
+    {
+        if (descriptor.Contains("Access "))
+        {
+            if (descriptor.Contains(" Read ") && descriptor.Contains("Write")) return OpenAccess.ReadWrite;
+            if (descriptor.Contains(" Read ")) return OpenAccess.Read;
+            if (descriptor.Contains("Write")) return OpenAccess.Write;
+        }
+        return OpenAccess.Default;
+    }
+
+    public static OpenShare VBFileShared(string descriptor)
+    {
+        if (descriptor.Contains("Lock Read Write")) return OpenShare.LockReadWrite;
+        if (descriptor.Contains("Lock Read")) return OpenShare.LockRead;
+        if (descriptor.Contains("Lock Write")) return OpenShare.LockWrite;
+        if (descriptor.Contains("Shared")) return OpenShare.Shared;
+        return OpenShare.Default;
+    }
+
+    public static int VBFileRecLen(string descriptor)
+    {
+        if (descriptor.Contains(" Len "))
+        {
+            return -1;
+        }
+        return -1;
+    }
+
+    public static bool VBCloseFile(dynamic FileHandle) { return false; }
     public static bool DoEvents(Window Frm = null)
     {
         //if (Frm == null) Frm = MainMenu1.instance;
@@ -694,6 +740,15 @@ public static class VBExtension
         public void startTimer(int MilliSeconds, dynamic setTag) { Tag = setTag; startTimer(MilliSeconds); }
         public void startTimerSeconds(int Seconds, dynamic setTag) { Tag = setTag; startTimerSeconds(Seconds); }
         public void stopTimer() { Enabled = false; }
+    }
+
+    public static List<T> controlArray<T>(this Window Frm, string name)
+    {
+        List<T> res = new List<T>();
+        Panel G = (Panel)Frm.Content;
+        foreach (var C in G.Children)
+            if (((FrameworkElement)C).Name.StartsWith(name + "_")) res.Add((T)C);
+        return res;
     }
     public static List<FrameworkElement> controlArray(this Window Frm, string name)
     {

@@ -451,7 +451,7 @@ static class modQuickLint
                 Y = InStr(Y + 2, Line, Q);
             }
             if (Y == 0) break;
-            Line = Left(Line, X - 1) + String(Y - X + 1, "S") + Mid(Line, Y + 1);
+            Line = Left(Line, X - 1) + new String('S', Y - X + 1) + Mid(Line, Y + 1);
         }
         X = InStr(Line, A);
         if (X > 0) Line = RTrim(Left(Line, X - 1));

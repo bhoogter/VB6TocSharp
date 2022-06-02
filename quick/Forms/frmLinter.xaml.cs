@@ -10,7 +10,7 @@ namespace VB2CS.Forms
         public static frmLinter instance { set { _instance = null; } get { return _instance ?? (_instance = new frmLinter()); } }
         public static void Load() { if (_instance == null) { dynamic A = frmLinter.instance; } }
         public static void Unload() { if (_instance != null) instance.Close(); _instance = null; }
-        public frmLinter() { InitializeComponent(); }
+        public frmLinter() => InitializeComponent();
 
 
         // Linting Form

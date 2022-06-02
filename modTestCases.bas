@@ -97,3 +97,26 @@ Public Sub VB6FileAccess()
 ''''''''''''''
 End Sub
 
+Public Function getFrm() As frm
+  Set getFrm = frm
+End Function
+
+Public Sub VerifyWith()
+  With frm   ' Should be permitted.
+    .Caption = .Caption
+    .Top = 0
+  End With
+  
+  With getFrm() ' Should NOT be permitted.
+    .Caption = ""
+    .Top = 0
+  End With
+
+  
+  With frm ' Should be permitted.
+    With .txtFile ' Should NOT be permitted
+      .Text = ""
+      .Top = 0
+    End With
+  End With
+End Sub

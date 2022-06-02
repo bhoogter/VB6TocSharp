@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+﻿<?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
@@ -89,6 +89,11 @@
       <DependentUpon>frmLinter.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Properties\Resources.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Resources.resx</DependentUpon>
+    </Compile>
     <Compile Include="VBExtension.cs" />
     <Compile Include="VBConstants.cs" />
     <Compile Include="Modules\modProjectFiles.cs" />
@@ -107,23 +112,18 @@
     <Compile Include="Modules\modGit.cs" />
     <Compile Include="Modules\modDirStack.cs" />
     <Compile Include="Modules\modShell.cs" />
-    <Compile Include="Modules\modTestCases.cs" />
     <Compile Include="Modules\modQuickLint.cs" />
     <Compile Include="Modules\modConvert.cs" />
     <Compile Include="Modules\modRefScan.cs" />
-    <Compile Include="Modules\modUtils.cs" />
     <Compile Include="Modules\modOrigConvert.cs" />
     <Compile Include="Modules\modVB6ToCS.cs" />
+    <Compile Include="Modules\modTestCases.cs" />
+    <Compile Include="Modules\modUtils.cs" />
     <Compile Include="Modules\modQuickConvert.cs" />
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
-    </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
     <Compile Include="Properties\Settings.Designer.cs">
       <AutoGen>True</AutoGen>
@@ -132,6 +132,7 @@
     </Compile>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
+      <SubType>Designer</SubType>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
