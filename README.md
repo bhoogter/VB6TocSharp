@@ -94,6 +94,10 @@ NOTE:  Most of the places the converter knows there will be a problem it will an
 - A VB6 code linter. `?Lint`.  Root out as much tech debt before even beginning the process.
 - VB6 form to XAML
 
+## Future Possibilities
+
+The project is largely as-is.  It works at what it does.  However, a few things to keep an eye on are things like ["Extension Properties"](https://github.com/dotnet/roslyn/issues/11159).  If C# ever implemented this or something like it, converting `.Visible = True` becomes much more straight-forward.  Because C# uses an enum now instead of a boolean, this isn't possible, but it would be with this feature.
+
 ## Contact
 
 - If you do have any questions, concerns, or simply would like some quick pointers, feel free to open an Issue.  I can't guarantee much, but I do try!
