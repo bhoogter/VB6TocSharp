@@ -40,7 +40,7 @@ Whether you use this converter or not, we give our solution to commonly encounte
 
 ### Converted program requirements
 - Visual Studio supporting some relatively modern version of C#.  Or alternate.
-- [Visual Basic Power Packs](http://go.microsoft.com/fwlink/?LinkID=145727&clcid=0x804) [Another link](https://download.microsoft.com/download/A/D/E/ADEFBFFF-2165-4F63-BB29-DCE891B95CC7/VisualBasicPowerPacksSetup.exe) [Provided in Repo since it can be hard to find some days](VisualBasicPowerPacksSetup.exe)
+- [Visual Basic Power Packs](http://go.microsoft.com/fwlink/?LinkID=145727&clcid=0x804) / [Another link](https://download.microsoft.com/download/A/D/E/ADEFBFFF-2165-4F63-BB29-DCE891B95CC7/VisualBasicPowerPacksSetup.exe) / [Provided in Repo since it can be hard to find some days](VisualBasicPowerPacksSetup.exe)
     - Allows use of Standard VB functions like `Mid`, `Trim`, `Abs`, `DateDiff`, etc, directly in C# code.
     - Ensures 99.9% compatibility with VB6 functionality (except for `Format`...), without the need for a 3rd party, black-box library (it's from MS, so it's a 1st party black box).
     - Easy to iterate off of once it's converted and up-and-running.
