@@ -215,7 +215,8 @@ End Sub
 
 Private Sub cmdConfig_Click()
   frmConfig.Show 1
-  modConfig.LoadSettings
+  modConfig.LoadSettings True
+  txtSrc = vbpFile
 End Sub
 
 Private Sub cmdExit_Click()
