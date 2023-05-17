@@ -12,6 +12,7 @@ Private Const EXPRESSION_TOKEN_PREFIX As String = "__E_"
 
 Private LineStrings() As String, LineStringsCount As Long
 Private LineComment As String
+Private LineLineNo As String
 Private InProperty As Boolean
 Private CurrentTypeName As String
 Private CurrentEnumName As String
@@ -366,6 +367,12 @@ Public Function CleanLine(ByVal Line As String) As String
   Erase LineStrings
   LineStringsCount = 0
   LineComment = ""
+  LineLineNo = ""
+  
+  If RegExTest(Line, "^[0-9]+\b") Then
+      LineLineNo = RegExNMatch(Line, "^([0-9]+)\b")
+      Line = Trim(Mid(Line, Len(LineLineNo) + 1))
+  End If
   
   Do While True
     X = InStr(Line, Q)
@@ -386,10 +393,15 @@ Public Function CleanLine(ByVal Line As String) As String
     Line = Left(Line, X - 1) & Token & Mid(Line, Y + 1)
   Loop
   
-  X = InStr(Line, A)
-  If X > 0 Then
-    LineComment = Trim(Mid(Line, X + 1))
-    Line = RTrim(Left(Line, X - 1))
+  If LCase(Left(LTrim(Line), 4)) = "rem " Then
+    LineComment = Line
+    Line = ""
+  Else
+    X = InStr(Line, A)
+    If X > 0 Then
+      LineComment = Trim(Mid(Line, X + 1))
+      Line = RTrim(Left(Line, X - 1))
+    End If
   End If
   
   CleanLine = Line

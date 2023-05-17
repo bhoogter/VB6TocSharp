@@ -120,3 +120,14 @@ Public Sub VerifyWith()
     End With
   End With
 End Sub
+
+Public Sub VerifyNumericLineNos()
+100 Dim Something As String
+
+  MsgBox "Hello World"
+End Sub
+
+Public Sub VerifyRemStatement()
+  Rem This comment should persist
+  MsgBox "Hello world"
+End Sub

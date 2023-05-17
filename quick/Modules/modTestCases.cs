@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using VB2CS.Forms;
 using static Microsoft.VisualBasic.FileSystem;
+using static Microsoft.VisualBasic.Interaction;
 using static modGit;
 using static VBExtension;
 
@@ -37,30 +38,30 @@ static class modTestCases
         // fcall (w/w/o)
         bool B = false;
         bool NB = false;
+        B = HasGit;
         B = HasGit();
-        B = HasGit();
+        B = modGit.HasGit;
         B = modGit.HasGit();
-        B = modGit.HasGit();
+        B = !HasGit;
         B = !HasGit();
-        B = !HasGit();
+        B = !modGit.HasGit;
         B = !modGit.HasGit();
-        B = !modGit.HasGit();
+        TestCallWithBooleanFunction(HasGit);
+        TestCallWithBooleanFunction(!HasGit);
+        TestCallWithBooleanFunction(modGit.HasGit);
+        TestCallWithBooleanFunction(!modGit.HasGit);
         TestCallWithBooleanFunction(HasGit());
         TestCallWithBooleanFunction(!HasGit());
         TestCallWithBooleanFunction(modGit.HasGit());
         TestCallWithBooleanFunction(!modGit.HasGit());
-        TestCallWithBooleanFunction(HasGit());
-        TestCallWithBooleanFunction(!HasGit());
-        TestCallWithBooleanFunction(modGit.HasGit());
-        TestCallWithBooleanFunction(!modGit.HasGit());
+        if (HasGit) Console.WriteLine("");
         if (HasGit()) Console.WriteLine("");
-        if (HasGit()) Console.WriteLine("");
-        if (modGit.HasGit()) Console.WriteLine();
-        if (modGit.HasGit()) Console.WriteLine();
+        if (modGit.HasGit) Debug.Print();
+        if (modGit.HasGit()) Debug.Print();
+        if (!HasGit) Console.WriteLine("");
         if (!HasGit()) Console.WriteLine("");
-        if (!HasGit()) Console.WriteLine("");
-        if (!modGit.HasGit()) Console.WriteLine();
-        if (!modGit.HasGit()) Console.WriteLine();
+        if (!modGit.HasGit) Debug.Print();
+        if (!modGit.HasGit()) Debug.Print();
     }
     public static bool TestCallWithBooleanFunction(bool B)
     {
@@ -72,13 +73,13 @@ static class modTestCases
     public static List<string> testFunctionWithPropertyInName()
     {
         List<string> _testFunctionWithPropertyInName = null;
-        _testFunctionWithPropertyInName = new List<string>();
+        _testFunctionWithPropertyInName = Array();
         return _testFunctionWithPropertyInName;
     }
     public static void TestPrivateLocalFunctionCall()
     {
         PrivateLocalFunctionCall();
-        PrivateLocalFunctionCall();
+        Call(PrivateLocalFunctionCall());
     }
     private static void PrivateLocalFunctionCall()
     {
@@ -109,23 +110,33 @@ static class modTestCases
     public static frm getFrm()
     {
         frm _getFrm = null;
-        _getFrm = frm.instance;
+        _getFrm = frm;
         return _getFrm;
     }
     public static void VerifyWith()
     {
         // Converted WITH statement: With frm // Should be permitted.
-        frm.instance.Title = frm.instance.Title;
-        frm.instance.Top = 0;
+        frm.Caption = frm.Caption;
+        frm.Top = 0;
         // With getFrm() // TODO (not supported): Expression used in WITH.  Verify result: getFrm()
-        dynamic __withVar962 = getFrm(); ; // Should NOT be permitted.
-        __withVar962.Caption = "";
-        __withVar962.Top = 0;
+        dynamic __withVar260 = getFrm(); ; // Should NOT be permitted.
+        __withVar260.Caption = "";
+        __withVar260.Top = 0;
         // Converted WITH statement: With frm // Should be permitted.
         // With .txtFile // TODO (not supported): Expression used in WITH.  Verify result: .txtFile
-        dynamic __withVar432 = frm.instance.txtFile; ; // Should NOT be permitted
-        __withVar432.Text = "";
-        __withVar432.Top = 0;
+        dynamic __withVar578 = frm.txtFile(); ; // Should NOT be permitted
+        __withVar578.Text = "";
+        __withVar578.Top = 0;
+    }
+    public static void VerifyNumericLineNos()
+    {
+        string Something = "";
+        MsgBox("Hello World");
+    }
+    public static void VerifyRemStatement()
+    {
+        //   Rem This comment should persist
+        MsgBox("Hello world");
     }
 
 }
